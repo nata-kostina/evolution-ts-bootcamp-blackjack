@@ -1,0 +1,13 @@
+.bets-list {
+  border: 1px solid blue;
+  display: flex;
+}
+
+.bets-item {
+  list-style: none;
+  height: 50px;
+  width: 50px;
+  border: 1px solid green;
+
+  cursor: pointer;
+}

@@ -1,0 +1,14 @@
+.player-actions {
+  border: 3px solid blue;
+  display: flex;
+  margin: 0px;
+  padding: 0px;
+}
+
+.action_item {
+  list-style: none;
+  height: 50px;
+  width: 70px;
+  border: 1px solid orange;
+  cursor: pointer;
+}

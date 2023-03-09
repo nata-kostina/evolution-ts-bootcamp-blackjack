@@ -1,0 +1,35 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Server for Blackjack game",
+  "main": "index.ts",
+  "type": "module",
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
+  },
+  "scripts": {
+    "dev": "npx nodemon",
+    "build": "rimraf ./build && npx tsc",
+    "start": "npm run build && node build/main",
+    "lint": "npx eslint ./src",
+    "format": "npx eslint ./src --fix"
+  },
+  "author": "natakostina123@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "joi": "^17.8.3",
+    "nodemon": "^2.0.21",
+    "socket.io": "^4.6.1",
+    "ts-node": "^10.9.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.54.1",
+    "@typescript-eslint/parser": "^5.54.1",
+    "eslint": "^8.35.0",
+    "husky": "^8.0.3",
+    "prettier": "^2.8.4",
+    "rimraf": "^4.3.1"
+  }
+}

@@ -1,0 +1,7 @@
+.balance {
+  width: 100px;
+  height: 100px;
+  display: flex;
+
+  border: 3px solid red;
+}
