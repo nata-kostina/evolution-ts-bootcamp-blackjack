@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import "./styles.css";
 import { observer } from "mobx-react-lite";
-import { player } from "../../store/index";
 import { isInputValid } from "../../utils/validation/InputLayerValidation";
 import { formatStringToNumber } from "../../utils/formatting/InputLayerFromatting";
 import { betsSet } from "../../constants/gameConstants";
+import { game, uiStore } from "../../store";
 
 export const BetsForm = observer(() => {
     const [inputValue, setInputValue] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
     const handleInputChange = (value: string) => {
+        if (game.isPlaceBetAvailable) { return; }
         const result = isInputValid(value, "betInput");
         if (result.isValid) {
             setInputValue(value);
@@ -24,24 +25,26 @@ export const BetsForm = observer(() => {
     };
 
     const handleBetClick = (bet: number) => {
-        player.addBet(bet);
+        uiStore.addBet(bet);
     };
 
     const handleInputSubmit = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     ) => {
         e.preventDefault();
-        const bet = formatStringToNumber(inputValue);
-        player.addBet(bet);
-        setInputValue("");
+        if (!game.isPlaceBetAvailable) {
+            const bet = formatStringToNumber(inputValue);
+            uiStore.addBet(bet);
+            setInputValue("");
+        }
     };
 
     const handleUndoBet = () => {
-        player.undoBet();
+        uiStore.undoBet();
     };
 
     const handleClearClick = () => {
-        player.clearBets();
+        uiStore.clearBets();
     };
 
     return (
@@ -53,7 +56,11 @@ export const BetsForm = observer(() => {
                     <div>Default bets</div>
                     <ul className="bets-list">
                         {betsSet.map((item) => (
-                            <li key={item.id} className="bets-item" onClick={() => handleBetClick(item.value)}>
+                            <li
+                                key={item.id}
+                                className="bets-item"
+                                onClick={() => handleBetClick(item.value)}
+                            >
                                 {item.value}
                             </li>
                         ))}
@@ -70,15 +77,27 @@ export const BetsForm = observer(() => {
                                 onChange={(e) => handleInputChange(e.target.value)}
                             />
                         </label>
-                        <button onClick={handleInputSubmit} type="submit">
+                        <button
+                            onClick={handleInputSubmit}
+                            type="submit"
+                            disabled={!game.isPlaceBetAvailable}
+                        >
                             Place bet
                         </button>
                     </div>
                 </div>
-                <button type="button" onClick={handleUndoBet}>
+                <button
+                    type="button"
+                    onClick={handleUndoBet}
+                    disabled={!game.isPlaceBetAvailable}
+                >
                     Undo bet
                 </button>
-                <button type="button" onClick={handleClearClick}>
+                <button
+                    type="button"
+                    onClick={handleClearClick}
+                    disabled={!game.isPlaceBetAvailable}
+                >
                     Clear bets
                 </button>
             </form>

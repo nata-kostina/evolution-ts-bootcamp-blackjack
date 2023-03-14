@@ -1,9 +1,14 @@
 import { Server } from 'socket.io';
-import { ClientToServerEvents, GameSession, GetPlayerParams, Player, ServerToClientEvents, State } from './types.js';
-import { createNewGameSession, isError } from './utils.js';
-import { roomSchema } from './validation.js';
+import { isError } from './utils/isError.js';
+import { Store } from './store/Store.class.js';
+import { SocketInstance } from './instances/Socket.class.js';
+import { makeDelayedSequence } from './utils/respondConfig.js';
+import { PlaceBetNotification } from './constants/notifications.js';
+import { betSchema, playerSchema, roomSchema } from './utils/validation.js';
+import { ClientToServerEvents, ServerToClientEvents } from './types/socketTypes.js';
 
-const state: State = {};
+export const store = new Store();
+
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(3000, {
   cors: {
     origin: 'http://localhost:3001',
@@ -17,22 +22,54 @@ io.engine.on('headers', (headers) => {
 io.on('connection', (socket) => {
   console.log(`Socket ${socket.id} was connected`);
 
+  const connection = new SocketInstance(socket);
+
   socket.on('startGame', (room) => {
     try {
       const { error } = roomSchema.validate(room);
-
       if (error) {
         throw new Error('Invalid parameter');
       }
-
-      const game = getGameSession(room);
-      const player = createNewPlayer(socket.id);
-      joinPlayerToGameSession(game, player);
-
-      socket.emit('startGame', { ok: true, statusText: 'Ok', payload: game.deck });
+      makeDelayedSequence(connection, () => {
+        connection.handleStartGame([room]);
+        connection.notificate(PlaceBetNotification);
+      });
+      console.log(`Socket ${socket.id} started a game`);
     } catch (e: unknown) {
       console.log(`Socket ${socket.id} failed to start a game`);
-      socket.emit('startGame', { ok: false, statusText: isError(e) ? e.message : 'Fail to start a game' });
+      socket.emit('startGame', { ok: false, statusText: isError(e) ? e.message : 'Failed to start a game' });
+    }
+  });
+
+  socket.on('placeBet', ({ roomID, playerID, bet }) => {
+    try {
+      const player = store.getPlayer({ roomID, playerID });
+      const { error } = betSchema.validate(bet, { context: { min: 0, max: player.balance } });
+      if (error) {
+        throw new Error('Invalid bet');
+      }
+      makeDelayedSequence(connection, () => {
+        connection.handlePlaceBet({ playerID, roomID, bet });
+        connection.dealCards({ playerID, roomID });
+        connection.checkCombination({ playerID, roomID });
+      });
+      console.log(`Socket ${socket.id} placed bet`);
+    } catch (e) {
+      console.log(`Socket ${socket.id} failed to place a bet`);
+      socket.emit('placeBet', { ok: false, statusText: isError(e) ? e.message : 'Failed to place a bet' });
+    }
+  });
+
+  socket.on('makeDecision', ({ decision, id }) => {
+    try {
+      const { error: roomIDError } = roomSchema.validate(id.roomID);
+      const { error: playerIDError } = playerSchema.validate(id.playerID);
+
+      if (roomIDError || playerIDError) {
+        throw new Error('Invalid parameter');
+      }
+    } catch (error) {
+      console.log(`Socket ${socket.id} failed to handle player's decision`);
     }
   });
 
@@ -40,61 +77,3 @@ io.on('connection', (socket) => {
     console.log(`Socket ${socket.id} was disconnected`);
   });
 });
-
-const maxPlayersNum = 4;
-const getAvailableRoomID = (): [string, Set<string>] | null => {
-  const rooms = io.sockets.adapter.rooms;
-  for (const [id, participants] of rooms) {
-    if (id.startsWith('Room_id_') && participants.size < maxPlayersNum) {
-      return [id, participants];
-    }
-  }
-  return null;
-};
-
-const generateNewRoom = (): [string, Set<string>] => {
-  return ['Room_id_' + Math.random().toString(36).substring(2, 13), new Set()];
-};
-
-function getGameSession(roomID: string): GameSession {
-  if (state[roomID]) {
-    return state[roomID];
-  } else {
-    state[roomID] = createNewGameSession(roomID);
-    return state[roomID];
-  }
-}
-
-function createNewPlayer(id: string): Player {
-  return { id, balance: 1000, bet: 0 };
-}
-
-function joinPlayerToGameSession(game: GameSession, player: Player): void {
-  game.players.push(player);
-}
-
-function getPlayer({ roomID, playerID }: GetPlayerParams): Player {
-  if (state[roomID]) {
-    const player = state[roomID].players.find((player) => (player.id = playerID));
-    if (player) {
-      return player;
-    } else {
-      throw new Error('There is no such player');
-    }
-  }
-  throw new Error('There is no such room');
-}
-
-type PlaceBetFn = ({ roomID, playerID, bet }: { roomID: string; playerID: string; bet: string }) => void;
-
-const handlePlaceBet: PlaceBetFn = ({ roomID, playerID, bet }) => {
-  const player = getPlayer({ roomID, playerID });
-  if (player) {
-    if (+bet < player.balance) {
-      player.bet = +bet;
-      player.balance -= +bet;
-    } else {
-      throw new Error("Bet is greater than player's balance");
-    }
-  }
-};

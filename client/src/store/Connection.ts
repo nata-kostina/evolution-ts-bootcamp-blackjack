@@ -16,6 +16,7 @@ export class Connection {
     public constructor() {
         this.socket = io("http://localhost:3000", {
             withCredentials: true,
+            transports: ["websocket"],
         });
 
         this.socket.on("connect", () => {
@@ -36,5 +37,9 @@ export class Connection {
         });
 
         makeAutoObservable(this);
+    }
+
+    public get isFailed(): boolean {
+        return this.status === "error" || this.status === "disconnected";
     }
 }

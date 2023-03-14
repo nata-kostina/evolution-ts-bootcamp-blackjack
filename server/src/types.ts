@@ -1,37 +1,31 @@
-export interface ServerToClientEvents {
-  startGame: (response: SocketResponse<Deck>) => void;
-}
+import { SpecificID } from './types/socketTypes.js';
+import { GameState } from './types/storeTypes.js';
+import { RoomID, PlayerID, Decision, PlayerInstance, DealerInstance } from './types/gameTypes.js';
 
-export interface ClientToServerEvents {
-  startGame: (room: string) => void;
-}
-
-export type SocketResponse<T> = {
-  ok: boolean;
-  statusText: string;
-  payload?: T;
+export type DecisionRequest = {
+  decision: Decision;
+  id: SpecificID;
 };
 
-export interface Player {
-  id: string;
-  balance: number;
-  bet: number;
-}
+export type UpdatePlayerParams = {
+  playerID: PlayerID;
+  roomID: RoomID;
+  payload: { [key in keyof Partial<Omit<PlayerInstance, 'playerID' | 'roomID'>>]: PlayerInstance[key] };
+};
 
-export interface GameSession {
-  roomID: string;
-  deck: Deck;
-  players: Player[];
-}
+export type UpdateGameParams = {
+  roomID: RoomID;
+  payload: { [key in keyof Partial<Omit<GameState, 'roomID'>>]: GameState[key] };
+};
 
-export type RoomID = string;
+export type UpdateDealerParams = {
+  roomID: RoomID;
+  payload: { [key in keyof Partial<DealerInstance>]: DealerInstance[key] };
+};
 
-export type Room = [string, Set<string>];
-
-export type State = Record<RoomID, GameSession>;
-
-export type GetPlayerParams = { roomID: string; playerID: string };
-export type PlaceBetParams = { roomID: string; playerID: string; bet: string };
-
-export type Card = [value: string, suit: string];
-export type Deck = Card[];
+export type DealSingleCard = {
+  roomID: RoomID;
+  playerID: PlayerID;
+  target: 'player' | 'dealer';
+  asHoleCard?: boolean;
+};

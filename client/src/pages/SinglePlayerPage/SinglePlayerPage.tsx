@@ -3,47 +3,44 @@ import { observer } from "mobx-react-lite";
 import { game } from "../../store";
 import { RequireConnection } from "../../hoc/RequireConnection";
 import { GameBoard } from "./GameBoard";
-import { ModalWindow } from "../../components/Modal/ModalWindow";
+import { ErrorModalBase } from "../../components/Modal/ErrorModalBase";
 
 const SinglePlayerPage = observer(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [modalIsOpen, setIsOpen] = useState(false);
 
-    function afterOpenModal() {
-        console.log("afterOpenModal");
-    }
-
-    function closeModal() {
+    const processError = () => {
         setIsOpen(false);
         game.errorHandler.execute();
-    }
+    };
 
     useEffect(() => {
         game.startGame();
-        // player.initPlayer();
         return () => {
             console.log("Single page unmount");
-            game.resetGame();
-            setIsOpen(false);
+            game.finishGame();
         };
     }, []);
 
     useEffect(() => {
-        if (game.status === "error") {
+        if (game.isFailed) {
             setIsOpen(true);
+        } else {
+            game.setNextRequest();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [game.status]);
-
+    }, [game.isFailed]);
     return (
         <div>
             <div>Game status: {game.status}</div>
-            {game.status === "started" ? <GameBoard /> : "Loading..."}
-            <ModalWindow
-                type="gameError"
-                modalIsOpen={modalIsOpen}
-                afterOpenModal={afterOpenModal}
-                closeModal={closeModal}
-            />
+            {!game.isFailed ? <GameBoard /> : "Loading..."}
+            {game.error && (
+                <ErrorModalBase
+                    type={game.error}
+                    modalIsOpen={modalIsOpen}
+                    closeModal={processError}
+                />
+            )}
         </div>
     );
 });

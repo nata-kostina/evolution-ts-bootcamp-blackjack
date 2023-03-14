@@ -1,7 +1,7 @@
 import { Connection } from "./Connection";
 import { Game } from "./Game";
-import { Player } from "./Player";
+import { UIStore } from "./ui/UIstore";
 
 export const connection = new Connection();
-export const game = new Game(connection);
-export const player = new Player(connection);
+export const uiStore = new UIStore(connection);
+export const game = new Game(connection, uiStore);
