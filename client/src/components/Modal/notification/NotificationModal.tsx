@@ -18,23 +18,22 @@ export const NotificationModal = ({ isOpen, modalVariant, closeModal }: Props) =
         case ModalKinds.Ok:
             return <OkCloseNotificationModal onClose={closeModal} isOpen={isOpen} />;
         case ModalKinds.YesNo:
-            const { negativeCallback, positiveCallback, text: yesNoText } = modalVariant;
+            const { notification, handleAnswer } = modalVariant;
             return (
                 <YesNoNotificationModal
-                    text={yesNoText}
+                    text={notification.text}
                     onClose={closeModal}
                     isOpen={isOpen}
-                    negativeCallback={negativeCallback}
-                    positiveCallback={positiveCallback}
+                    handleAnswer={handleAnswer}
                 />
             );
         case ModalKinds.Disappearing:
-            const { text, timer } = modalVariant;
+            const { notification: disappearingNotification, timer } = modalVariant;
             return (
                 <DisappearingNotificationModal
                     onClose={closeModal}
                     isOpen={isOpen}
-                    text={text}
+                    text={disappearingNotification.text}
                     timer={timer}
                 />
             );

@@ -7,7 +7,7 @@ export const MainPage = observer(() => {
     return (
         <div>
             {connection.status === "connected" ?
-                <Menu socketID={connection.socket.id} /> : (
+                <Menu socketID="sdf" /> : (
                     <>
                         <button onClick={() => {
                             window.location.reload();

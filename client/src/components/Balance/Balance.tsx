@@ -1,19 +1,19 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
 import "./styles.css";
-import { uiStore } from "../../store";
+import { game } from "../../store";
 
 export const Balance = observer(() => {
     return (
-        <>{uiStore.session && (
+        <>{game.ui.player && (
             <div className="balance">
                 <div className="balance-amount">
                     <div>Balance</div>
-                    <span>{uiStore.session.player.balance}</span>
+                    <span>{game.ui.player.balance}</span>
                 </div>
                 <div className="bet-amount">
                     <div>Bet</div>
-                    <span>{uiStore.session.player.bet}</span>
+                    <span>{game.ui.player.bet}</span>
                 </div>
             </div>
         )}

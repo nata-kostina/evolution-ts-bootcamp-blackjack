@@ -26,17 +26,19 @@ export type PlayerInstance = {
   bet: number;
   balance: number;
   points: number;
+  insurance?: number;
+  status: "ready-to-play" | "not-ready-to-play" | "combination-checked";
 };
 export type DealerInstance = {
   cards: Card[];
-  hasHole: boolean;
+  hasHoleCard: boolean;
   holeCard?: Card;
   points: number;
 };
 
 export interface GameSession {
   roomID: RoomID;
-  player: PlayerInstance;
+  players: Record<PlayerID, PlayerInstance>;
   dealer: Omit<DealerInstance, 'holeCard'>;
 }
 
@@ -49,11 +51,14 @@ export type Card = { value: CardValue; suit: string; id: string };
 export type Deck = Card[];
 
 export enum Decision {
-  HIT = 'hit',
-  STAND = 'stand',
+  Hit = 'hit',
+  Stand = 'stand',
+  Double = "double",
+  Surender = "surender",
 }
 
 export const WinCoefficient = {
   '3:2': 1.5,
   '1:1': 1,
+  'even': 0,
 };

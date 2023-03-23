@@ -1,5 +1,5 @@
-import { v4 } from "uuid";
-import { Suit, CardValue, Card, Deck } from "../types/gameTypes.js";
+import { v4 } from 'uuid';
+import { Suit, CardValue, Card, Deck } from '../types/gameTypes.js';
 
 const suits = [Suit.Clubs, Suit.Diamonds, Suit.Hearts, Suit.Spades] as const;
 const values = Object.values(CardValue);
@@ -31,5 +31,19 @@ export const PointsMap: Record<CardValue, number> = {
 };
 
 export const TWENTY_ONE = 21;
+export const SEVENTEEN = 17;
+export const NINE = 9;
+export const TEN = 10;
+export const ELEVEN = 11;
 
 export const TenSet = new Set([CardValue.TEN, CardValue.J, CardValue.Q, CardValue.K]);
+export const MinorSet = new Set([
+  CardValue.TWO,
+  CardValue.THREE,
+  CardValue.FOUR,
+  CardValue.FIVE,
+  CardValue.SIX,
+  CardValue.SEVEN,
+  CardValue.EIGHT,
+  CardValue.NINE,
+]);

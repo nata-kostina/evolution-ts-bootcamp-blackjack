@@ -1,11 +1,14 @@
 import { store } from '../index.js';
 import { SpecificID } from '../types/socketTypes.js';
 import { Card, CardValue } from '../types/gameTypes.js';
-import { TenSet, PointsMap, TWENTY_ONE } from '../constants/cards.js';
+import { TenSet, PointsMap, TWENTY_ONE, TEN, NINE } from '../constants/cards.js';
+import { ELEVEN } from './../constants/cards.js';
 
 type Handler = {
   takeCardFromDeck: (deck: Card[]) => { card: Card; updatedDeck: Card[] };
   isBlackjack: (id: SpecificID) => boolean;
+  canDouble: (id: SpecificID) => boolean;
+  canSplit: (id: SpecificID) => boolean;
   getPointsSum: (cards: Card[]) => number;
 };
 
@@ -35,6 +38,31 @@ export const CardsHandler: Handler = {
       throw new Error('Failed to check for blackjack');
     }
   },
+  canDouble: ({ playerID, roomID }: SpecificID) => {
+    try {
+      const player = store.getPlayer({ playerID, roomID });
+      const { cards, points } = player;
+      if (cards.length === 2) {
+        return points === NINE || points === TEN || points === ELEVEN;
+      }
+      return false;
+    } catch (error) {
+      throw new Error('Failed to check for double');
+    }
+  },
+  canSplit: ({ playerID, roomID }: SpecificID) => {
+    try {
+      const player = store.getPlayer({ playerID, roomID });
+      const { cards } = player;
+      if (cards.length === 2) {
+        const [first, second] = cards;
+        return first.value === first.value || (TenSet.has(first.value) && TenSet.has(second.value));
+      }
+      return false;
+    } catch (error) {
+      throw new Error('Failed to check for double');
+    }
+  },
 
   getPointsSum(cards: Card[]): number {
     return cards.reduce((sum, card) => {
@@ -42,9 +70,9 @@ export const CardsHandler: Handler = {
       // special check for Ace
       if (card.value === CardValue.ACE && sum > TWENTY_ONE) {
         point = 1;
-      }  
+      }
       sum += point;
       return sum;
     }, 0);
-  }
+  },
 };

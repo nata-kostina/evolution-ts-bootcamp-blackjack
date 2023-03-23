@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import "./styles.css";
 import { MenuItem } from "./MenuItem";
@@ -15,7 +16,7 @@ export const Menu = ({ socketID }: Props) => {
                     key={item.id}
                     text={item.text}
                     link={item.link}
-                    socketID={socketID}
+                    // socketID={socketID}
                 />
             ))}
         </ul>

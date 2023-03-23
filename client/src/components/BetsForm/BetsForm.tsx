@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import { isInputValid } from "../../utils/validation/InputLayerValidation";
 import { formatStringToNumber } from "../../utils/formatting/InputLayerFromatting";
 import { betsSet } from "../../constants/gameConstants";
-import { game, uiStore } from "../../store";
+import { game } from "../../store";
 
 export const BetsForm = observer(() => {
     const [inputValue, setInputValue] = useState("");
@@ -25,7 +25,7 @@ export const BetsForm = observer(() => {
     };
 
     const handleBetClick = (bet: number) => {
-        uiStore.addBet(bet);
+        game.ui.addBet(bet);
     };
 
     const handleInputSubmit = (
@@ -34,17 +34,17 @@ export const BetsForm = observer(() => {
         e.preventDefault();
         if (!game.isPlaceBetAvailable) {
             const bet = formatStringToNumber(inputValue);
-            uiStore.addBet(bet);
+            game.ui.addBet(bet);
             setInputValue("");
         }
     };
 
     const handleUndoBet = () => {
-        uiStore.undoBet();
+        game.ui.undoBet();
     };
 
     const handleClearClick = () => {
-        uiStore.clearBets();
+        game.ui.clearBets();
     };
 
     return (

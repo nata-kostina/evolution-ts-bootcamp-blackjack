@@ -1,41 +1,40 @@
-import { Socket } from 'socket.io';
-import { SocketInstance } from '../instances/Socket.class.js';
-import { ServerToClientEvents, EventResponseMap } from '../types/socketTypes.js';
+import { io } from '../index.js';
+import { ServerToClientEvents, ResponseParameters } from '../types/socketTypes.js';
 
 export type RespondFn = <T extends keyof Partial<ServerToClientEvents>>({
+  response,
   event,
-  payload,
-}: EventResponseMap<T>) => void;
+  roomID,
+}: ResponseParameters<T>) => void;
 
 export const respondWithoutDelay = () => {
-  const respond: RespondFn = ({ event, payload, socket }) => socket.emit(event, ...payload);
+  const respond: RespondFn = ({ event, response, roomID }) => {
+    io.timeout(20000)
+      .to(roomID)
+      .emit<typeof event>(event, ...response);
+  };
   return respond;
 };
 
-export const sendInSequence = (socket: Socket, initialDelay = 0) => {
-  const delayStep = 1000;
-  let delay = initialDelay;
+export const sendInSequence = (delay = 1000) => {
   let abortSequence = false;
-  return <T extends keyof Partial<ServerToClientEvents>>({ event, payload }: EventResponseMap<T>) => {
-    setTimeout(() => {
-      try {
-        if (!abortSequence) {
-          socket.emit(event, ...payload, ({ ok }: { ok: boolean }) => {
-            if (!ok) {
-              abortSequence = true;
-            }
-          });
+  const respond: RespondFn = async ({ event, response, roomID }) => {
+    console.log(`Send in sequence, delay: `, delay);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        try {
+          if (!abortSequence) {
+              io.timeout(20000)
+                .to(roomID)
+                .emit(event, ...response);
+            console.log('emit ', event);
+            return resolve();
+          }
+        } catch (error) {
+          abortSequence = true;
         }
-      } catch (error) {
-        abortSequence = true;
-      }
-    }, delay);
-    delay += delayStep;
+      }, delay);
+    });
   };
-};
-
-export const makeDelayedSequence = (socket: SocketInstance, callback: () => void) => {
-  socket.setRespond(sendInSequence(socket.connection));
-  callback();
-  socket.setRespond(respondWithoutDelay());
+  return respond;
 };

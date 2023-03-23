@@ -1,15 +1,17 @@
 import { Server } from 'socket.io';
 import { isError } from './utils/isError.js';
 import { Store } from './store/Store.class.js';
-import { SocketInstance } from './instances/Socket.class.js';
-import { makeDelayedSequence } from './utils/respondConfig.js';
-import { PlaceBetNotification } from './constants/notifications.js';
-import { betSchema, playerSchema, roomSchema } from './utils/validation.js';
-import { ClientToServerEvents, ServerToClientEvents } from './types/socketTypes.js';
+import { betSchema, playerSchema } from './utils/validation.js';
+import { ClientToServerEvents, GameMode, ServerToClientEvents } from './types/socketTypes.js';
+import { SinglePlayerController } from './instances/SinglePlayerController.js';
+import { MultiPlayersController } from './instances/MultiPlayersController.js';
+import { Controller } from './types.js';
+import { initializePlayer } from './utils/initializers.js';
+import { PlayersStore } from './store/PlayersStore.class.js';
 
 export const store = new Store();
-
-const io = new Server<ClientToServerEvents, ServerToClientEvents>(3000, {
+export const playersStore = new PlayersStore();
+export const io = new Server<ClientToServerEvents, ServerToClientEvents>(3000, {
   cors: {
     origin: 'http://localhost:3001',
   },
@@ -21,19 +23,25 @@ io.engine.on('headers', (headers) => {
 
 io.on('connection', (socket) => {
   console.log(`Socket ${socket.id} was connected`);
-
-  const connection = new SocketInstance(socket);
-
-  socket.on('startGame', (room) => {
+  const singlePlayerController = new SinglePlayerController(socket);
+  const multiPlayersController = new MultiPlayersController(socket);
+  const controllerMap = {
+    [GameMode.Single]: singlePlayerController,
+    [GameMode.Multi]: multiPlayersController,
+  };
+  let controller = singlePlayerController;
+  const changeController = (newController: Controller) => {
+    controller = newController;
+  };
+  const player = initializePlayer({ playerID: socket.id, roomID: socket.id });
+  socket.on('startGame', ({ playerID, mode }) => {
     try {
-      const { error } = roomSchema.validate(room);
+      const { error } = playerSchema.validate(playerID);
       if (error) {
         throw new Error('Invalid parameter');
       }
-      makeDelayedSequence(connection, () => {
-        connection.handleStartGame([room]);
-        connection.notificate(PlaceBetNotification);
-      });
+      changeController(controllerMap[mode]);
+      controller.handleStartGame({ playerID, socket });
       console.log(`Socket ${socket.id} started a game`);
     } catch (e: unknown) {
       console.log(`Socket ${socket.id} failed to start a game`);
@@ -48,28 +56,11 @@ io.on('connection', (socket) => {
       if (error) {
         throw new Error('Invalid bet');
       }
-      makeDelayedSequence(connection, () => {
-        connection.handlePlaceBet({ playerID, roomID, bet });
-        connection.dealCards({ playerID, roomID });
-        connection.checkCombination({ playerID, roomID });
-      });
-      console.log(`Socket ${socket.id} placed bet`);
+      controller.handlePlaceBet({ playerID, roomID, bet });
+      console.log(`Socket ${socket.id} request to place bet`);
     } catch (e) {
       console.log(`Socket ${socket.id} failed to place a bet`);
       socket.emit('placeBet', { ok: false, statusText: isError(e) ? e.message : 'Failed to place a bet' });
-    }
-  });
-
-  socket.on('makeDecision', ({ decision, id }) => {
-    try {
-      const { error: roomIDError } = roomSchema.validate(id.roomID);
-      const { error: playerIDError } = playerSchema.validate(id.playerID);
-
-      if (roomIDError || playerIDError) {
-        throw new Error('Invalid parameter');
-      }
-    } catch (error) {
-      console.log(`Socket ${socket.id} failed to handle player's decision`);
     }
   });
 

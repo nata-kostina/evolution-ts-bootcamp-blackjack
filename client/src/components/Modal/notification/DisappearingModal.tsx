@@ -6,7 +6,7 @@ interface DisappearingNotificationProps extends WithModalProps {
     timer?: number;
 }
 
-const DisappearingNotification = ({ onClose, text, timer = 3000 }: DisappearingNotificationProps) => {
+const DisappearingNotification = ({ onClose, text, timer = 1000 }: DisappearingNotificationProps) => {
     useEffect(() => {
         const timerID = setTimeout(() => onClose(), timer);
         return () => {

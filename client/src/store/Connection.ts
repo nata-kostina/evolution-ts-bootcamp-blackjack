@@ -1,5 +1,7 @@
+/* eslint-disable import/no-cycle */
 import { makeAutoObservable } from "mobx";
 import { io, Socket } from "socket.io-client";
+import { game } from ".";
 import { ServerToClientEvents, ClientToServerEvents } from "../types/socketTypes";
 
 type Disconnected = "disconnected";
@@ -12,7 +14,6 @@ type SocketStatus = Disconnected | Connected | Waiting | WithError;
 export class Connection {
     public socket: Socket<ServerToClientEvents, ClientToServerEvents>;
     public status: SocketStatus = "waiting";
-    public roomID = "";
     public constructor() {
         this.socket = io("http://localhost:3000", {
             withCredentials: true,
@@ -22,7 +23,7 @@ export class Connection {
         this.socket.on("connect", () => {
             console.log("Socket is connected");
             this.status = "connected";
-            this.roomID = this.socket.id;
+            game.setPlayerID(this.socket.id);
         });
 
         this.socket.on("disconnect", () => {

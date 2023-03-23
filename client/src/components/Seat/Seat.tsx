@@ -1,29 +1,37 @@
 import React from "react";
-import { Card, DealerInstance, PlayerInstance, SeatPlace } from "../../types/types";
-import { CardItem } from "../Card/CardItem";
+import { observer } from "mobx-react-lite";
+import { game } from "../../store";
+import {
+    DealerInstance,
+    PlayerInstance,
+    SeatPlace,
+} from "../../types/types";
 import { CardList } from "../CardList/CardList";
 
 interface Props {
-    type: SeatPlace;
-    member: PlayerInstance | DealerInstance;
-    cards: Card[];
-    points: number;
+    seatType: SeatPlace;
 }
 
-export const Seat = ({ type, cards, points, member }: Props) => {
+export const Seat = observer(({ seatType }: Props) => {
+    const player = game.ui.seats[seatType];
     return (
-        <div>
-            <span>Type: {type}</span>
-            <div>
-                <CardList points={points} cards={cards}>
-                    {isDealer(member) && member.hasHole &&
-                        <CardItem card={{ id: "HOLE", suit: "HOLE", value: "HOLE" }} />}
-                </CardList>
-            </div>
+        <div style={{ border: "1px solid orange", width: "200px", height: "300px" }}>
+            {player && (
+                <div>
+                    <div><span>Player ID: </span>{player.playerID}</div>
+                    <CardList points={player.points} cards={player.cards} />
+                    <div><span>Balance: </span>{player.balance}</div>
+                    <div><span>Bet: </span>{player.bet}</div>
+                    <div><span>Insurance: </span>{player.insurance}</div>
+                </div>
+            )}
+
         </div>
     );
-};
+});
 
-export function isDealer(member: PlayerInstance | DealerInstance): member is DealerInstance {
-    return "hasHole" in member;
+export function isDealer(
+    member: PlayerInstance | DealerInstance,
+): member is DealerInstance {
+    return "hasHoleCard" in member;
 }

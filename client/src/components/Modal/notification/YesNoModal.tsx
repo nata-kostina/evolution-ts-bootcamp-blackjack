@@ -1,20 +1,21 @@
 import React from "react";
+import { YesNoAcknowledgement } from "../../../types/types";
 import { withModal, WithModalProps } from "./hoc/withModal";
 
 interface YesNoNotificationProps extends WithModalProps {
     text: string;
-    positiveCallback: () => void;
-    negativeCallback: () => void;
+    handleAnswer: (answer: YesNoAcknowledgement) => void;
     onClose: () => void;
 }
 
-export const YesNoNotification = ({ text, positiveCallback, negativeCallback, onClose }: YesNoNotificationProps) => {
+export const YesNoNotification = ({ text, handleAnswer, onClose }: YesNoNotificationProps) => {
     const handleYesClick = () => {
-        positiveCallback();
+        console.log("Handle answer yes");
+        handleAnswer("yes");
         onClose();
     };
     const handleNoClick = () => {
-        negativeCallback();
+        handleAnswer("no");
         onClose();
     };
 

@@ -1,6 +1,6 @@
-import { SocketResponse } from "../types/socketTypes.js";
+import { SuccessResponse } from "../types/socketTypes.js";
 
-export const successResponse = <T>(payload: T): SocketResponse<T> => {
+export const successResponse = <T>(payload: T): SuccessResponse<T> => {
   return {
     ok: true,
     statusText: 'Ok',

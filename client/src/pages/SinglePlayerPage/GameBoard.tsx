@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { ControlPanel } from "../../components/ControlPanel/ControlPanel";
-import { game, uiStore } from "../../store/index";
 import { NotificationModal } from "../../components/Modal/notification/NotificationModal";
+import { changeStatus } from "../../utils/controller/changeStatus";
+import { game } from "../../store";
 
 const notificationDelay = 200;
 
@@ -19,14 +20,19 @@ export const GameBoard = observer(() => {
     }, [game.ui.notification.queue]);
 
     const closeModal = () => {
+        if (game.ui.notification.currentModal) {
+            const { variant } = game.ui.notification.currentModal.notification;
+            const updatedStatus = changeStatus(game.status, variant);
+            game.updateStatus(updatedStatus);
+        }
         game.ui.notification.hideNotification();
     };
     return (
         <div>
             <NotificationModal
                 closeModal={closeModal}
-                isOpen={uiStore.notification.isShown}
-                modalVariant={uiStore.notification.currentModal}
+                isOpen={game.ui.notification.isShown}
+                modalVariant={game.ui.notification.currentModal}
             />
             <ControlPanel />
         </div>

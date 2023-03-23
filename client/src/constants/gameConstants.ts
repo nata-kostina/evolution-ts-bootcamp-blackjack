@@ -23,3 +23,5 @@ export const betsSet: BetItem[] = [{
     id: uuid(),
     value: 200,
 }];
+
+export const maxPlayersNum = 4;

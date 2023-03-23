@@ -21,11 +21,12 @@ export type PlayerInstance = {
     bet: number;
     balance: number;
     points: number;
+    insurance?: number;
 };
 export type DealerInstance = {
     cards: Card[];
     points: number;
-    hasHole: boolean;
+    hasHoleCard: boolean;
 };
 
 export enum GameError {
@@ -33,53 +34,32 @@ export enum GameError {
     PlayerError = "player-error",
 }
 
-export enum Turn {
-    Player = "player",
-    Dealer = "dealer",
-}
-
-export enum PlayerCommand {
-    InitPlayer = "init-player",
-    ToggleTurn = "toggle-turn",
-    PlacingBet = "placing-bet",
-    PlaceBet = "place-bet",
-    GetCard = "get-card",
-}
-export enum DealerCommand {
-    // Init = "init",
-    // PlaceBet = "place-bet",
-    GiveCard = "get-card",
-}
-
-export enum ECommand {
-    GET_CARDS = "get-cards",
-    Waiting = "waiting",
-    Check_combination = "check-combination",
-}
-
-export type Command = PlayerCommand | DealerCommand;
-
 export interface GameSession {
     roomID: RoomID;
-    player: PlayerInstance;
+    players: Record<PlayerID, PlayerInstance>;
     dealer: DealerInstance;
 }
 
-export enum SeatPlace {
-    Left = "left",
-    MiddleLeft = "middle-left",
-    MiddleRight = "middle-right",
-    Right = "right",
-    Dealer = "dealer",
-}
+// export enum SeatPlace {
+//     Left = "left",
+//     MiddleLeft = "middle-left",
+//     MiddleRight = "middle-right",
+//     Right = "right",
+// }
+
+export type SeatPlace = "left" | "middle-left" | "middle-right" | "right";
 
 export enum Decision {
     HIT = "hit",
     STAND = "stand",
+    Double = "double",
+    Surender = "surender",
+    TakeMoney = "take-money",
+    DenyMoney = "deny-money",
 }
 
 export type GameStatus = "starting" | "started" | "in_progress" | "finished" | "error" | "waiting-decision" |
-"waiting-bet" | "waits-for-dealer" | "waiting-cards" | "placing-bet";
+"waiting-bet" | "waits-for-dealer" | "waiting-cards" | "placing-bet" | "waiting-others" | "new-game";
 
 export enum NotificationVariant {
     PlaceBet = "place-bet",
@@ -88,9 +68,16 @@ export enum NotificationVariant {
     StandOrTakeMoney = "stand-or-take-money",
     Victory = "victory",
     Finish = "finish",
+    PlayerLose = "player-lose",
+    Double = "double",
+    Insurance = "insurance",
+    Disconnection = "disconnection",
+    Move = "move",
 }
+
 export type Notification = {
-    type: NotificationVariant;
+    kind: NotificationKind;
+    variant: NotificationVariant;
     text: string;
 };
 
@@ -102,19 +89,33 @@ export const enum ModalKinds {
 
 export type YesNoModal = {
     type: ModalKinds.YesNo;
-    text: string;
-    positiveCallback: (() => void);
-    negativeCallback: (() => void);
+    notification: Notification;
+    handleAnswer: (answer: YesNoAcknowledgement) => void;
 };
 
 export type OkModal = {
     type: ModalKinds.Ok;
+    notification: Notification;
+
 };
 
 export type DisappearingModal = {
     type: ModalKinds.Disappearing;
-    text: string;
+    notification: Notification;
     timer?: number;
+    handleAnswer?: (answer: Decision) => void;
 };
 
 export type ModalUnion = YesNoModal | OkModal | DisappearingModal;
+
+export enum NotificationKind {
+    YesNo = "yes-no",
+    Ok = "ok",
+    Move = "move",
+}
+export type YesNoAcknowledgement = "yes" | "no";
+
+export enum GameMode {
+    Single = "single",
+    Multi = "multi",
+}
