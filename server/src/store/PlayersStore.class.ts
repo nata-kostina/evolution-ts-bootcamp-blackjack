@@ -8,11 +8,16 @@ export class PlayersStore {
     this.store = {};
   }
 
-  addPlayer(playerID: PlayerID, balance: number) {
+  public isNewPlayer(playerID: PlayerID): boolean {
+    return !(this.store[playerID]);
+  }
+
+  public updatePlayerBalance({playerID, balance}: {playerID: PlayerID, balance: number}): void {
+    console.log(this.store);
     this.store[playerID] = balance;
   }
 
-  removePlayer(playerID: PlayerID) {
+  public removePlayer(playerID: PlayerID): void {
     if (this.store[playerID]) {
       delete this.store[playerID];
     } else {
@@ -20,11 +25,7 @@ export class PlayersStore {
     }
   }
 
-  getPlayer(playerID: PlayerID) {
-    if (this.store[playerID]) {
+  public getPlayerBalance(playerID: PlayerID): number {
       return this.store[playerID];
-    } else {
-      return null;
-    }
   }
 }

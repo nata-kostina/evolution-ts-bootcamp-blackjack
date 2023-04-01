@@ -73,7 +73,6 @@ export class Store {
       if (player) {
         return player;
       } else {
-        console.log('There is no such player');
         throw new Error('There is no such player');
       }
     } catch (error) {
@@ -86,8 +85,6 @@ export class Store {
     const room = this.store[roomID];
     if (room) {
       delete this.store[roomID];
-    } else {
-      throw new Error('No game found');
     }
   }
 
@@ -104,9 +101,6 @@ export class Store {
   public removePlayerFromGame({ roomID, playerID }: SpecificID): void {
     try {
       const game = this.getGame(roomID);
-      if (playerID === game.organizer) {
-        this.reassignOrginizer({ playerID, roomID });
-      }
       if (game.players[playerID]) {
         delete game.players[playerID];
       } else {
@@ -151,7 +145,14 @@ export class Store {
       const player = this.getPlayerInstance({ playerID, roomID });
       const updatedCards = payload.cards ? [...player.cards, ...payload.cards] : player.cards;
       const updatedPoints = CardsHandler.getPointsSum(updatedCards);
-      const updatedPlayer = { ...player, ...payload, points: updatedPoints, cards: [...updatedCards] };
+      const updatedActions = payload.availableActions ? payload.availableActions : [];
+      const updatedPlayer: PlayerInstance = {
+        ...player,
+        ...payload,
+        points: updatedPoints,
+        cards: [...updatedCards],
+        availableActions: updatedActions,
+      };
 
       game.players[player.playerID] = updatedPlayer;
     } catch (e: unknown) {
@@ -253,7 +254,14 @@ export class Store {
   public getResetSession({ playerID, roomID }: SpecificID): GameSession {
     try {
       const player = this.getPlayer({ playerID, roomID });
-      const updatedPlayer: PlayerInstance = { ...player, cards: [], bet: 0, points: 0, insurance: undefined };
+      const updatedPlayer: PlayerInstance = {
+        ...player,
+        cards: [],
+        bet: 0,
+        points: 0,
+        insurance: undefined,
+        availableActions: [],
+      };
 
       const session: GameSession = {
         roomID: playerID,

@@ -10,7 +10,7 @@ interface Props {
 export const MenuItem = ({ text, link }: Props) => {
     return (
         <li className="menu__item">
-            <Link to={`${link}/dfg`}>{text}</Link>
+            <Link to={`${link}`}>{text}</Link>
         </li>
     );
 };

@@ -11,7 +11,9 @@ export const BetsForm = observer(() => {
     const [errorMessage, setErrorMessage] = useState("");
 
     const handleInputChange = (value: string) => {
-        if (game.isPlaceBetAvailable) { return; }
+        if (game.ui.placeBetBtnDisabled) {
+            return;
+        }
         const result = isInputValid(value, "betInput");
         if (result.isValid) {
             setInputValue(value);
@@ -32,11 +34,9 @@ export const BetsForm = observer(() => {
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     ) => {
         e.preventDefault();
-        if (!game.isPlaceBetAvailable) {
-            const bet = formatStringToNumber(inputValue);
-            game.ui.addBet(bet);
-            setInputValue("");
-        }
+        const bet = formatStringToNumber(inputValue);
+        game.ui.addBet(bet);
+        setInputValue("");
     };
 
     const handleUndoBet = () => {
@@ -80,7 +80,7 @@ export const BetsForm = observer(() => {
                         <button
                             onClick={handleInputSubmit}
                             type="submit"
-                            disabled={!game.isPlaceBetAvailable}
+                            disabled={game.ui.placeBetBtnDisabled}
                         >
                             Place bet
                         </button>
@@ -89,14 +89,14 @@ export const BetsForm = observer(() => {
                 <button
                     type="button"
                     onClick={handleUndoBet}
-                    disabled={!game.isPlaceBetAvailable}
+                    disabled={game.ui.placeBetBtnDisabled}
                 >
                     Undo bet
                 </button>
                 <button
                     type="button"
                     onClick={handleClearClick}
-                    disabled={!game.isPlaceBetAvailable}
+                    disabled={game.ui.placeBetBtnDisabled}
                 >
                     Clear bets
                 </button>

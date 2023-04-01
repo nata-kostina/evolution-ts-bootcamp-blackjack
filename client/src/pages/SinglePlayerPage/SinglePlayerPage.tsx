@@ -8,21 +8,17 @@ import { ErrorModalBase } from "../../components/Modal/ErrorModalBase";
 import { GameMode } from "../../types/types";
 
 const SinglePlayerPage = observer(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [modalIsOpen, setIsOpen] = useState(false);
 
     const processError = () => {
         setIsOpen(false);
-        game.errorHandler.execute();
     };
 
     useEffect(() => {
-        alert("Not implemented yet");
-        // game.startGame(GameMode.Single);
-        // return () => {
-        //     console.log("Single page unmount");
-        //     game.finishGame();
-        // };
+        game.startGame(GameMode.Single);
+        return () => {
+            game.finishGame();
+        };
     }, []);
 
     useEffect(() => {
@@ -34,10 +30,10 @@ const SinglePlayerPage = observer(() => {
     return (
         <div>
             <div>Game status: {game.status}</div>
-            {!game.isFailed ? <GameBoard /> : "Loading..."}
-            {game.error && (
+            {game.isReady && <GameBoard />}
+            {game.isLoading && "Loading..."}
+            {game.isFailed && (
                 <ErrorModalBase
-                    type={game.error}
                     modalIsOpen={modalIsOpen}
                     closeModal={processError}
                 />

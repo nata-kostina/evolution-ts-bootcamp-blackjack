@@ -14,6 +14,10 @@ export class UINotification {
         this.queue = [...this.queue, modal];
     }
 
+    public resetQueue(): void {
+        this.queue = [];
+    }
+
     public showNotification(): void {
         if (!this.isShown) {
             this.currentModal = this.queue[0];

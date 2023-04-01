@@ -4,11 +4,7 @@ import "./styles.css";
 import { MenuItem } from "./MenuItem";
 import { menu } from "../../constants/navigationConstants";
 
-interface Props {
-    socketID: string;
-}
-
-export const Menu = ({ socketID }: Props) => {
+export const Menu = () => {
     return (
         <ul className="menu">
             {menu.map((item) => (
@@ -16,7 +12,6 @@ export const Menu = ({ socketID }: Props) => {
                     key={item.id}
                     text={item.text}
                     link={item.link}
-                    // socketID={socketID}
                 />
             ))}
         </ul>

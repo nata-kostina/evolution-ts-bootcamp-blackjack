@@ -1,10 +1,9 @@
 import React from "react";
 import Modal from "react-modal";
 import { ErrorModalProps } from "../../types/types";
-import { getErrorModal } from "../../utils/getErrorModal";
+import { GameErrorModal } from "./GameErrorModal";
 
 export const ErrorModalBase = (props: ErrorModalProps) => {
-    const ChildComponent = getErrorModal(props);
     const { closeModal, modalIsOpen } = props;
     return (
         <Modal
@@ -12,7 +11,7 @@ export const ErrorModalBase = (props: ErrorModalProps) => {
             onRequestClose={closeModal}
             contentLabel="Example Modal"
         >
-            {ChildComponent}
+            <GameErrorModal />
         </Modal>
     );
 };

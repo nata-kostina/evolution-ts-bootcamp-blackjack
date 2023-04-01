@@ -5,7 +5,6 @@ export type Deck = Card[];
 export type ModalVariant = "gameError" | "playerError";
 
 export interface ErrorModalProps {
-    type: GameError;
     modalIsOpen: boolean;
     closeModal: () => void;
 }
@@ -22,6 +21,7 @@ export type PlayerInstance = {
     balance: number;
     points: number;
     insurance?: number;
+    availableActions: Decision[];
 };
 export type DealerInstance = {
     cards: Card[];
@@ -49,17 +49,22 @@ export interface GameSession {
 
 export type SeatPlace = "left" | "middle-left" | "middle-right" | "right";
 
-export enum Decision {
-    HIT = "hit",
-    STAND = "stand",
-    Double = "double",
-    Surender = "surender",
-    TakeMoney = "take-money",
-    DenyMoney = "deny-money",
-}
+export type Decision = "hit" | "stand" | "double" | "surender";
 
-export type GameStatus = "starting" | "started" | "in_progress" | "finished" | "error" | "waiting-decision" |
-"waiting-bet" | "waits-for-dealer" | "waiting-cards" | "placing-bet" | "waiting-others" | "new-game";
+export type GameStatus =
+  | "starting"
+  | "started"
+  | "in_progress"
+  | "finished"
+  | "error"
+  | "waiting-decision"
+  | "waiting-bet"
+  | "waits-for-dealer"
+  | "waiting-cards"
+  | "placing-bet"
+  | "waiting-others"
+  | "new-game"
+  | "loading";
 
 export enum NotificationVariant {
     PlaceBet = "place-bet",
@@ -96,7 +101,6 @@ export type YesNoModal = {
 export type OkModal = {
     type: ModalKinds.Ok;
     notification: Notification;
-
 };
 
 export type DisappearingModal = {
@@ -119,3 +123,8 @@ export enum GameMode {
     Single = "single",
     Multi = "multi",
 }
+
+export type Bet = number;
+
+export type Acknowledgment<T> = { playerID: PlayerID; answer: T; };
+export type AvailableActions = Decision[];

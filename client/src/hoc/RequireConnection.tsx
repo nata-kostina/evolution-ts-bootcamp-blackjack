@@ -7,14 +7,16 @@ export const RequireConnection = (Component: React.FC) => {
     const ComponentWithRequireConnection: React.FC = observer(() => {
         return (
             <div>
-                {connection.status === "connected" ? (
-                    <Component />
-                ) : (
+                <h1>{connection.status}</h1>
+                {connection.status === "connected" && <Component />}
+                {connection.status === "waiting" && "Waiting connection"}
+                {connection.status === "error" && (
                     <div>
                         <Link to="/">Main Page</Link>
                         <span>Oooops the connection is broken</span>
                     </div>
                 )}
+
             </div>
         );
     });

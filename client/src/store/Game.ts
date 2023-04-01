@@ -16,6 +16,9 @@ import {
     NotificationKind,
     YesNoAcknowledgement,
     GameMode,
+    Bet,
+    Acknowledgment,
+    AvailableActions,
 } from "../types/types";
 import { Connection } from "./Connection";
 import { ErrorHandler } from "../utils/ErrorHandler";
@@ -35,7 +38,6 @@ export class Game {
     public roomID: RoomID | null = null;
     public player: PlayerInstance | null = null;
     public balance = 0;
-    private mode: GameMode = GameMode.Single;
 
     public constructor() {
         this.connection = connection;
@@ -43,26 +45,14 @@ export class Game {
         this.connection.socket.on("startGame", (reponse) =>
       this.handleStartGame(reponse),
         );
-        this.connection.socket.on("getPlayer", (response) =>
-      this.handleGetPlayer(response),
-        );
-        this.connection.socket.on("finishGame", (response) =>
-      this.handleFinishGame(response),
-        );
-        this.connection.socket.on("placeBet", (response) =>
-      this.handlePlaceBet(response),
-        );
-        this.connection.socket.on("makeDecision", (response) =>
-      this.updateGameSession(response),
+        this.connection.socket.on("placeBet", (reponse, acknowledge) =>
+      this.handlePlaceBet(reponse, acknowledge),
         );
         this.connection.socket.on("updateSession", (response) =>
       this.updateGameSession(response),
         );
         this.connection.socket.on("notificate", (response, acknowledge) =>
       this.handleNotificate(response, acknowledge),
-        );
-        this.connection.socket.on("waitOthers", (response) =>
-      this.handleWaitOthers(response),
         );
         this.connection.socket.on("getDecision", (response, acknowledgement) =>
       this.handleGetDecision(response, acknowledgement),
@@ -97,9 +87,9 @@ export class Game {
     }
 
     public startGame(mode: GameMode): void {
-        this.status = "starting";
-        this.mode = mode;
+        this.status = "loading";
         if (this.playerID) {
+            this.ui.togglePlaceBetBtn(false);
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
             this.connection.socket.emit("startGame", {
                 playerID: this.playerID,
@@ -112,11 +102,9 @@ export class Game {
 
     public finishGame(): void {
         this.status = "finished";
-        if (this.playerID) {
-            this.connection.socket.emit("finishGame", {
-                roomID: this.connection.socket.id,
-                playerID: this.playerID,
-            });
+        if (this.roomID && this.playerID) {
+            this.ui.notification.resetQueue();
+            this.connection.socket.emit("finishGame", { roomID: this.roomID, playerID: this.playerID });
         }
     }
 
@@ -124,39 +112,17 @@ export class Game {
         return this.status === "error";
     }
 
-    public get isDecisionEnabled(): boolean {
-        return this.status === "waiting-decision";
+    public get isLoading(): boolean {
+        return this.status === "loading";
     }
 
-    public get isPlaceBetAvailable(): boolean {
-        return this.status === "waiting-bet";
+    public get isReady(): boolean {
+        return (this.status !== "loading") && (this.status !== "error");
     }
-
-    // public getPlayer(): void {
-    //     this.connection.socket.emit("getPlayer", {
-    //         roomID: this.connection.socket.id,
-    //         playerID: this.connection.socket.id,
-    //     });
-    // }
 
     public imitateErrorResponse(): void {
         this.status = "error";
-        this.error = GameError.PlayerError;
         // this.errorHandler.setHandler({ execute: () => this.getPlayer() });
-    }
-
-    public placeBet(): void {
-        if (this.playerID && this.roomID && this.ui.player) {
-            this.status = "in_progress";
-            this.connection.socket.emit("placeBet", {
-                roomID: this.roomID,
-                playerID: this.playerID,
-                bet: this.ui.player.bet,
-                mode: this.mode,
-            });
-        } else {
-            this.status = "error";
-        }
     }
 
     public getPlayerInstance(
@@ -167,21 +133,6 @@ export class Game {
             return players[playerID];
         }
         throw new Error("Failed to get current player");
-    }
-
-    public makeDecision(decision: Decision): void {
-        if (this.session) {
-            this.connection.socket.emit("makeDecision", {
-                decision,
-                id: {
-                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-                    playerID: this.playerID as string,
-                    roomID: this.session.roomID,
-                },
-            });
-        } else {
-            console.warn("makeDecision: No session found");
-        }
     }
 
     public updateStatus(value: GameStatus): void {
@@ -218,6 +169,7 @@ export class Game {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private handleFinishGame(response: SocketResponse<PlayerInstance>): void {
         this.status = "finished";
+        this.ui.toggleActionBtns([]);
     }
 
     private updateGameSession(response: SocketResponse<GameSession>): void {
@@ -231,12 +183,19 @@ export class Game {
         }
     }
 
-    private handlePlaceBet(response: SocketResponse<GameSession>): void {
-        console.log("handlePlaceBet: ", response);
+    private handlePlaceBet(response: SocketResponse<GameSession>,
+        acknowledgement: (responses: Acknowledgment<Bet>) => void): void {
         if (response.ok && response.payload) {
-            // this.status = "waiting-cards";
-            this.session = response.payload;
             this.ui.setGameSession(response.payload);
+            this.ui.togglePlaceBetBtn(false);
+            this.ui.setBetHandler((bet) => {
+                if (this.playerID) {
+                    this.status = "in_progress";
+                    acknowledgement({ playerID: this.playerID, answer: bet });
+                }
+                this.ui.resetBetHandler();
+                this.ui.togglePlaceBetBtn(true);
+            });
         } else {
             this.status = "error";
         }
@@ -244,7 +203,7 @@ export class Game {
 
     private handleNotificate(
         response: SocketResponse<Notification>,
-        acknowledge: (answer: { playerID: PlayerID; ack: YesNoAcknowledgement; }) => void,
+        acknowledge?: (ack: Acknowledgment<YesNoAcknowledgement>) => void,
     ): void {
         if (response.ok) {
             switch (response.payload.kind) {
@@ -260,9 +219,8 @@ export class Game {
                         type: ModalKinds.YesNo,
                         notification: response.payload,
                         handleAnswer: (ack: YesNoAcknowledgement) => {
-                            console.log("handle answer inside, ack ", ack);
                             if (acknowledge && this.playerID) {
-                                acknowledge({ playerID: this.playerID, ack });
+                                acknowledge({ playerID: this.playerID, answer: ack });
                             }
                         },
                     });
@@ -278,13 +236,14 @@ export class Game {
     }
 
     private handleGetDecision(
-        response: SocketResponse<string>,
-        acknowledge: (answer: { playerID: PlayerID; ack: Decision; }) => void,
+        response: SocketResponse<GameSession>,
+        acknowledge: (ack: Acknowledgment<Decision>) => void,
     ): void {
         if (response.ok) {
+            this.ui.setGameSession(response.payload);
             this.ui.setDecisionHandler((decision) => {
                 if (acknowledge && this.playerID) {
-                    acknowledge({ playerID: this.playerID, ack: decision });
+                    acknowledge({ playerID: this.playerID, answer: decision });
                 }
                 this.ui.resetDecisionHandler();
             });
@@ -299,9 +258,10 @@ export class Game {
             const player = this.getPlayerInstance(response.payload.players);
             this.player = player;
             this.roomID = response.payload.roomID;
+            this.ui.toggleNewBetDisabled(false);
             this.ui.setGameSession(response.payload);
-            // this.ui.placePlayers();
-            // this.ui.setGameSession(response.payload);
+            // this.ui.togglePlaceBetBtn(false);
+            // this.startGame(GameMode.Single);
         } else {
             this.status = "error";
         }

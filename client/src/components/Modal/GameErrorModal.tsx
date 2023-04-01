@@ -1,12 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ErrorModalProps } from "../../types/types";
 
-export const GameErrorModal = ({ closeModal }: Omit<ErrorModalProps, "type">) => {
+export const GameErrorModal = () => {
     return (
         <div>
+            <span>Something went wrong</span>
+            <span>Please, return to the Main Menu</span>
             <button><Link to="/">Main Menu</Link></button>
-            <button onClick={closeModal}>Try again</button>
         </div>
     );
 };

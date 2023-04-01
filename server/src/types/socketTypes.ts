@@ -1,6 +1,7 @@
-import { DecisionRequest } from '../types.js';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { AvailableActions, DecisionRequest, NewGameMode } from '../types.js';
 import { Notification } from './notificationTypes.js';
-import { Decision, GameSession, PlayerID, PlayerInstance, RoomID } from './gameTypes.js';
+import { Bet, Decision, GameSession, PlayerID, PlayerInstance, RoomID } from './gameTypes.js';
 
 export type ResponseParameters<Event extends keyof ServerToClientEvents> = {
   event: Event;
@@ -10,31 +11,26 @@ export type ResponseParameters<Event extends keyof ServerToClientEvents> = {
 
 export interface ServerToClientEvents {
   startGame: (response: SocketResponse<GameSession>) => void;
-  getPlayer: (response: SocketResponse<PlayerInstance>) => void;
-  finishGame: (response: SocketResponse<PlayerInstance>) => void;
-  placeBet: (response: SocketResponse<GameSession>) => void;
-  makeDecision: (response: SocketResponse<GameSession>) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getDecision: (response: SocketResponse<string>, acknowledgement: (err: any, responses:{ playerID: PlayerID; ack: Decision; }[]) => void) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  placeBet: (
+    response: SocketResponse<GameSession>,
+    acknowledgement: (err: any, responses: Acknowledgment<Bet>[]) => Promise<void>
+  ) => void;
+  getDecision: (
+    response: SocketResponse<GameSession>,
+    acknowledgement: (err: any, responses: Acknowledgment<Decision>[]) => Promise<void>
+  ) => void;
   notificate: (
     response: SocketResponse<Notification>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ack?: (err: any, responses: Acknowledgment[]) => void
+    ack?: (err: any, responses: Acknowledgment<YesNoAcknowledgement>[]) => void
   ) => void;
   updateSession: (response: SocketResponse<GameSession>) => void;
   finishRound: (response: SocketResponse<GameSession>) => void;
-  waitOthers: (response: SocketResponse<GameSession>) => void;
-  //   sendPlayerbalance: (response: SocketResponse<GameSession>) => void;
 }
 
 export interface ClientToServerEvents {
-  startGame: (payload: { playerID: PlayerID; mode: GameMode }) => void;
-  getPlayer: (id: SpecificID) => void;
-  finishGame: (id: SpecificID) => void;
-  placeBet: ({ playerID, roomID, bet, mode }: SpecificID & { bet: number; mode: GameMode }) => void;
-  makeDecision: (decision: DecisionRequest) => void;
-  insurance: (payload: SpecificID & { accept: boolean }) => void;
+  startGame: (payload: { playerID: PlayerID; mode: GameMode; roundMode: NewGameMode }) => void;
+  finishGame: ({roomID, playerID}: SpecificID) => void;
 }
 
 export type ClientPayload<T extends keyof ClientToServerEvents> = Parameters<ClientToServerEvents[T]>[0];
@@ -68,4 +64,4 @@ export enum GameMode {
   Multi = 'multi',
 }
 
-export type Acknowledgment = { playerID: PlayerID; answer: YesNoAcknowledgement };
+export type Acknowledgment<T> = { playerID: PlayerID; answer: T };

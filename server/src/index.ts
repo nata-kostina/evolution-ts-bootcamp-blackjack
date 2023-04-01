@@ -1,16 +1,15 @@
 import { Server } from 'socket.io';
 import { isError } from './utils/isError.js';
 import { Store } from './store/Store.class.js';
-import { betSchema, playerSchema } from './utils/validation.js';
-import { ClientToServerEvents, GameMode, ServerToClientEvents } from './types/socketTypes.js';
+import { playerSchema } from './utils/validation.js';
+import { ClientToServerEvents, ServerToClientEvents } from './types/socketTypes.js';
 import { SinglePlayerController } from './instances/SinglePlayerController.js';
-import { MultiPlayersController } from './instances/MultiPlayersController.js';
-import { Controller } from './types.js';
-import { initializePlayer } from './utils/initializers.js';
 import { PlayersStore } from './store/PlayersStore.class.js';
+import { ConnectionStore } from './store/ConnectionStore.class.js';
 
 export const store = new Store();
 export const playersStore = new PlayersStore();
+export const connectionStore = new ConnectionStore();
 export const io = new Server<ClientToServerEvents, ServerToClientEvents>(3000, {
   cors: {
     origin: 'http://localhost:3001',
@@ -23,44 +22,34 @@ io.engine.on('headers', (headers) => {
 
 io.on('connection', (socket) => {
   console.log(`Socket ${socket.id} was connected`);
+
   const singlePlayerController = new SinglePlayerController(socket);
-  const multiPlayersController = new MultiPlayersController(socket);
-  const controllerMap = {
-    [GameMode.Single]: singlePlayerController,
-    [GameMode.Multi]: multiPlayersController,
-  };
-  let controller = singlePlayerController;
-  const changeController = (newController: Controller) => {
-    controller = newController;
-  };
-  const player = initializePlayer({ playerID: socket.id, roomID: socket.id });
-  socket.on('startGame', ({ playerID, mode }) => {
+  const controller = singlePlayerController;
+
+  socket.on('startGame', async ({ playerID }) => {
+    const roomID = store.createNewRoom(socket.id);
     try {
       const { error } = playerSchema.validate(playerID);
       if (error) {
         throw new Error('Invalid parameter');
       }
-      changeController(controllerMap[mode]);
-      controller.handleStartGame({ playerID, socket });
+      await controller.handleStartGame({ roomID, playerID });
       console.log(`Socket ${socket.id} started a game`);
     } catch (e: unknown) {
-      console.log(`Socket ${socket.id} failed to start a game`);
-      socket.emit('startGame', { ok: false, statusText: isError(e) ? e.message : 'Failed to start a game' });
+      io.to(roomID).emit('startGame', { ok: false, statusText: isError(e) ? e.message : 'Failed to start a game' });
     }
   });
 
-  socket.on('placeBet', ({ roomID, playerID, bet }) => {
+  socket.on('finishGame', ({ roomID, playerID }) => {
     try {
-      const player = store.getPlayer({ roomID, playerID });
-      const { error } = betSchema.validate(bet, { context: { min: 0, max: player.balance } });
+      const { error } = playerSchema.validate(playerID);
       if (error) {
-        throw new Error('Invalid bet');
+        throw new Error('Invalid parameter');
       }
-      controller.handlePlaceBet({ playerID, roomID, bet });
-      console.log(`Socket ${socket.id} request to place bet`);
-    } catch (e) {
-      console.log(`Socket ${socket.id} failed to place a bet`);
-      socket.emit('placeBet', { ok: false, statusText: isError(e) ? e.message : 'Failed to place a bet' });
+      controller.finishGame({ roomID, playerID });
+      console.log(`Socket ${socket.id} finished a game`);
+    } catch (e: unknown) {
+      console.log(isError(e) ? e.message : `Socket ${socket.id} failed to finish a game`);
     }
   });
 

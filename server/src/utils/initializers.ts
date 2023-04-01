@@ -18,5 +18,5 @@ export function initializeGameState({ roomID, playerID }: SpecificID): GameState
 }
 
 export function initializePlayer({ playerID, roomID, balance = 2000 }: SpecificID & {balance?: number}): PlayerInstance {
-  return { playerID, roomID, balance, bet: 0, cards: [], points: 0, status: 'ready-to-play' };
+    return { playerID, roomID, balance, bet: 0, cards: [], points: 0, availableActions: [] };
 }

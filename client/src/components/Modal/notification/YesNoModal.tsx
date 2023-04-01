@@ -10,7 +10,6 @@ interface YesNoNotificationProps extends WithModalProps {
 
 export const YesNoNotification = ({ text, handleAnswer, onClose }: YesNoNotificationProps) => {
     const handleYesClick = () => {
-        console.log("Handle answer yes");
         handleAnswer("yes");
         onClose();
     };

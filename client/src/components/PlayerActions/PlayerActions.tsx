@@ -2,18 +2,23 @@ import React from "react";
 import { observer } from "mobx-react-lite";
 import { game } from "../../store";
 import "./styles.css";
-import { Decision } from "../../types/types";
+import { Decision, GameMode } from "../../types/types";
 
 export const PlayerActions = observer(() => {
     const handleBetClick = () => {
-        game.placeBet();
+        if (game.ui.betHandler && game.ui.player) {
+            game.ui.betHandler(game.ui.player.bet);
+        }
     };
     const handleDecision = (decision: Decision) => {
         if (game.ui.decisionHandler) {
             game.ui.decisionHandler(decision);
         }
     };
-
+    const handleNewBetClick = () => {
+        game.ui.toggleNewBetDisabled(true);
+        game.startGame(GameMode.Single);
+    };
     return (
         <ul className="player-actions">
             <li className="action_item" />
@@ -21,33 +26,39 @@ export const PlayerActions = observer(() => {
                 <button
                     type="button"
                     onClick={handleBetClick}
-                    disabled={!game.isPlaceBetAvailable}
+                    disabled={game.ui.placeBetBtnDisabled}
                 >Emit Bet Place
+                </button>
+                <button
+                    type="button"
+                    onClick={handleNewBetClick}
+                    disabled={game.ui.newBetDisabled}
+                >New Bet
                 </button>
             </li>
             <li className="action_item">
                 <button
                     type="button"
-                    disabled={!game.isDecisionEnabled}
-                    onClick={() => handleDecision(Decision.HIT)}
+                    disabled={game.ui.actionBtns.hit}
+                    onClick={() => handleDecision("hit")}
                 >HIT
                 </button>
                 <button
                     type="button"
-                    disabled={!game.isDecisionEnabled}
-                    onClick={() => handleDecision(Decision.STAND)}
+                    disabled={game.ui.actionBtns.stand}
+                    onClick={() => handleDecision("stand")}
                 >STAND
                 </button>
                 <button
                     type="button"
-                    disabled={!game.isDecisionEnabled}
-                    onClick={() => handleDecision(Decision.Double)}
+                    disabled={game.ui.actionBtns.double}
+                    onClick={() => handleDecision("double")}
                 >DOUBLE
                 </button>
                 <button
                     type="button"
-                    disabled={!game.isDecisionEnabled}
-                    onClick={() => handleDecision(Decision.Surender)}
+                    disabled={game.ui.actionBtns.surender}
+                    onClick={() => handleDecision("surender")}
                 >SURENDER
                 </button>
             </li>

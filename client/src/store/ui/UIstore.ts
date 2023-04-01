@@ -5,6 +5,8 @@ import { makeAutoObservable, toJS } from "mobx";
 import { reaction } from "mobx";
 import { PlayerID, RoomID } from "../../types/socketTypes";
 import {
+    AvailableActions,
+    Bet,
     DealerInstance,
     Decision,
     GameSession,
@@ -27,6 +29,14 @@ export class UIStore {
     public player: PlayerInstance | null = null;
     public roomID: RoomID = "";
     public players: Record<PlayerID, PlayerInstance> | null = null;
+    public placeBetBtnDisabled = true;
+    public newBetDisabled = true;
+    public actionBtns: Record<Decision, boolean> = {
+        hit: true,
+        stand: true,
+        double: true,
+        surender: true,
+    };
 
     public dealer: DealerInstance | null = null;
     public errorHandler: ErrorHandler = new ErrorHandler();
@@ -39,6 +49,7 @@ export class UIStore {
     };
 
     public decisionHandler: ((decision: Decision) => void) | null = null;
+    public betHandler: ((bet: Bet) => void) | null = null;
 
     public constructor() {
         makeAutoObservable(this);
@@ -71,6 +82,14 @@ export class UIStore {
         );
     }
 
+    public togglePlaceBetBtn(value: boolean): void {
+        this.placeBetBtnDisabled = value;
+    }
+
+    public toggleNewBetDisabled(value: boolean): void {
+        this.newBetDisabled = value;
+    }
+
     public setPlayerID(playerID: PlayerID): void {
         this.playerID = playerID;
     }
@@ -88,6 +107,14 @@ export class UIStore {
         this.decisionHandler = null;
     }
 
+    public setBetHandler(handler: (decision: Bet) => void): void {
+        this.betHandler = handler;
+    }
+
+    public resetBetHandler(): void {
+        this.betHandler = null;
+    }
+
     public setGameSession(session: GameSession): void {
         try {
             console.log("setGameSession");
@@ -95,6 +122,7 @@ export class UIStore {
             this.players = session.players;
             this.roomID = session.roomID;
             this.player = this.getPlayer(session.players);
+            this.toggleActionBtns(this.player.availableActions);
         } catch (error) {}
     }
 
@@ -153,5 +181,15 @@ export class UIStore {
         while (this.betHistory.length > 0) {
             this.undoBet();
         }
+    }
+
+    public toggleActionBtns(enabled: AvailableActions): void {
+        Object.keys(this.actionBtns).forEach((btn) => {
+            if (enabled.includes(btn as Decision)) {
+                this.actionBtns[btn as Decision] = false;
+            } else {
+                this.actionBtns[btn as Decision] = true;
+            }
+        });
     }
 }

@@ -41,12 +41,13 @@ export const CardsHandler: Handler = {
   canDouble: ({ playerID, roomID }: SpecificID) => {
     try {
       const player = store.getPlayer({ playerID, roomID });
-      const { cards, points } = player;
-      if (cards.length === 2) {
+      const { cards: playerCards, points } = player;
+      
+      if (playerCards.length === 2) {
         return points === NINE || points === TEN || points === ELEVEN;
       }
       return false;
-    } catch (error) {
+    } catch (error: unknown) {
       throw new Error('Failed to check for double');
     }
   },

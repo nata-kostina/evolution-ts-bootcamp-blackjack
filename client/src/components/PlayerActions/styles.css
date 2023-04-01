@@ -8,7 +8,7 @@
 .action_item {
   list-style: none;
   height: 50px;
-  width: 70px;
+  width: 270px;
   border: 1px solid orange;
   cursor: pointer;
 }

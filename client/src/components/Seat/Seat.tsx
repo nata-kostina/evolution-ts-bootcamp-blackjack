@@ -19,10 +19,10 @@ export const Seat = observer(({ seatType }: Props) => {
             {player && (
                 <div>
                     <div><span>Player ID: </span>{player.playerID}</div>
-                    <CardList points={player.points} cards={player.cards} />
                     <div><span>Balance: </span>{player.balance}</div>
                     <div><span>Bet: </span>{player.bet}</div>
                     <div><span>Insurance: </span>{player.insurance}</div>
+                    <CardList points={player.points} cards={player.cards} />
                 </div>
             )}
 
