@@ -1,5 +1,26 @@
 export type PlaceBetParams = { roomID: string; playerID: string; bet: string; };
-export type Card = { value: string; suit: string; id: string; };
+export enum CardValue {
+    ACE = "A",
+    J = "J",
+    Q = "Q",
+    K = "K",
+    TWO = "2",
+    THREE = "3",
+    FOUR = "4",
+    FIVE = "5",
+    SIX = "6",
+    SEVEN = "7",
+    EIGHT = "8",
+    NINE = "9",
+    TEN = "10",
+}
+export enum Suit {
+    Spades = "S",
+    Diamonds = "D",
+    Clubs = "C",
+    Hearts = "H",
+}
+export type Card = { value: CardValue; suit: Suit; id: string; };
 export type Deck = Card[];
 
 export type ModalVariant = "gameError" | "playerError";
@@ -9,7 +30,7 @@ export interface ErrorModalProps {
     closeModal: () => void;
 }
 
-export type BetItem = { id: string; value: number; };
+export type ChipItem = { id: string; value: number; img: string; };
 type PlayerID = string;
 type RoomID = string;
 
@@ -128,3 +149,10 @@ export type Bet = number;
 
 export type Acknowledgment<T> = { playerID: PlayerID; answer: T; };
 export type AvailableActions = Decision[];
+export type HoleCard = { id: string; };
+
+export type NewCard = {
+    target: "dealer" | "player";
+    card: Card | HoleCard;
+    points: number;
+};

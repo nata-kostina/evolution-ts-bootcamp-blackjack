@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Socket } from 'socket.io';
 import {
@@ -11,8 +12,8 @@ import {
   VictoryNotification,
 } from '../constants/notifications.js';
 import { io, playersStore, store } from '../index.js';
-import { AvailableActions, Controller } from '../types.js';
-import { PlayerID, GameSession, RoomID, CardValue, WinCoefficient, Decision } from '../types/gameTypes.js';
+import { AvailableActions, Controller, NewCard } from '../types.js';
+import { PlayerID, GameSession, RoomID, CardValue, WinCoefficient, Decision, Suit } from '../types/gameTypes.js';
 import { Notification } from '../types/notificationTypes.js';
 import { Acknowledgment, SpecificID, YesNoAcknowledgement } from '../types/socketTypes.js';
 import { initializeGameState, initializePlayer } from '../utils/initializers.js';
@@ -37,10 +38,10 @@ export class SinglePlayerController implements Controller {
     this.socket = socket;
   }
 
-  public async handleStartGame({roomID, playerID}: SpecificID): Promise<void> {
+  public async handleStartGame({ roomID, playerID }: SpecificID): Promise<void> {
     try {
       if (playersStore.isNewPlayer(playerID)) {
-          playersStore.updatePlayerBalance({playerID, balance: defaultBalance});
+        playersStore.updatePlayerBalance({ playerID, balance: defaultBalance });
       }
       const player = initializePlayer({
         playerID,
@@ -119,9 +120,9 @@ export class SinglePlayerController implements Controller {
   public async startPlay({ roomID, playerID }: SpecificID): Promise<void> {
     try {
       await this.dealCards({ playerID, roomID });
-      await this.checkForBlackjack({ roomID, playerID });
-      await this.checkDealerFirstCard({ roomID, playerID });
-      await this.playWithSinglePlayer({ roomID, playerID });
+      //   await this.checkForBlackjack({ roomID, playerID });
+      //   await this.checkDealerFirstCard({ roomID, playerID });
+      //   await this.playWithSinglePlayer({ roomID, playerID });
     } catch (error: unknown) {
       throw new Error(isError(error) ? error.message : `Socket ${playerID}: Failed to start play`);
     }
@@ -149,15 +150,15 @@ export class SinglePlayerController implements Controller {
 
   public async finishGame({ playerID, roomID }: SpecificID): Promise<void> {
     try {
-        store.removeRoomFromStore(roomID);
-        const roomMembers = io.sockets.adapter.rooms.get(roomID);
-        if (roomMembers) {
-          roomMembers.delete(playerID);
-          io.sockets.adapter.rooms.set(roomID, roomMembers);
-        }
-      } catch (error: unknown) {
-        throw new Error(isError(error) ? error.message : `${playerID}: Failed to handle game finish`);
+      store.removeRoomFromStore(roomID);
+      const roomMembers = io.sockets.adapter.rooms.get(roomID);
+      if (roomMembers) {
+        roomMembers.delete(playerID);
+        io.sockets.adapter.rooms.set(roomID, roomMembers);
       }
+    } catch (error: unknown) {
+      throw new Error(isError(error) ? error.message : `${playerID}: Failed to handle game finish`);
+    }
   }
 
   public async notificate({
@@ -388,7 +389,7 @@ export class SinglePlayerController implements Controller {
       store.updatePlayer({
         roomID,
         playerID,
-        payload: { cards: [{ id: 'sjfajo;', suit: 'clubs', value: CardValue.ACE }] },
+        payload: { cards: [{ id: 'sjfajo;', suit: Suit.Clubs, value: CardValue.ACE }] },
       });
       const session = store.getSession(roomID);
       await this.respond({
@@ -447,7 +448,7 @@ export class SinglePlayerController implements Controller {
 
       switch (true) {
         case playerPoints === TWENTY_ONE:
-            await this.checkDealerCombination({ playerID, roomID });
+          await this.checkDealerCombination({ playerID, roomID });
           break;
         case playerPoints > TWENTY_ONE:
           await this.handlePlayerLose({ playerID, roomID });
@@ -514,7 +515,7 @@ export class SinglePlayerController implements Controller {
         const { card, updatedDeck } = CardsHandler.takeCardFromDeck(deck);
         store.updateDeck({ roomID, deck: updatedDeck });
 
-        store.updateDealer({ roomID, payload: { cards: [{ id: 'sodjh', suit: 'hearts', value: CardValue.FOUR }] } });
+        store.updateDealer({ roomID, payload: { cards: [{ id: 'sodjh', suit: Suit.Hearts, value: CardValue.FOUR }] } });
         await this.respond({
           event: 'updateSession',
           roomID,
@@ -644,60 +645,105 @@ export class SinglePlayerController implements Controller {
 
   public async dealMockCards({ playerID, roomID }: SpecificID) {
     const player = store.getPlayer({ playerID, roomID });
+    const card1 = { id: '1sd23', suit: Suit.Clubs, value: CardValue.SIX };
     store.updatePlayer({
       playerID: player.playerID,
       roomID,
       payload: {
-        cards: [{ id: '1sd23', suit: 'clubs', value: CardValue.SIX }],
+        cards: [card1],
       },
     });
 
     await this.respond({
       roomID,
-      event: 'updateSession',
-      response: [successResponse<GameSession>(store.getSession(roomID))],
+      event: 'dealCard',
+      response: [
+        successResponse<NewCard>({
+          target: 'player',
+          card: card1,
+          points: store.getPlayer({ playerID, roomID }).points,
+        }),
+      ],
     });
-
+    // await this.respond({
+    //   roomID,
+    //   event: 'updateSession',
+    //   response: [successResponse<GameSession>(store.getSession(roomID))],
+    // });
+    const card2 = { id: '1faf', suit: Suit.Clubs, value: CardValue.ACE };
     store.updateDealer({
       roomID,
       payload: {
         hasHoleCard: false,
-        cards: [{ id: '1faf', suit: 'clubs', value: CardValue.ACE }],
+        cards: [card2],
       },
     });
-
     await this.respond({
       roomID,
-      event: 'updateSession',
-      response: [successResponse<GameSession>(store.getSession(roomID))],
+      event: 'dealCard',
+      response: [
+        successResponse<NewCard>({
+          target: 'dealer',
+          card: card2,
+          points: store.getDealer(roomID).points,
+        }),
+      ],
     });
 
+    //     await this.respond({
+    //       roomID,
+    //       event: 'updateSession',
+    //       response: [successResponse<GameSession>(store.getSession(roomID))],
+    //     });
+    const card3 = { id: 'ghjr', suit: Suit.Clubs, value: CardValue.FOUR };
     store.updatePlayer({
       playerID: player.playerID,
       roomID,
       payload: {
-        cards: [{ id: 'ghjr', suit: 'clubs', value: CardValue.FOUR }],
+        cards: [card3],
       },
     });
-
     await this.respond({
       roomID,
-      event: 'updateSession',
-      response: [successResponse<GameSession>(store.getSession(roomID))],
+      event: 'dealCard',
+      response: [
+        successResponse<NewCard>({
+          target: 'player',
+          card: card3,
+          points: store.getPlayer({ playerID, roomID }).points,
+        }),
+      ],
     });
 
+    //     await this.respond({
+    //       roomID,
+    //       event: 'updateSession',
+    //       response: [successResponse<GameSession>(store.getSession(roomID))],
+    //     });
+    const card4 = { id: 'wegtq', suit: Suit.Hearts, value: CardValue.TWO };
     store.updateDealer({
       roomID,
       payload: {
         hasHoleCard: true,
-        holeCard: { id: 'wegtq', suit: 'hearts', value: CardValue.TWO },
+        holeCard: card4,
       },
     });
-
     await this.respond({
       roomID,
-      event: 'updateSession',
-      response: [successResponse<GameSession>(store.getSession(roomID))],
+      event: 'dealCard',
+      response: [
+        successResponse<NewCard>({
+          target: 'dealer',
+          card: {id: 'hole'},
+          points: store.getDealer(roomID).points,
+        }),
+      ],
     });
+
+    //     await this.respond({
+    //       roomID,
+    //       event: 'updateSession',
+    //       response: [successResponse<GameSession>(store.getSession(roomID))],
+    //     });
   }
 }

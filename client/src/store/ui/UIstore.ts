@@ -41,45 +41,45 @@ export class UIStore {
     public dealer: DealerInstance | null = null;
     public errorHandler: ErrorHandler = new ErrorHandler();
     public notification: UINotification = new UINotification();
-    public seats: ForceStringType = {
-        "left": null,
-        "middle-left": null,
-        "middle-right": null,
-        "right": null,
-    };
+    // public seats: ForceStringType = {
+    //     "left": null,
+    //     "middle-left": null,
+    //     "middle-right": null,
+    //     "right": null,
+    // };
 
     public decisionHandler: ((decision: Decision) => void) | null = null;
     public betHandler: ((bet: Bet) => void) | null = null;
 
     public constructor() {
         makeAutoObservable(this);
-        reaction(
-      () => this.players,
-      (players) => {
-          if (players) {
-              const playersIDs = Object.keys(players);
-              Object.keys(this.seats).forEach((seat) => {
-                  const seatValue = this.seats[seat as keyof ForceStringType];
-                  if (!(seatValue && playersIDs.includes(seatValue.playerID))) {
-                      this.seats[seat as keyof ForceStringType] = null;
-                  } else {
-                      const prevPlayer = this.seats[seat as keyof ForceStringType];
-                      if (prevPlayer) {
-                          const pID = prevPlayer.playerID;
-                          this.seats[seat as keyof ForceStringType] = players[pID];
-                      }
-                  }
-              });
-          } else {
-              this.seats = {
-                  "left": null,
-                  "middle-left": null,
-                  "middle-right": null,
-                  "right": null,
-              };
-          }
-      },
-        );
+    //     reaction(
+    //   () => this.players,
+    //   (players) => {
+    //       if (players) {
+    //           const playersIDs = Object.keys(players);
+    //           Object.keys(this.seats).forEach((seat) => {
+    //               const seatValue = this.seats[seat as keyof ForceStringType];
+    //               if (!(seatValue && playersIDs.includes(seatValue.playerID))) {
+    //                   this.seats[seat as keyof ForceStringType] = null;
+    //               } else {
+    //                   const prevPlayer = this.seats[seat as keyof ForceStringType];
+    //                   if (prevPlayer) {
+    //                       const pID = prevPlayer.playerID;
+    //                       this.seats[seat as keyof ForceStringType] = players[pID];
+    //                   }
+    //               }
+    //           });
+    //       } else {
+    //           this.seats = {
+    //               "left": null,
+    //               "middle-left": null,
+    //               "middle-right": null,
+    //               "right": null,
+    //           };
+    //       }
+    //   },
+    //     );
     }
 
     public togglePlaceBetBtn(value: boolean): void {
@@ -91,6 +91,7 @@ export class UIStore {
     }
 
     public setPlayerID(playerID: PlayerID): void {
+        console.log("ui setplayerid: ", playerID);
         this.playerID = playerID;
     }
 
@@ -134,22 +135,22 @@ export class UIStore {
         throw new Error("Failed to get current player");
     }
 
-    public placePlayers(): void {
-        const prioritySeats: SeatPlace[] = [
-            "right",
-            "middle-right",
-            "middle-left",
-            "left",
-        ];
-        // prioritySeats.forEach((seat) => {
+    // public placePlayers(): void {
+    //     const prioritySeats: SeatPlace[] = [
+    //         "right",
+    //         "middle-right",
+    //         "middle-left",
+    //         "left",
+    //     ];
+    //     // prioritySeats.forEach((seat) => {
 
-        // })
-        if (this.players && Object.keys(this.players).length > 0) {
-            Object.values(this.players).forEach((playerID, index) => {
-                this.seats[prioritySeats[index]] = playerID;
-            });
-        }
-    }
+    //     // })
+    //     if (this.players && Object.keys(this.players).length > 0) {
+    //         Object.values(this.players).forEach((playerID, index) => {
+    //             this.seats[prioritySeats[index]] = playerID;
+    //         });
+    //     }
+    // }
 
     public addBet(bet: number): void {
         try {

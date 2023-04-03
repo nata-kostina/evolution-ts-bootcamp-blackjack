@@ -16,7 +16,7 @@ export const sendImmediately = () => {
   return respond;
 };
 
-export const sendInSequence = (delay = 1000) => {
+export const sendInSequence = (delay = 800) => {
   let abortSequence = false;
   const respond: RespondFn = async ({ event, response, roomID }) => {
     // console.log(`Send in sequence, delay: `, delay);

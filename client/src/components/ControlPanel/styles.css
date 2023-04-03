@@ -11,3 +11,17 @@
 
   cursor: pointer;
 }
+
+.controlPanel {
+    position: fixed;
+    height: 100px;
+    left: 0;
+    bottom: 0;
+    right: 0;
+
+    display: flex;
+
+    border: 2px solid red;
+
+    background-color: gold;
+}

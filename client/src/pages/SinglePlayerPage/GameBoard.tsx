@@ -4,6 +4,7 @@ import { ControlPanel } from "../../components/ControlPanel/ControlPanel";
 import { NotificationModal } from "../../components/Modal/notification/NotificationModal";
 import { changeStatus } from "../../utils/controller/changeStatus";
 import { game } from "../../store";
+import { Table } from "../../components/Table/Table";
 
 const notificationDelay = 200;
 
@@ -35,6 +36,9 @@ export const GameBoard = observer(() => {
                 modalVariant={game.ui.notification.currentModal}
             />
             <ControlPanel />
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <Table />
+            </div>
         </div>
     );
 });

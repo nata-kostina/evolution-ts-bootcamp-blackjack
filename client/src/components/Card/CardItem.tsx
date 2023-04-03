@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import { observer } from "mobx-react-lite";
 import {
@@ -24,12 +25,12 @@ const suitMap = {
 export const CardItem = observer(({ card }: Props) => {
     return (
         <div className="card">
-            <span className="suit">
-                {card.value}
+            {/* <span className="suit">
+                {card.suit}
             </span>
             <span className="value">
                 {suitMap[card.suit as keyof typeof suitMap]}
-            </span>
+            </span> */}
         </div>
     );
 });

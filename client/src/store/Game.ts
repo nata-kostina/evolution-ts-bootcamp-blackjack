@@ -19,6 +19,10 @@ import {
     Bet,
     Acknowledgment,
     AvailableActions,
+    NewCard,
+    CardValue,
+    Suit,
+    Card,
 } from "../types/types";
 import { Connection } from "./Connection";
 import { ErrorHandler } from "../utils/ErrorHandler";
@@ -26,6 +30,8 @@ import { PlayerID, RoomID, SocketResponse, SpecificID } from "../types/socketTyp
 import { changeStatus } from "../utils/controller/changeStatus";
 import { connection } from ".";
 import { UIStore } from "./ui/UIstore";
+import { CanvasBase } from "../canvas/CanvasBase";
+import { SceneCanvasElement } from "../canvas/canvasElements/Scene.canvas.element";
 
 export class Game {
     public connection: Connection;
@@ -38,15 +44,22 @@ export class Game {
     public roomID: RoomID | null = null;
     public player: PlayerInstance | null = null;
     public balance = 0;
+    public baseCanvas: CanvasBase;
+    public scene: SceneCanvasElement;
 
     public constructor() {
         this.connection = connection;
+        this.baseCanvas = new CanvasBase();
+        this.scene = new SceneCanvasElement(this.baseCanvas);
         this.ui = new UIStore();
         this.connection.socket.on("startGame", (reponse) =>
       this.handleStartGame(reponse),
         );
         this.connection.socket.on("placeBet", (reponse, acknowledge) =>
       this.handlePlaceBet(reponse, acknowledge),
+        );
+        this.connection.socket.on("dealCard", (reponse) =>
+      this.handleDealCard(reponse),
         );
         this.connection.socket.on("updateSession", (response) =>
       this.updateGameSession(response),
@@ -83,14 +96,20 @@ export class Game {
     }
 
     public setPlayerID(playerID: PlayerID): void {
+        console.log("setPlayerID");
         this.playerID = playerID;
     }
 
     public startGame(mode: GameMode): void {
-        this.status = "loading";
+        // this.status = "loading";
         if (this.playerID) {
-            this.ui.togglePlaceBetBtn(false);
+            // this.ui.togglePlaceBetBtn(false);
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
+            this.scene.addContent();
+            // this.scene.dealDealerCard({ id: "34235", suit: Suit.Clubs, value: CardValue.NINE });
+            // setTimeout(() => { this.scene.dealPlayerCard({ id: "df", suit: Suit.Diamonds, value: CardValue.FOUR }); }, 1000);
+
             this.connection.socket.emit("startGame", {
                 playerID: this.playerID,
                 mode,
@@ -147,7 +166,7 @@ export class Game {
             this.player = player;
             this.roomID = response.payload.roomID;
             this.ui.setGameSession(response.payload);
-            this.ui.placePlayers();
+            // this.ui.placePlayers();
         } else {
             this.status = "error";
             this.error = GameError.GameError;
@@ -188,13 +207,15 @@ export class Game {
         if (response.ok && response.payload) {
             this.ui.setGameSession(response.payload);
             this.ui.togglePlaceBetBtn(false);
+            this.scene.toggleChipAction(true);
             this.ui.setBetHandler((bet) => {
                 if (this.playerID) {
                     this.status = "in_progress";
                     acknowledgement({ playerID: this.playerID, answer: bet });
+                    this.ui.resetBetHandler();
+                    this.scene.toggleChipAction(false);
+                    this.ui.togglePlaceBetBtn(true);
                 }
-                this.ui.resetBetHandler();
-                this.ui.togglePlaceBetBtn(true);
             });
         } else {
             this.status = "error";
@@ -272,6 +293,19 @@ export class Game {
             this.session = response.payload;
             this.status = "waiting-bet";
             this.ui.setGameSession(response.payload);
+        } else {
+            this.status = "error";
+        }
+    }
+
+    private handleDealCard(response: SocketResponse<NewCard>): void {
+        console.log("handleDealCard");
+        if (response.ok && response.payload) {
+            if (response.payload.target === "player") {
+                this.scene.dealPlayerCard(response.payload);
+            } else {
+                this.scene.dealDealerCard(response.payload);
+            }
         } else {
             this.status = "error";
         }

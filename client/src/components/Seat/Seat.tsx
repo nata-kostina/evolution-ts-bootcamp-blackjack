@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import { observer } from "mobx-react-lite";
 import { game } from "../../store";
@@ -13,10 +14,10 @@ interface Props {
 }
 
 export const Seat = observer(({ seatType }: Props) => {
-    const player = game.ui.seats[seatType];
+    // const player = game.ui.seats[seatType];
     return (
         <div style={{ border: "1px solid orange", width: "200px", height: "300px" }}>
-            {player && (
+            {/* {player && (
                 <div>
                     <div><span>Player ID: </span>{player.playerID}</div>
                     <div><span>Balance: </span>{player.balance}</div>
@@ -24,7 +25,7 @@ export const Seat = observer(({ seatType }: Props) => {
                     <div><span>Insurance: </span>{player.insurance}</div>
                     <CardList points={player.points} cards={player.cards} />
                 </div>
-            )}
+            )} */}
 
         </div>
     );

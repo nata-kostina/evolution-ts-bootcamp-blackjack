@@ -6,7 +6,7 @@ import { Decision, GameMode } from "../../types/types";
 
 export const PlayerActions = observer(() => {
     const handleBetClick = () => {
-        if (game.ui.betHandler && game.ui.player) {
+        if (game.ui.betHandler && game.ui.player && game.ui.player.bet > 0) {
             game.ui.betHandler(game.ui.player.bet);
         }
     };

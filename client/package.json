@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@babylonjs/gui": "^5.53.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -50,6 +51,7 @@
     ]
   },
   "devDependencies": {
+    "@babylonjs/core": "^5.53.0",
     "@types/react-modal": "^3.13.1",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^17.0.0",

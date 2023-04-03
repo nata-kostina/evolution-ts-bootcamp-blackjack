@@ -6,6 +6,7 @@ import {
     Acknowledgment,
     YesNoAcknowledgement,
     Bet,
+    NewCard,
 } from "./types";
 
 export interface ServerToClientEvents {
@@ -14,6 +15,7 @@ export interface ServerToClientEvents {
         response: SocketResponse<GameSession>,
         acknowledgement: (responses: Acknowledgment<Bet>) => void
     ) => void;
+    dealCard: (response: SocketResponse<NewCard>) => void;
     notificate: (
         response: SocketResponse<Notification>,
         acknowledgement?: (response: Acknowledgment<YesNoAcknowledgement>) => void

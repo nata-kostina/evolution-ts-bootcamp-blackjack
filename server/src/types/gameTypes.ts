@@ -14,10 +14,10 @@ export enum CardValue {
   TEN = '10',
 }
 export enum Suit {
-  Spades = 'spades',
-  Diamonds = 'diamonds',
-  Clubs = 'clubs',
-  Hearts = 'hearts',
+  Spades = 'S',
+  Diamonds = 'D',
+  Clubs = 'C',
+  Hearts = 'H',
 }
 export type PlayerInstance = {
   readonly playerID: PlayerID;
@@ -47,7 +47,7 @@ export type PlayerID = string;
 
 export type Room = [string, Set<string>];
 
-export type Card = { value: CardValue; suit: string; id: string };
+export type Card = { value: CardValue; suit: Suit; id: string };
 export type Deck = Card[];
 
 export type Decision = "hit" | "stand" | "double" | "surender";

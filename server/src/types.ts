@@ -1,6 +1,6 @@
 import { Acknowledgment, SpecificID, YesNoAcknowledgement } from './types/socketTypes.js';
 import { GameState } from './types/storeTypes.js';
-import { RoomID, PlayerID, Decision, PlayerInstance, DealerInstance } from './types/gameTypes.js';
+import { RoomID, PlayerID, Decision, PlayerInstance, DealerInstance, Card } from './types/gameTypes.js';
 import { Socket } from 'socket.io';
 import { Notification } from './types/notificationTypes.js';
 import { RespondFn } from './utils/respondConfig.js';
@@ -69,3 +69,11 @@ export interface Controller {
 
 export type AvailableActions = Decision[];
 export type NewGameMode = "new-game" | "new-round";
+
+export type HoleCard = {id: string}
+
+export type NewCard = {
+    target: "dealer" | "player",
+    card: Card | HoleCard,
+    points: number,
+}

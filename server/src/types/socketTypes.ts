@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AvailableActions, DecisionRequest, NewGameMode } from '../types.js';
+import { AvailableActions, DecisionRequest, NewCard, NewGameMode } from '../types.js';
 import { Notification } from './notificationTypes.js';
 import { Bet, Decision, GameSession, PlayerID, PlayerInstance, RoomID } from './gameTypes.js';
 
@@ -16,6 +16,7 @@ export interface ServerToClientEvents {
     response: SocketResponse<GameSession>,
     acknowledgement: (err: any, responses: Acknowledgment<Bet>[]) => Promise<void>
   ) => void;
+  dealCard: (response: SocketResponse<NewCard>) => void;
   getDecision: (
     response: SocketResponse<GameSession>,
     acknowledgement: (err: any, responses: Acknowledgment<Decision>[]) => Promise<void>

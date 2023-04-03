@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import "./styles.css";
 import { observer } from "mobx-react-lite";
 import { isInputValid } from "../../utils/validation/InputLayerValidation";
 import { formatStringToNumber } from "../../utils/formatting/InputLayerFromatting";
-import { betsSet } from "../../constants/gameConstants";
 import { game } from "../../store";
 
 export const BetsForm = observer(() => {
@@ -55,7 +55,7 @@ export const BetsForm = observer(() => {
                 <div>
                     <div>Default bets</div>
                     <ul className="bets-list">
-                        {betsSet.map((item) => (
+                        {/* {betsSet.map((item) => (
                             <li
                                 key={item.id}
                                 className="bets-item"
@@ -63,7 +63,7 @@ export const BetsForm = observer(() => {
                             >
                                 {item.value}
                             </li>
-                        ))}
+                        ))} */}
                     </ul>
                 </div>
                 <div>

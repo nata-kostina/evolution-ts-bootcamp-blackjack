@@ -6,8 +6,8 @@ import { connection } from "../store";
 export const RequireConnection = (Component: React.FC) => {
     const ComponentWithRequireConnection: React.FC = observer(() => {
         return (
-            <div>
-                <h1>{connection.status}</h1>
+            <>
+                {/* <h1>{connection.status}</h1> */}
                 {connection.status === "connected" && <Component />}
                 {connection.status === "waiting" && "Waiting connection"}
                 {connection.status === "error" && (
@@ -17,7 +17,7 @@ export const RequireConnection = (Component: React.FC) => {
                     </div>
                 )}
 
-            </div>
+            </>
         );
     });
 
