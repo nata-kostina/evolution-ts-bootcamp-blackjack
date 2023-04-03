@@ -41,17 +41,12 @@ export class CanvasBase {
     }
 
     protected createCamera(scene: Scene): ArcRotateCamera {
-        // const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 0, 1), scene);
-        // camera.setTarget(BABYLON.Vector3.Zero());
-        // const camera = new ArcRotateCamera("camera", -Math.PI * 0.5, 0.0000001, 3, Vector3.Zero(), scene);
         const camera = new ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2, 3, Vector3.Zero(), scene);
         camera.setTarget(Vector3.Zero());
-        // camera.attachControl();
         return camera;
     }
 
     protected createLight(scene: Scene): void {
-        // const lights = new HemisphericLight("light", new Vector3(0, 7, 7), scene);
         const light = new HemisphericLight("light", new Vector3(0, -2, -3), scene);
     }
 

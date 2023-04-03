@@ -13,7 +13,7 @@ import { Card, HoleCard, NewCard } from "../../types/types";
 import { PlayerSeatCanvasElement } from "./PlayerSeat.canvas.element";
 import { SceneMatrix, matrixSize, matrixWidth, cellSize, matrixHeight } from "../GameMatrix";
 import { DealerSeatCanvasElement, isHoleCard } from "./DealerSeat.canvas.element copy";
-import { chipSet } from "../../constants/gameConstants";
+import { chipSet } from "../../constants/game.constants";
 import { chipRadius } from "../../constants/canvas.constants";
 
 export class SceneCanvasElement {

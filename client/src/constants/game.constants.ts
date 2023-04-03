@@ -35,5 +35,4 @@ export const chipSet: ChipItem[] = [
         img: Chip100,
     }];
 
-// export const maxPlayersNum = 4;
 export const maxPlayersNum = 1;

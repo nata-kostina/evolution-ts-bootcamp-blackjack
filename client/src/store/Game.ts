@@ -1,10 +1,4 @@
-/* eslint-disable import/no-duplicates */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable import/no-cycle */
-/* eslint-disable no-debugger */
-import { makeAutoObservable, reaction } from "mobx";
-import { toJS } from "mobx";
-import { redirect } from "react-router-dom";
+import { makeAutoObservable } from "mobx";
 import {
     GameError,
     PlayerInstance,
@@ -15,28 +9,23 @@ import {
     ModalKinds,
     NotificationKind,
     YesNoAcknowledgement,
-    GameMode,
     Bet,
     Acknowledgment,
-    AvailableActions,
     NewCard,
-    CardValue,
-    Suit,
-    Card,
 } from "../types/types";
-import { Connection } from "./Connection";
 import { ErrorHandler } from "../utils/ErrorHandler";
-import { PlayerID, RoomID, SocketResponse, SpecificID } from "../types/socketTypes";
+import { PlayerID, RoomID, SocketResponse } from "../types/socketTypes";
 import { changeStatus } from "../utils/controller/changeStatus";
-import { connection } from ".";
 import { UIStore } from "./ui/UIstore";
 import { CanvasBase } from "../canvas/CanvasBase";
 import { SceneCanvasElement } from "../canvas/canvasElements/Scene.canvas.element";
 
 export class Game {
-    public connection: Connection;
-    public status: GameStatus = "starting";
     public ui: UIStore;
+    public canvas: CanvasBase;
+    public scene: SceneCanvasElement;
+
+    public status: GameStatus = "starting";
     public session: GameSession | null = null;
     public error: GameError | null = null;
     public errorHandler: ErrorHandler = new ErrorHandler();
@@ -44,55 +33,12 @@ export class Game {
     public roomID: RoomID | null = null;
     public player: PlayerInstance | null = null;
     public balance = 0;
-    public baseCanvas: CanvasBase;
-    public scene: SceneCanvasElement;
 
-    public constructor() {
-        this.connection = connection;
-        this.baseCanvas = new CanvasBase();
-        this.scene = new SceneCanvasElement(this.baseCanvas);
-        this.ui = new UIStore();
-        this.connection.socket.on("startGame", (reponse) =>
-      this.handleStartGame(reponse),
-        );
-        this.connection.socket.on("placeBet", (reponse, acknowledge) =>
-      this.handlePlaceBet(reponse, acknowledge),
-        );
-        this.connection.socket.on("dealCard", (reponse) =>
-      this.handleDealCard(reponse),
-        );
-        this.connection.socket.on("updateSession", (response) =>
-      this.updateGameSession(response),
-        );
-        this.connection.socket.on("notificate", (response, acknowledge) =>
-      this.handleNotificate(response, acknowledge),
-        );
-        this.connection.socket.on("getDecision", (response, acknowledgement) =>
-      this.handleGetDecision(response, acknowledgement),
-        );
-        this.connection.socket.on("finishRound", (response) =>
-      this.handleFinishRound(response),
-        );
-
+    public constructor(canvas: CanvasBase, ui: UIStore, scene: SceneCanvasElement) {
+        this.canvas = canvas;
+        this.scene = scene;
+        this.ui = ui;
         makeAutoObservable(this);
-
-        reaction(
-      () => this.playerID,
-      (playerID: PlayerID | null) => {
-          if (playerID) {
-              this.ui.setPlayerID(playerID);
-          }
-      },
-        );
-
-        reaction(
-      () => this.status,
-      (status: GameStatus) => {
-          if (status === "new-game") {
-              redirect("/");
-          }
-      },
-        );
     }
 
     public setPlayerID(playerID: PlayerID): void {
@@ -100,7 +46,7 @@ export class Game {
         this.playerID = playerID;
     }
 
-    public startGame(mode: GameMode): void {
+    public startGame(): void {
         // this.status = "loading";
         if (this.playerID) {
             // this.ui.togglePlaceBetBtn(false);
@@ -110,10 +56,10 @@ export class Game {
             // this.scene.dealDealerCard({ id: "34235", suit: Suit.Clubs, value: CardValue.NINE });
             // setTimeout(() => { this.scene.dealPlayerCard({ id: "df", suit: Suit.Diamonds, value: CardValue.FOUR }); }, 1000);
 
-            this.connection.socket.emit("startGame", {
-                playerID: this.playerID,
-                mode,
-            });
+            // this.connection.socket.emit("startGame", {
+            //     playerID: this.playerID,
+            //     mode,
+            // });
         } else {
             console.log("Connection lost");
         }
@@ -123,7 +69,7 @@ export class Game {
         this.status = "finished";
         if (this.roomID && this.playerID) {
             this.ui.notification.resetQueue();
-            this.connection.socket.emit("finishGame", { roomID: this.roomID, playerID: this.playerID });
+            // this.connection.socket.emit("finishGame", { roomID: this.roomID, playerID: this.playerID });
         }
     }
 
@@ -283,16 +229,6 @@ export class Game {
             this.ui.setGameSession(response.payload);
             // this.ui.togglePlaceBetBtn(false);
             // this.startGame(GameMode.Single);
-        } else {
-            this.status = "error";
-        }
-    }
-
-    private handleWaitOthers(response: SocketResponse<GameSession>): void {
-        if (response.ok && response.payload) {
-            this.session = response.payload;
-            this.status = "waiting-bet";
-            this.ui.setGameSession(response.payload);
         } else {
             this.status = "error";
         }

@@ -51,3 +51,8 @@ export type DecisionRequest = {
 
 export type RoomID = string;
 export type PlayerID = string;
+
+export type RequestParameters<Event extends keyof ClientToServerEvents> = {
+    event: Event;
+    payload: Parameters<ClientToServerEvents[Event]>;
+};
