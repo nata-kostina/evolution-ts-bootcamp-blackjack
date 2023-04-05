@@ -42,8 +42,9 @@ export type PlayerInstance = {
     balance: number;
     points: number;
     insurance?: number;
-    availableActions: Decision[];
+    availableActions: Action[];
 };
+
 export type DealerInstance = {
     cards: Card[];
     points: number;
@@ -61,16 +62,13 @@ export interface GameSession {
     dealer: DealerInstance;
 }
 
-// export enum SeatPlace {
-//     Left = "left",
-//     MiddleLeft = "middle-left",
-//     MiddleRight = "middle-right",
-//     Right = "right",
-// }
-
-export type SeatPlace = "left" | "middle-left" | "middle-right" | "right";
-
-export type Decision = "hit" | "stand" | "double" | "surender";
+export enum Action {
+    HIT = "hit",
+    STAND = "stand",
+    DOUBLE = "double",
+    SURENDER = "surender",
+    INSURANCE = "insurance",
+}
 
 export type GameStatus =
   | "starting"
@@ -128,7 +126,7 @@ export type DisappearingModal = {
     type: ModalKinds.Disappearing;
     notification: Notification;
     timer?: number;
-    handleAnswer?: (answer: Decision) => void;
+    handleAnswer?: (answer: Action) => void;
 };
 
 export type ModalUnion = YesNoModal | OkModal | DisappearingModal;
@@ -148,11 +146,27 @@ export enum GameMode {
 export type Bet = number;
 
 export type Acknowledgment<T> = { playerID: PlayerID; answer: T; };
-export type AvailableActions = Decision[];
+export type AvailableActions = Action[];
 export type HoleCard = { id: string; };
 
 export type NewCard = {
     target: "dealer" | "player";
     card: Card | HoleCard;
     points: number;
+};
+
+export enum SocketStatus {
+    Disconnected = "disconnected",
+    Connected = "connected",
+    Waiting = "waiting",
+    WithError = "error",
+}
+
+export interface ContextProviderProps {
+    children: React.ReactNode;
+}
+
+export type ActionBtn = {
+    action: Action;
+    svgPath: string;
 };

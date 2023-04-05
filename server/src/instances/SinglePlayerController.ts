@@ -13,7 +13,7 @@ import {
 } from '../constants/notifications.js';
 import { io, playersStore, store } from '../index.js';
 import { AvailableActions, Controller, NewCard } from '../types.js';
-import { PlayerID, GameSession, RoomID, CardValue, WinCoefficient, Decision, Suit } from '../types/gameTypes.js';
+import { PlayerID, GameSession, RoomID, CardValue, WinCoefficient, Action, Suit, Bet } from '../types/gameTypes.js';
 import { Notification } from '../types/notificationTypes.js';
 import { Acknowledgment, SpecificID, YesNoAcknowledgement } from '../types/socketTypes.js';
 import { initializeGameState, initializePlayer } from '../utils/initializers.js';
@@ -26,6 +26,7 @@ import { CardsHandler } from '../utils/CardsHandler.js';
 import { TenSet, MinorSet, TWENTY_ONE, SEVENTEEN } from '../constants/cards.js';
 import { assertUnreachable } from './../utils/assertUnreachable.js';
 import { betSchema } from './../utils/validation.js';
+import { ClientToServerEvents } from './../types/socketTypes';
 
 // interface SingleController extends Controller {
 
@@ -55,15 +56,15 @@ export class SinglePlayerController implements Controller {
         event: 'startGame',
         response: [successResponse<GameSession>(ld.cloneDeep(store.getSession(roomID)))],
       })
-        .then(() => {
-          return this.notificate({ roomID, notification: PlaceBetNotification });
-        })
-        .then(() => {
-          return this.waitPlayersToPlaceBet({ roomID, playerID });
-        })
-        .then(() => {
-          return this.startPlay({ roomID, playerID });
-        })
+        // .then(() => {
+        //   return this.notificate({ roomID, notification: PlaceBetNotification });
+        // })
+        // .then(() => {
+        //   return this.waitPlayersToPlaceBet({ roomID, playerID });
+        // })
+        // .then(() => {
+        //   return this.startPlay({ roomID, playerID });
+        // })
         .catch((error: unknown) => {
           throw new Error(isError(error) ? error.message : `Socket ${playerID}: Failed to handle game start`);
         });
@@ -117,6 +118,17 @@ export class SinglePlayerController implements Controller {
     });
   }
 
+  public handleDecision([{roomID, playerID, action}]: Parameters<ClientToServerEvents["makeDecision"]>): void {
+      try {
+        //   switch(action){
+        //       case Action.DOUBLE:
+        //         //   this.handlePlaveBet()
+        //               }
+      } catch (error) {
+        throw new Error(isError(error) ? error.message : `Socket ${playerID}: Failed to handle player decision`); 
+      }
+  }
+
   public async startPlay({ roomID, playerID }: SpecificID): Promise<void> {
     try {
       await this.dealCards({ playerID, roomID });
@@ -156,6 +168,20 @@ export class SinglePlayerController implements Controller {
         roomMembers.delete(playerID);
         io.sockets.adapter.rooms.set(roomID, roomMembers);
       }
+    } catch (error: unknown) {
+      throw new Error(isError(error) ? error.message : `${playerID}: Failed to handle game finish`);
+    }
+  }
+  public async handlePlaceBet({ playerID, roomID, bet }: SpecificID & {bet: Bet}): Promise<void> {
+    try {
+        const player = store.getPlayer({ roomID, playerID });
+        store.updatePlayer({ roomID, playerID, payload: { bet, balance: player.balance - bet } });
+
+        await this.respond({
+          roomID,
+          event: 'updateSession',
+          response: [successResponse<GameSession>(ld.cloneDeep(store.getSession(roomID)))],
+        });
     } catch (error: unknown) {
       throw new Error(isError(error) ? error.message : `${playerID}: Failed to handle game finish`);
     }
@@ -315,13 +341,13 @@ export class SinglePlayerController implements Controller {
   public async playWithSinglePlayer({ playerID, roomID }: SpecificID): Promise<void> {
     try {
       const { cards: playerCards } = store.getPlayer({ roomID, playerID });
-      const availableActions: AvailableActions = ['hit', 'stand'];
+      const availableActions: AvailableActions = [Action.HIT, Action.STAND];
 
       if (CardsHandler.canDouble({ roomID, playerID })) {
-        availableActions.push('double');
+        availableActions.push(Action.DOUBLE);
       }
       if (playerCards.length === 2) {
-        availableActions.push('surender');
+        availableActions.push(Action.SURENDER);
       }
 
       store.updatePlayer({ roomID, playerID, payload: { availableActions } });
@@ -339,16 +365,16 @@ export class SinglePlayerController implements Controller {
               const response = responses.find((response) => response.playerID === playerID);
               if (response) {
                 switch (response.answer) {
-                  case 'double':
+                  case Action.DOUBLE:
                     await this.handleDouble({ roomID, playerID });
                     break;
-                  case 'surender':
+                  case Action.SURENDER:
                     await this.handleSurender({ roomID, playerID });
                     break;
-                  case 'hit':
+                  case Action.HIT:
                     await this.handleHit({ roomID, playerID });
                     break;
-                  case 'stand':
+                  case Action.STAND:
                     await this.checkDealerCombination({ playerID, roomID });
                     break;
                   default:

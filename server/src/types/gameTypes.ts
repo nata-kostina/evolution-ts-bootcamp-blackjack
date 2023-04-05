@@ -27,7 +27,7 @@ export type PlayerInstance = {
   balance: number;
   points: number;
   insurance?: number;
-  availableActions: Decision[],
+  availableActions: Action[],
 };
 export type DealerInstance = {
   cards: Card[];
@@ -50,8 +50,12 @@ export type Room = [string, Set<string>];
 export type Card = { value: CardValue; suit: Suit; id: string };
 export type Deck = Card[];
 
-export type Decision = "hit" | "stand" | "double" | "surender";
-
+export enum Action {
+    HIT = "hit",
+    STAND = "stand",
+    DOUBLE = "double",
+    SURENDER = "surender",
+}
 export const WinCoefficient = {
   '3:2': 1.5,
   '1:1': 1,

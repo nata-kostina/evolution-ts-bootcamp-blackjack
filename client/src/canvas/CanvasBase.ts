@@ -8,7 +8,6 @@ export class CanvasBase {
     public readonly scene: Scene;
     public readonly camera: ArcRotateCamera;
     public constructor() {
-        console.log("CanvasBase constructor");
         this.canvas = this.createCanvas();
         this.engine = this.createEngine(this.canvas);
         this.scene = this.createScene(this.engine);

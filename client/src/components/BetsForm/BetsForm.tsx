@@ -4,48 +4,47 @@ import "./styles.css";
 import { observer } from "mobx-react-lite";
 import { isInputValid } from "../../utils/validation/InputLayerValidation";
 import { formatStringToNumber } from "../../utils/formatting/InputLayerFromatting";
-import { game } from "../../store";
 
 export const BetsForm = observer(() => {
     const [inputValue, setInputValue] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
-    const handleInputChange = (value: string) => {
-        if (game.ui.placeBetBtnDisabled) {
-            return;
-        }
-        const result = isInputValid(value, "betInput");
-        if (result.isValid) {
-            setInputValue(value);
-            if (errorMessage) {
-                setErrorMessage("");
-            }
-        } else {
-            setInputValue("");
-            setErrorMessage(result.message);
-        }
-    };
+    // const handleInputChange = (value: string) => {
+    //     if (game.ui.placeBetBtnDisabled) {
+    //         return;
+    //     }
+    //     const result = isInputValid(value, "betInput");
+    //     if (result.isValid) {
+    //         setInputValue(value);
+    //         if (errorMessage) {
+    //             setErrorMessage("");
+    //         }
+    //     } else {
+    //         setInputValue("");
+    //         setErrorMessage(result.message);
+    //     }
+    // };
 
-    const handleBetClick = (bet: number) => {
-        game.ui.addBet(bet);
-    };
+    // const handleBetClick = (bet: number) => {
+    //     game.ui.addBet(bet);
+    // };
 
-    const handleInputSubmit = (
-        e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    ) => {
-        e.preventDefault();
-        const bet = formatStringToNumber(inputValue);
-        game.ui.addBet(bet);
-        setInputValue("");
-    };
+    // const handleInputSubmit = (
+    //     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    // ) => {
+    //     e.preventDefault();
+    //     const bet = formatStringToNumber(inputValue);
+    //     game.ui.addBet(bet);
+    //     setInputValue("");
+    // };
 
-    const handleUndoBet = () => {
-        game.ui.undoBet();
-    };
+    // const handleUndoBet = () => {
+    //     game.ui.undoBet();
+    // };
 
-    const handleClearClick = () => {
-        game.ui.clearBets();
-    };
+    // const handleClearClick = () => {
+    //     game.ui.clearBets();
+    // };
 
     return (
         <div>
@@ -66,7 +65,7 @@ export const BetsForm = observer(() => {
                         ))} */}
                     </ul>
                 </div>
-                <div>
+                {/* <div>
                     <div>Custom bet</div>
                     <div>
                         <label>
@@ -99,7 +98,7 @@ export const BetsForm = observer(() => {
                     disabled={game.ui.placeBetBtnDisabled}
                 >
                     Clear bets
-                </button>
+                </button> */}
             </form>
         </div>
     );

@@ -1,3 +1,15 @@
+:root {
+    --controlPanel: #0c1007c7;
+    --controlPanelBorder: 2px;
+    --controlItemBg: radial-gradient(circle, rgba(253,253,179,1) 0%, rgba(211,195,155,1) 59%, rgba(229,214,180,1) 63%, rgba(229,214,180,1) 67%, rgba(107,92,66,1) 70%, rgba(107,92,66,1) 100%);
+    --controlItemWidth: 90px;
+    --controlItemImgBorder: 6px;
+    --controlItemImgInnerWidth: calc((var(--controlItemWidth) - 2*var(--controlItemImgBorder)) / 1.4);
+    --balanceContainerWidth: 250px;
+    --balanceContainerHeight: 50px;
+
+  }
+
 
 body {
   margin: 0;

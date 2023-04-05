@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AvailableActions, DecisionRequest, NewCard, NewGameMode } from '../types.js';
 import { Notification } from './notificationTypes.js';
-import { Bet, Decision, GameSession, PlayerID, PlayerInstance, RoomID } from './gameTypes.js';
+import { Bet, Action, GameSession, PlayerID, PlayerInstance, RoomID } from './gameTypes.js';
 
 export type ResponseParameters<Event extends keyof ServerToClientEvents> = {
   event: Event;
@@ -19,7 +19,7 @@ export interface ServerToClientEvents {
   dealCard: (response: SocketResponse<NewCard>) => void;
   getDecision: (
     response: SocketResponse<GameSession>,
-    acknowledgement: (err: any, responses: Acknowledgment<Decision>[]) => Promise<void>
+    acknowledgement: (err: any, responses: Acknowledgment<Action>[]) => Promise<void>
   ) => void;
   notificate: (
     response: SocketResponse<Notification>,
@@ -32,6 +32,8 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   startGame: (payload: { playerID: PlayerID; mode: GameMode; roundMode: NewGameMode }) => void;
   finishGame: ({roomID, playerID}: SpecificID) => void;
+  placeBet: ({ roomID, playerID, bet }: SpecificID & { bet: Bet; }) => void;
+  makeDecision: ({ roomID, playerID, action }: SpecificID & { action: Action; }) => void;
 }
 
 export type ClientPayload<T extends keyof ClientToServerEvents> = Parameters<ClientToServerEvents[T]>[0];

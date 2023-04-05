@@ -1,24 +1,11 @@
 import React, { createContext, useContext } from "react";
+import { connection } from "../init";
 import { Connection } from "../store/Connection";
-import { serverURL } from "../constants/api.constants";
-import { Game } from "../store/Game";
-import { CanvasBase } from "../canvas/CanvasBase";
-import { SceneCanvasElement } from "../canvas/canvasElements/Scene.canvas.element";
-import { UIStore } from "../store/ui/UIstore";
-
-const canvas = new CanvasBase();
-const scene = new SceneCanvasElement(canvas);
-const ui = new UIStore();
-const game = new Game(canvas, ui, scene);
-const connection = new Connection(serverURL, game);
+import { ContextProviderProps } from "../types/types";
 
 const ConnectionContext = createContext<Connection>(connection);
 
-interface ConnectionProviderProps {
-    children: React.ReactNode;
-}
-
-export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
+export const ConnectionProvider: React.FC<ContextProviderProps> = ({
     children,
 }) => {
     return (
@@ -28,4 +15,6 @@ export const ConnectionProvider: React.FC<ConnectionProviderProps> = ({
     );
 };
 
-export const useConnection = () => useContext(ConnectionContext);
+export const useConnection = () => {
+    return useContext(ConnectionContext);
+};

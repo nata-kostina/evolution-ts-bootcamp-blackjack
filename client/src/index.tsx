@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import ReactDOM from "react-dom/client";
+import "./normalize.css";
 import "./index.css";
 import Modal from "react-modal";
 import { SinglePlayerPageWithConnectionRequired } from "./pages/SinglePlayerPage/SinglePlayerPage";
 import { ConnectionProvider } from "./context/ConnectionContext";
+import { GameProvider } from "./context/GameContext";
+import { ControlPanel } from "./components/ControlPanel/ControlPanel";
 
 Modal.setAppElement("#modal-window");
 
@@ -13,6 +17,9 @@ const root = ReactDOM.createRoot(
 
 root.render(
     <ConnectionProvider>
-        <SinglePlayerPageWithConnectionRequired />,
+        <GameProvider>
+            {/* <SinglePlayerPageWithConnectionRequired />, */}
+            <ControlPanel />
+        </GameProvider>
     </ConnectionProvider>,
 );

@@ -81,14 +81,11 @@ export class SceneCanvasElement {
     }
 
     public dealPlayerCard(newCard: NewCard): void {
-        console.log("dealPlayerCard");
         this.playerSeat.dealCard(newCard.card as Card);
         this.playerSeat.updatePoints(newCard.points);
     }
 
     public dealDealerCard(newCard: NewCard): void {
-        console.log("dealDealerCard", newCard);
-
         this.dealerSeat.dealCard(newCard.card);
         if (!isHoleCard(newCard.card)) {
             this.dealerSeat.updatePoints(newCard.points);

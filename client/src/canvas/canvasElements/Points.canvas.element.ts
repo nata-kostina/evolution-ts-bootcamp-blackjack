@@ -25,7 +25,6 @@ export class PointsCanvasElement {
     private textBlock: TextBlock;
 
     public constructor(base: CanvasBase, id: Cell) {
-        console.log("Points constructor");
         this.base = base;
         this.id = id;
 

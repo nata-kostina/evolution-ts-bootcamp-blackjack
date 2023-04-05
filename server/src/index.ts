@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { isError } from './utils/isError.js';
 import { Store } from './store/Store.class.js';
-import { playerSchema } from './utils/validation.js';
+import { actionSchema, betSchema, playerSchema, roomSchema } from './utils/validation.js';
 import { ClientToServerEvents, ServerToClientEvents } from './types/socketTypes.js';
 import { SinglePlayerController } from './instances/SinglePlayerController.js';
 import { PlayersStore } from './store/PlayersStore.class.js';
@@ -47,6 +47,35 @@ io.on('connection', (socket) => {
         throw new Error('Invalid parameter');
       }
       controller.finishGame({ roomID, playerID });
+      console.log(`Socket ${socket.id} finished a game`);
+    } catch (e: unknown) {
+      console.log(isError(e) ? e.message : `Socket ${socket.id} failed to finish a game`);
+    }
+  });
+  socket.on('makeDecision', ({ roomID, playerID, action }) => {
+    try {
+      const { error: playerSchemaError } = playerSchema.validate(playerID);
+      const { error: actionSchemaError } = actionSchema.validate(action);
+      if (playerSchemaError || actionSchemaError) {
+        throw new Error('Invalid parameter');
+      }
+      // controller.handleDecision({ roomID, playerID, action });
+      console.log(`Socket ${socket.id} finished a game`);
+    } catch (e: unknown) {
+      console.log(isError(e) ? e.message : `Socket ${socket.id} failed to finish a game`);
+    }
+  });
+  socket.on('placeBet', ({ roomID, playerID, bet }) => {
+    try {
+      const { error: roomSchemaError } = roomSchema.validate(playerID);
+      const { error: playerSchemaError } = playerSchema.validate(playerID);
+      const { error: betSchemaError } = betSchema.validate(bet, {
+        context: { min: 0.1, max: playersStore.getPlayerBalance(playerID) },
+      });
+      if (roomSchemaError || playerSchemaError || betSchemaError) {
+        throw new Error('Invalid parameter');
+      }
+      controller.handlePlaceBet({ roomID, playerID, bet });
       console.log(`Socket ${socket.id} finished a game`);
     } catch (e: unknown) {
       console.log(isError(e) ? e.message : `Socket ${socket.id} failed to finish a game`);

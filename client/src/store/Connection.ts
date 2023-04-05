@@ -1,22 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { makeAutoObservable } from "mobx";
 import { io, Socket } from "socket.io-client";
-import { ServerToClientEvents, ClientToServerEvents, RequestParameters } from "../types/socketTypes";
 import { Game } from "./Game";
-
-type Disconnected = "disconnected";
-type Connected = "connected";
-type Waiting = "waiting";
-type WithError = "error";
-
-type SocketStatus = Disconnected | Connected | Waiting | WithError;
+import { SocketStatus } from "../types/types";
+import { errorConncetionNumLimit } from "../constants/connection.constants";
+import { ServerToClientEvents, ClientToServerEvents, RequestParameters, RoomID } from "../types/socketTypes";
 
 export class Connection {
     private socket: Socket<ServerToClientEvents, ClientToServerEvents>;
-    private status: SocketStatus = "waiting";
+    private status: SocketStatus = SocketStatus.Waiting;
     private connectionErrorCounter = 0;
     private game: Game;
-    private connectionID: string;
+    private connectionID: string | null = null;
+    private roomID: RoomID | null = null;
 
     public constructor(serverURL: string, game: Game) {
         this.game = game;
@@ -28,29 +23,28 @@ export class Connection {
 
         this.socket.on("connect", () => {
             this.connectionErrorCounter = 0;
-            this.status = "connected";
+            this.status = SocketStatus.Connected;
             this.setConnectionID(this.socket.id);
             console.log("Socket is connected");
         });
 
         this.socket.on("disconnect", () => {
             console.log("Socket is disconnected");
-            this.status = "disconnected";
+            this.status = SocketStatus.Disconnected;
         });
 
         this.socket.on("connect_error", () => {
             this.connectionErrorCounter++;
             const errorMsg = "Sorry, there seems to be an issue with the connection!";
             console.log(errorMsg);
-            if (this.connectionErrorCounter > 5) {
-                this.status = "error";
+            if (this.connectionErrorCounter > errorConncetionNumLimit) {
+                this.status = SocketStatus.WithError;
             }
         });
 
-        this.socket.on("startGame", (reponse) => {
-            if (this.game) {
-                // this.game.handleStartGame(reponse);
-            }
+        this.socket.on("startGame", (response) => {
+            this.roomID = response.payload.roomID;
+            this.game.handleStartGame(response);
         });
         // this.socket.on("placeBet", (reponse, acknowledge) => this.handlePlaceBet(reponse, acknowledge));
         // this.socket.on("dealCard", (reponse) => this.handleDealCard(reponse));
@@ -71,19 +65,19 @@ export class Connection {
     }
 
     public sendRequest<Event extends keyof ClientToServerEvents>(request: RequestParameters<Event>): void {
-        this.socket.emit<Event>(request.event, ...request.payload);
+        this.socket.emit(request.event, ...request.payload);
     }
 
-    public setGame(game: Game): void {
-        this.game = game;
-    }
-
-    public getConncetionID(): string {
+    public getConncetionID(): string | null {
         return this.connectionID;
+    }
+
+    public getRoomID(): string | null {
+        return this.roomID;
     }
 
     private setConnectionID(id: string): void {
         this.connectionID = this.socket.id;
-        this.game.setPlayerID();
+        this.game.setPlayerID(id);
     }
 }

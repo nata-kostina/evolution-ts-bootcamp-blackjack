@@ -12,7 +12,7 @@ import {
 } from '../constants/notifications.js';
 import { io, playersStore, store } from '../index.js';
 import { Controller, DealSingleCard } from '../types.js';
-import { PlayerID, GameSession, RoomID, CardValue, WinCoefficient, Decision } from '../types/gameTypes.js';
+import { PlayerID, GameSession, RoomID, CardValue, WinCoefficient, Action } from '../types/gameTypes.js';
 import { Notification } from '../types/notificationTypes.js';
 import { Acknowledgment, SpecificID, YesNoAcknowledgement } from '../types/socketTypes.js';
 import { CardsHandler } from '../utils/CardsHandler.js';
@@ -485,16 +485,16 @@ export class MultiPlayersController {
     //         if (response) {
     //           console.log(response);
     //           switch (response.ack) {
-    //             case Decision.Double:
+    //             case Action.Double:
     //               await this.handleDouble({ roomID, playerID });
     //               break;
-    //             case Decision.Surender:
+    //             case Action.Surender:
     //               await this.handleSurender({ roomID, playerID });
     //               break;
-    //             case Decision.Hit:
+    //             case Action.Hit:
     //               await this.handleHit({ roomID, playerID });
     //               break;
-    //             case Decision.Stand:
+    //             case Action.Stand:
     //               break;
     //             default:
     //               break;

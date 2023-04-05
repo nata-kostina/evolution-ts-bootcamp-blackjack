@@ -17,7 +17,6 @@ import {
 } from "@babylonjs/core";
 import { CanvasBase } from "../CanvasBase";
 import ChipImg from "../../assets/img/chips/chip_5.png";
-import { game } from "../../store/index";
 import { ChipItem } from "../../types/types";
 import { chipRadius } from "../../constants/canvas.constants";
 
@@ -37,7 +36,7 @@ export class ChipCanvasElement {
                 trigger: ActionManager.OnPickTrigger,
             },
             (() => {
-                game.ui.addBet(this.chip.value);
+                // game.ui.addBet(this.chip.value);
             }),
         );
     }

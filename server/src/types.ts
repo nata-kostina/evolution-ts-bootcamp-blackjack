@@ -1,12 +1,12 @@
 import { Acknowledgment, SpecificID, YesNoAcknowledgement } from './types/socketTypes.js';
 import { GameState } from './types/storeTypes.js';
-import { RoomID, PlayerID, Decision, PlayerInstance, DealerInstance, Card } from './types/gameTypes.js';
+import { RoomID, PlayerID, Action, PlayerInstance, DealerInstance, Card } from './types/gameTypes.js';
 import { Socket } from 'socket.io';
 import { Notification } from './types/notificationTypes.js';
 import { RespondFn } from './utils/respondConfig.js';
 
 export type DecisionRequest = {
-  decision: Decision;
+  decision: Action;
   id: SpecificID;
 };
 
@@ -67,7 +67,7 @@ export interface Controller {
   takeOutInsurance({ playerID, roomID }: SpecificID): void;
 }
 
-export type AvailableActions = Decision[];
+export type AvailableActions = Action[];
 export type NewGameMode = "new-game" | "new-round";
 
 export type HoleCard = {id: string}

@@ -1,27 +1,27 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import { observer } from "mobx-react-lite";
-import { game } from "../../store";
-import "./styles.css";
-import { Decision, GameMode } from "../../types/types";
+import * as styles from "./styles.scss";
+import { Action, GameMode } from "../../types/types";
 
 export const PlayerActions = observer(() => {
-    const handleBetClick = () => {
-        if (game.ui.betHandler && game.ui.player && game.ui.player.bet > 0) {
-            game.ui.betHandler(game.ui.player.bet);
-        }
-    };
-    const handleDecision = (decision: Decision) => {
-        if (game.ui.decisionHandler) {
-            game.ui.decisionHandler(decision);
-        }
-    };
-    const handleNewBetClick = () => {
-        game.ui.toggleNewBetDisabled(true);
-        game.startGame(GameMode.Single);
-    };
+    // const handleBetClick = () => {
+    //     if (game.ui.betHandler && game.ui.player && game.ui.player.bet > 0) {
+    //         game.ui.betHandler(game.ui.player.bet);
+    //     }
+    // };
+    // const handleDecision = (decision: Decision) => {
+    //     if (game.ui.decisionHandler) {
+    //         game.ui.decisionHandler(decision);
+    //     }
+    // };
+    // const handleNewBetClick = () => {
+    //     game.ui.toggleNewBetDisabled(true);
+    //     game.startGame(GameMode.Single);
+    // };
     return (
-        <ul className="player-actions">
-            <li className="action_item" />
+        <ul className={styles.panel}>
+            {/* <li className="action_item" />
             <li className="action_item">
                 <button
                     type="button"
@@ -61,7 +61,7 @@ export const PlayerActions = observer(() => {
                     onClick={() => handleDecision("surender")}
                 >SURENDER
                 </button>
-            </li>
+            </li> */}
         </ul>
     );
 });

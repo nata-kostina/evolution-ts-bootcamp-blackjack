@@ -50,7 +50,6 @@ export class PlayerSeatCanvasElement {
     // }
 
     public dealCard(card: Card): void {
-        console.log("player seat dealCard");
         const box = MeshBuilder.CreateGround("box", { width: 0.3, height: 0.5 }, this.base.scene);
         box.rotation.x = -Math.PI * 0.5;
         box.position.z = -this.cards.length * 0.1;
