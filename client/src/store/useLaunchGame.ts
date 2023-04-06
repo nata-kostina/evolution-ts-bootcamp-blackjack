@@ -1,11 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect } from "react";
 import { useConnection } from "../context/ConnectionContext";
 import { GameMode } from "../types/types";
 
-export const useLaunchGame = (): void => {
+export const useLaunchGame = (connectionID: string | null): void => {
     const connection = useConnection();
-    const connectionID = connection.getConncetionID();
     useEffect(() => {
+        console.log("connectionID: ", connectionID);
         if (connectionID) {
             connection.sendRequest<"startGame">({
                 event: "startGame",

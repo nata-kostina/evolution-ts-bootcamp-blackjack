@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { Action } from '../types/gameTypes';
+import { Action } from '../types/gameTypes.js';
 
 export const roomSchema = Joi.string();
 export const playerSchema = Joi.string();

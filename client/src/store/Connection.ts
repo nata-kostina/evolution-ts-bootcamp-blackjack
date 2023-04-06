@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { makeAutoObservable } from "mobx";
 import { io, Socket } from "socket.io-client";
 import { Game } from "./Game";
@@ -43,12 +44,13 @@ export class Connection {
         });
 
         this.socket.on("startGame", (response) => {
+            console.log("socket on start Game");
             this.roomID = response.payload.roomID;
             this.game.handleStartGame(response);
         });
-        // this.socket.on("placeBet", (reponse, acknowledge) => this.handlePlaceBet(reponse, acknowledge));
-        // this.socket.on("dealCard", (reponse) => this.handleDealCard(reponse));
-        // this.socket.on("updateSession", (response) => this.updateGameSession(response));
+        this.socket.on("placeBet", (reponse) => this.game.handlePlaceBetNotification(reponse));
+        this.socket.on("updateSession", (response) => this.game.updateGameSession(response));
+        this.socket.on("dealCard", (reponse) => this.game.handleDealCard(reponse));
         // this.socket.on("notificate", (response, acknowledge) => this.handleNotificate(response, acknowledge));
         // this.socket.on("getDecision", (response, acknowledgement) => this.handleGetDecision(response, acknowledgement));
         // this.socket.on("finishRound", (response) => this.handleFinishRound(response));

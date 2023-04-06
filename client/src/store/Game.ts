@@ -14,16 +14,15 @@ import {
     NewCard,
 } from "../types/types";
 import { PlayerID, RoomID, SocketResponse } from "../types/socketTypes";
-import { changeStatus } from "../utils/controller/changeStatus";
 import { UIStore } from "./ui/UIstore";
 import { CanvasBase } from "../canvas/CanvasBase";
-import { SceneCanvasElement } from "../canvas/canvasElements/Scene.canvas.element";
 import { pickPlayerInstance } from "../utils/storeUtils/pickPlayerInsrance";
+import { SceneCanvasElement } from "../canvas/canvasElements/Scene.canvas.element";
 
 export class Game {
     public ui: UIStore;
     public canvas: CanvasBase | null = null;
-    public scene: SceneCanvasElement | null = null;
+    public scene: SceneCanvasElement;
 
     public status: GameStatus = "starting";
     public session: GameSession | null = null;
@@ -31,9 +30,9 @@ export class Game {
     public playerID: PlayerID | null = null;
     public roomID: RoomID | null = null;
 
-    public constructor(canvas: CanvasBase | null, ui: UIStore, scene: SceneCanvasElement | null) {
-        // this.canvas = canvas;
-        // this.scene = scene;
+    public constructor(canvas: CanvasBase | null, ui: UIStore, scene: SceneCanvasElement) {
+        this.canvas = canvas;
+        this.scene = scene;
         this.ui = ui;
         makeAutoObservable(this);
     }
@@ -80,6 +79,8 @@ export class Game {
                 this.ui.setDealer(response.payload.dealer);
                 this.ui.setPlayer(player);
                 this.ui.toggleActionBtns(player.availableActions);
+                this.ui.togglePlaceBetBtnDisabled(false);
+                this.scene.toggleChipAction(true);
             }
         } else {
             this.status = "error";
@@ -96,36 +97,40 @@ export class Game {
     //     // this.ui.toggleActionBtns([]);
     // }
 
-    // private updateGameSession(response: SocketResponse<GameSession>): void {
-    //     console.log(response);
-    //     if (response.ok && response.payload) {
-    //         this.status = "in_progress";
-    //         this.session = response.payload;
-    //         this.ui.setUIGameSession(response.payload);
-    //     } else {
-    //         this.status = "error";
-    //     }
-    // }
+    public updateGameSession(response: SocketResponse<GameSession>): void {
+        console.log(response);
+        if (response.ok && response.payload && this.playerID) {
+            const player = pickPlayerInstance({ playerID: this.playerID, players: response.payload.players });
+            if (player) {
+                this.status = "in_progress";
+                this.session = response.payload;
+                this.ui.setDealer(response.payload.dealer);
+                this.ui.setPlayer(player);
+                this.ui.toggleActionBtns(player.availableActions);
+                this.scene.toggleChipAction(true);
+            }
+        } else {
+            this.status = "error";
+        }
+    }
 
-    // private handlePlaceBet(response: SocketResponse<GameSession>,
-    //     acknowledgement: (responses: Acknowledgment<Bet>) => void): void {
-    //     if (response.ok && response.payload) {
-    //         this.ui.setUIGameSession(response.payload);
-    //         this.ui.togglePlaceBetBtn(false);
-    //         this.scene.toggleChipAction(true);
-    //         this.ui.setBetHandler((bet) => {
-    //             if (this.playerID) {
-    //                 this.status = "in_progress";
-    //                 acknowledgement({ playerID: this.playerID, answer: bet });
-    //                 this.ui.resetBetHandler();
-    //                 this.scene.toggleChipAction(false);
-    //                 this.ui.togglePlaceBetBtn(true);
-    //             }
-    //         });
-    //     } else {
-    //         this.status = "error";
-    //     }
-    // }
+    public handlePlaceBetNotification(response: SocketResponse<GameSession>): void {
+        if (response.ok && response.payload && this.playerID) {
+            console.log("handlePlaceBetNotification");
+            const player = pickPlayerInstance({ playerID: this.playerID, players: response.payload.players });
+            if (player) {
+                this.session = response.payload;
+                this.ui.setDealer(response.payload.dealer);
+                this.ui.setPlayer(player);
+                this.ui.toggleActionBtns(player.availableActions);
+                this.ui.togglePlaceBetBtnDisabled(true);
+                this.ui.toggleBetEditBtnsDisabled(true);
+                this.scene.toggleChipAction(false);
+            }
+        } else {
+            this.status = "error";
+        }
+    }
 
     // private handleNotificate(
     //     response: SocketResponse<Notification>,
@@ -193,16 +198,16 @@ export class Game {
     //     }
     // }
 
-    // private handleDealCard(response: SocketResponse<NewCard>): void {
-    //     console.log("handleDealCard");
-    //     if (response.ok && response.payload) {
-    //         if (response.payload.target === "player") {
-    //             this.scene.dealPlayerCard(response.payload);
-    //         } else {
-    //             this.scene.dealDealerCard(response.payload);
-    //         }
-    //     } else {
-    //         this.status = "error";
-    //     }
-    // }
+    public handleDealCard(response: SocketResponse<NewCard>): void {
+        console.log("handleDealCard");
+        if (response.ok && response.payload) {
+            if (response.payload.target === "player") {
+                this.scene.dealPlayerCard(response.payload);
+            } else {
+                this.scene.dealDealerCard(response.payload);
+            }
+        } else {
+            this.status = "error";
+        }
+    }
 }

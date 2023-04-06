@@ -15,8 +15,9 @@ import {
     Vector3,
 } from "@babylonjs/core";
 import { AdvancedDynamicTexture, Button, TextBlock } from "@babylonjs/gui/2D";
+import { Cell } from "../../types/types";
 import { CanvasBase } from "../CanvasBase";
-import { SceneMatrix, matrixSize, matrixWidth, cellSize, matrixHeight, Cell } from "../GameMatrix";
+import { GameMatrix } from "../GameMatrix";
 
 export class PointsCanvasElement {
     private id: Cell;
@@ -24,19 +25,29 @@ export class PointsCanvasElement {
     private readonly base: CanvasBase;
     private textBlock: TextBlock;
 
-    public constructor(base: CanvasBase, id: Cell) {
+    public constructor(base: CanvasBase, id: Cell, matrix: GameMatrix) {
         this.base = base;
         this.id = id;
 
-        const index = SceneMatrix.indexOf(this.id);
+        this.base = base;
 
-        const row = Math.floor(index / matrixSize);
-        const column = index % matrixSize;
+        const mtx = matrix.getMatrix();
+        const mtxSize = matrix.getMatrixSize();
+        const cellWidth = matrix.getCellWidth();
+        const cellHeight = matrix.getCellHeight();
+        const matrixWidth = matrix.getMatrixWidth();
+        const matrixHeight = matrix.getMatrixHeight();
+        const index = mtx.indexOf(id);
+
+        const row = Math.floor(index / mtxSize);
+        const column = index % mtxSize;
         this.position = new Vector3(
-            -matrixWidth * 0.5 + cellSize * 0.5 + cellSize * column,
-            matrixHeight * 0.5 - cellSize * 0.5 - cellSize * row,
+            -matrixWidth * 0.5 + cellWidth * 0.5 + cellWidth * column,
+            matrixHeight * 0.5 - cellHeight * 0.5 - cellHeight * row,
             0,
         );
+
+        // this.position = new Vector3(0, 0, 0);
 
         const points = MeshBuilder.CreateGround(`points-${this.id}`, { width: 0.5, height: 0.2 }, this.base.scene);
         // points.scaling = new Vector3(0.2, 0.2, 0.2);

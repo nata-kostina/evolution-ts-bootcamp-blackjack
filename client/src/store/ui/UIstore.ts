@@ -9,6 +9,7 @@ import {
     Action,
     GameSession,
     PlayerInstance,
+    BetAction,
 } from "../../types/types";
 import { ErrorHandler } from "../../utils/ErrorHandler";
 import { UINotification } from "./UInotification";
@@ -22,10 +23,11 @@ export class UIStore {
         double: true,
         surender: true,
         insurance: true,
+        bet: false,
     };
 
+    private betEditBtnsDisabled = true;
     private betHistory: number[] = [];
-    private placeBetBtnDisabled = true;
     private newBetDisabled = true;
 
     private errorHandler: ErrorHandler = new ErrorHandler();
@@ -38,12 +40,17 @@ export class UIStore {
         makeAutoObservable(this);
     }
 
-    public togglePlaceBetBtn(value: boolean): void {
-        this.placeBetBtnDisabled = value;
-    }
-
     public toggleNewBetDisabled(value: boolean): void {
         this.newBetDisabled = value;
+    }
+
+    public togglePlaceBetBtnDisabled(value: boolean): void {
+        console.log("togglePlaceBetBtnDisabled");
+        this.actionBtnsDisabled.bet = value;
+    }
+
+    public toggleBetEditBtnsDisabled(value: boolean): void {
+        this.betEditBtnsDisabled = value;
     }
 
     public setPlayer(player: PlayerInstance): void {
@@ -54,8 +61,23 @@ export class UIStore {
         return this.player;
     }
 
+    public getBet(): Bet | null {
+        if (this.player) {
+            return this.player.bet;
+        }
+        return null;
+    }
+
     public setDealer(dealer: DealerInstance): void {
         this.dealer = dealer;
+    }
+
+    public isBtnDisabled(btn: Action): boolean {
+        return this.actionBtnsDisabled[btn];
+    }
+
+    public isBetEditBtnDisabled(): boolean {
+        return this.betEditBtnsDisabled;
     }
 
     public addBet(bet: number): void {

@@ -7,7 +7,7 @@ import Modal from "react-modal";
 import { SinglePlayerPageWithConnectionRequired } from "./pages/SinglePlayerPage/SinglePlayerPage";
 import { ConnectionProvider } from "./context/ConnectionContext";
 import { GameProvider } from "./context/GameContext";
-import { ControlPanel } from "./components/ControlPanel/ControlPanel";
+import { ControlPanel } from "./components/ActionControlPanel/ControlPanel";
 
 Modal.setAppElement("#modal-window");
 
@@ -18,8 +18,7 @@ const root = ReactDOM.createRoot(
 root.render(
     <ConnectionProvider>
         <GameProvider>
-            {/* <SinglePlayerPageWithConnectionRequired />, */}
-            <ControlPanel />
+            <SinglePlayerPageWithConnectionRequired />,
         </GameProvider>
     </ConnectionProvider>,
 );

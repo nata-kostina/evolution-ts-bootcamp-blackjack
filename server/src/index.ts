@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
       // controller.handleDecision({ roomID, playerID, action });
       console.log(`Socket ${socket.id} finished a game`);
     } catch (e: unknown) {
-      console.log(isError(e) ? e.message : `Socket ${socket.id} failed to finish a game`);
+      console.log(isError(e) ? e.message : `Socket ${socket.id} failed to send decision`);
     }
   });
   socket.on('placeBet', ({ roomID, playerID, bet }) => {
@@ -76,9 +76,9 @@ io.on('connection', (socket) => {
         throw new Error('Invalid parameter');
       }
       controller.handlePlaceBet({ roomID, playerID, bet });
-      console.log(`Socket ${socket.id} finished a game`);
+      console.log(`Socket ${socket.id} placed bet`);
     } catch (e: unknown) {
-      console.log(isError(e) ? e.message : `Socket ${socket.id} failed to finish a game`);
+      console.log(isError(e) ? e.message : `Socket ${socket.id} failed to place bet`);
     }
   });
 

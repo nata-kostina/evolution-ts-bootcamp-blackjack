@@ -73,50 +73,50 @@ export class SinglePlayerController implements Controller {
     }
   }
 
-  public async waitPlayersToPlaceBet({ roomID, playerID }: SpecificID): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.respond({
-        roomID,
-        event: 'placeBet',
-        response: [
-          successResponse<GameSession>(ld.cloneDeep(store.getSession(roomID))),
-          async (err, responses) => {
-            try {
-              if (err) {
-                reject();
-              }
-              if (responses) {
-                const response = responses.find((response) => response.playerID === playerID);
-                if (response) {
-                  const bet = response.answer;
-                  const { error: betError } = betSchema.validate(bet, {
-                    context: { min: 0.1, max: playersStore.getPlayerBalance(playerID) },
-                  });
+//   public async waitPlayersToPlaceBet({ roomID, playerID }: SpecificID): Promise<void> {
+//     return new Promise<void>((resolve, reject) => {
+//       this.respond({
+//         roomID,
+//         event: 'placeBet',
+//         response: [
+//           successResponse<GameSession>(ld.cloneDeep(store.getSession(roomID))),
+//           async (err, responses) => {
+//             try {
+//               if (err) {
+//                 reject();
+//               }
+//               if (responses) {
+//                 const response = responses.find((response) => response.playerID === playerID);
+//                 if (response) {
+//                   const bet = response.answer;
+//                   const { error: betError } = betSchema.validate(bet, {
+//                     context: { min: 0.1, max: playersStore.getPlayerBalance(playerID) },
+//                   });
 
-                  if (betError) {
-                    throw new Error('Invalid parameter');
-                  }
-                  const player = store.getPlayer({ roomID, playerID });
-                  store.updatePlayer({ roomID, playerID, payload: { bet, balance: player.balance - bet } });
+//                   if (betError) {
+//                     throw new Error('Invalid parameter');
+//                   }
+//                   const player = store.getPlayer({ roomID, playerID });
+//                   store.updatePlayer({ roomID, playerID, payload: { bet, balance: player.balance - bet } });
 
-                  await this.respond({
-                    roomID,
-                    event: 'updateSession',
-                    response: [successResponse<GameSession>(ld.cloneDeep(store.getSession(roomID)))],
-                  });
-                  return resolve();
-                }
-              } else {
-                reject();
-              }
-            } catch (error: unknown) {
-              reject();
-            }
-          },
-        ],
-      });
-    });
-  }
+//                   await this.respond({
+//                     roomID,
+//                     event: 'updateSession',
+//                     response: [successResponse<GameSession>(ld.cloneDeep(store.getSession(roomID)))],
+//                   });
+//                   return resolve();
+//                 }
+//               } else {
+//                 reject();
+//               }
+//             } catch (error: unknown) {
+//               reject();
+//             }
+//           },
+//         ],
+//       });
+//     });
+//   }
 
   public handleDecision([{roomID, playerID, action}]: Parameters<ClientToServerEvents["makeDecision"]>): void {
       try {
@@ -179,9 +179,12 @@ export class SinglePlayerController implements Controller {
 
         await this.respond({
           roomID,
-          event: 'updateSession',
+          event: 'placeBet',
           response: [successResponse<GameSession>(ld.cloneDeep(store.getSession(roomID)))],
         });
+
+        this.startPlay({ playerID, roomID});
+        console.log(`Socket ${playerID}: handle place bet`);
     } catch (error: unknown) {
       throw new Error(isError(error) ? error.message : `${playerID}: Failed to handle game finish`);
     }

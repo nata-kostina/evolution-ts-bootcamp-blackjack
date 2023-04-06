@@ -47,7 +47,7 @@ export interface Controller {
   dealCards: ({ playerID, roomID }: SpecificID) =>  Promise<void>;
   dealMockCards: ({ playerID, roomID }: SpecificID) =>  Promise<void>;
   changeRespond: (value: RespondFn) => void;
-  waitPlayersToPlaceBet: ({ roomID, playerID }: SpecificID) => Promise<void>;
+//   waitPlayersToPlaceBet: ({ roomID, playerID }: SpecificID) => Promise<void>;
   checkForBlackjack({ playerID, roomID }: SpecificID): Promise<void>;
   handleBlackjack({ playerID, roomID }: SpecificID): Promise<void>;
   checkDealerFirstCard({roomID, playerID}: SpecificID): Promise<void>;

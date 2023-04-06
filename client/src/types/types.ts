@@ -68,6 +68,12 @@ export enum Action {
     DOUBLE = "double",
     SURENDER = "surender",
     INSURANCE = "insurance",
+    BET = "bet",
+}
+
+export enum BetAction {
+    Undo = "undo",
+    Reset = "reset",
 }
 
 export type GameStatus =
@@ -170,3 +176,23 @@ export type ActionBtn = {
     action: Action;
     svgPath: string;
 };
+
+export type BetActionBtn = {
+    action: BetAction;
+    svgPath: string;
+};
+
+export type MatrixProps = {
+    map: Cell[];
+    size: number;
+    width: number;
+    height: number;
+    cellWidth: number;
+    cellHeight: number;
+};
+
+export interface CanvasElement {
+    update: (data: MatrixProps) => void;
+}
+
+export type Cell = "0" | "chips" | "player-seat" | "dealer-seat" | "dealer-points" | "player-points" | "bet";

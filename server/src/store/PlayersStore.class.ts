@@ -13,7 +13,6 @@ export class PlayersStore {
   }
 
   public updatePlayerBalance({playerID, balance}: {playerID: PlayerID, balance: number}): void {
-    console.log(this.store);
     this.store[playerID] = balance;
   }
 

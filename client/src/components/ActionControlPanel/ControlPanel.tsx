@@ -2,12 +2,14 @@
 import React, { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { Balance } from "../Balance/Balance";
-// import { BetsForm } from "../BetsForm/BetsForm";
-import { PlayerActions } from "../PlayerActions/PlayerActions";
 import styles from "./styles.module.css";
 import { NotificationModal } from "../Modal/notification/NotificationModal";
 import { actionButtons } from "../../constants/game.constants";
 import { ActionButton } from "./ActionButton";
+import { Action } from "../../types/types";
+import BetSVG from "../../assets/img/actions/bet.svg";
+import { ActionPanel } from "./ActionPanel";
+import { BetControlPanel } from "../BetControlPanel/BetControlPanel";
 
 const notificationDelay = 200;
 
@@ -36,11 +38,15 @@ export const ControlPanel = observer(() => {
             <div className={styles.controlPanel}>
                 <div className={styles.inner}>
                     <Balance />
-                    <div className={styles.actionsPanel}>
+                    <ActionPanel actionBtns={actionButtons} type="playerAction" />
+                    <BetControlPanel />
+                    {/* <ActionPanel actionBtns={actionButtons} type="playerAction" /> */}
+                    {/* <div className={styles.actionsPanel}>
+                        <ActionButton key={Action.BET} item={{ action: Action.BET, svgPath: BetSVG }} />
                         {actionButtons.map((btn) => {
                             return <ActionButton key={btn.action} item={btn} />;
                         })}
-                    </div>
+                    </div> */}
                 </div>
             </div>
             {/*

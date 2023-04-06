@@ -12,10 +12,7 @@ export type ResponseParameters<Event extends keyof ServerToClientEvents> = {
 export interface ServerToClientEvents {
   startGame: (response: SocketResponse<GameSession>) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  placeBet: (
-    response: SocketResponse<GameSession>,
-    acknowledgement: (err: any, responses: Acknowledgment<Bet>[]) => Promise<void>
-  ) => void;
+  placeBet: (response: SocketResponse<GameSession>) => void;
   dealCard: (response: SocketResponse<NewCard>) => void;
   getDecision: (
     response: SocketResponse<GameSession>,
@@ -30,7 +27,7 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  startGame: (payload: { playerID: PlayerID; mode: GameMode; roundMode: NewGameMode }) => void;
+    startGame: ({ playerID, mode }: { playerID: PlayerID; mode: GameMode; }) => void;
   finishGame: ({roomID, playerID}: SpecificID) => void;
   placeBet: ({ roomID, playerID, bet }: SpecificID & { bet: Bet; }) => void;
   makeDecision: ({ roomID, playerID, action }: SpecificID & { action: Action; }) => void;

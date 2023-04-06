@@ -2,12 +2,17 @@
     --controlPanel: #0c1007c7;
     --controlPanelBorder: 2px;
     --controlItemBg: radial-gradient(circle, rgba(253,253,179,1) 0%, rgba(211,195,155,1) 59%, rgba(229,214,180,1) 63%, rgba(229,214,180,1) 67%, rgba(107,92,66,1) 70%, rgba(107,92,66,1) 100%);
-    --controlItemWidth: 90px;
+    --controlItemWidth: 70px;
     --controlItemImgBorder: 6px;
     --controlItemImgInnerWidth: calc((var(--controlItemWidth) - 2*var(--controlItemImgBorder)) / 1.4);
-    --balanceContainerWidth: 250px;
+    --controlItemTextHeight: 30px;
+
+    --balanceContainerWidth: 200px;
     --balanceContainerHeight: 50px;
 
+    --betActionWidth: 50px;
+    --betActionBorder: 2px;
+    --betActionImgInnerWidth: calc((var(--betActionWidth) - 2*var(--betActionBorder)) / 1.4);
   }
 
 
@@ -32,8 +37,8 @@ body {
 canvas {
     width: 100%;
     height: 100%;
-    max-width: 1000px;
-    max-height: 800px;
+    /* max-width: 1000px;
+    max-height: 800px; */
     outline: none;
 }
 
