@@ -10,6 +10,9 @@ import {
     GameSession,
     PlayerInstance,
     BetAction,
+    ModalUnion,
+    NotificationKind,
+    NotificationVariant,
 } from "../../types/types";
 import { ErrorHandler } from "../../utils/ErrorHandler";
 import { UINotification } from "./UInotification";
@@ -28,20 +31,13 @@ export class UIStore {
 
     private betEditBtnsDisabled = true;
     private betHistory: number[] = [];
-    private newBetDisabled = true;
 
     private errorHandler: ErrorHandler = new ErrorHandler();
     private notification: UINotification = new UINotification();
-
-    private decisionHandler: ((decision: Action) => void) | null = null;
-    private betHandler: ((bet: Bet) => void) | null = null;
+    private _helperTarget: Action | null = null;
 
     public constructor() {
         makeAutoObservable(this);
-    }
-
-    public toggleNewBetDisabled(value: boolean): void {
-        this.newBetDisabled = value;
     }
 
     public togglePlaceBetBtnDisabled(value: boolean): void {
@@ -72,7 +68,7 @@ export class UIStore {
         this.dealer = dealer;
     }
 
-    public isBtnDisabled(btn: Action): boolean {
+    public isPlayerActionBtnDisabled(btn: Action): boolean {
         return this.actionBtnsDisabled[btn];
     }
 
@@ -81,8 +77,10 @@ export class UIStore {
     }
 
     public addBet(bet: number): void {
+        console.log("add bet: ", bet);
         try {
             if (this.player) {
+                console.log("this.player: ", toJS(this.player));
                 this.player.bet += bet;
                 this.player.balance -= bet;
                 this.betHistory.push(bet);
@@ -107,6 +105,7 @@ export class UIStore {
     }
 
     public clearBets(): void {
+        console.log("clearBets history: ", toJS(this.betHistory));
         while (this.betHistory.length > 0) {
             this.undoBet();
         }
@@ -120,5 +119,41 @@ export class UIStore {
                 this.actionBtnsDisabled[btn as Action] = true;
             }
         });
+    }
+
+    public addNotificationModal(modal: ModalUnion): void {
+        this.notification.add(modal);
+    }
+
+    public getCurrentModal(): ModalUnion | null {
+        return this.notification.getCurrentModal();
+    }
+
+    public isModalShown(): boolean {
+        return this.notification.isModalShown();
+    }
+
+    public getModalQueue(): Array<ModalUnion> {
+        return this.notification.getModalQueue();
+    }
+
+    public showNotification(): void {
+        this.notification.showNotification();
+    }
+
+    public hideNotification(): void {
+        this.notification.hideNotification();
+    }
+
+    public addHelper(action: Action): void {
+        this._helperTarget = action;
+    }
+
+    public get helperTarget(): Action | null {
+        return this._helperTarget;
+    }
+
+    public resetHelperTarget(): void {
+        this._helperTarget = null;
     }
 }

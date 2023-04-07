@@ -106,7 +106,7 @@ export enum NotificationVariant {
 }
 
 export type Notification = {
-    kind: NotificationKind;
+    // kind: NotificationKind;
     variant: NotificationVariant;
     text: string;
 };
@@ -120,7 +120,6 @@ export const enum ModalKinds {
 export type YesNoModal = {
     type: ModalKinds.YesNo;
     notification: Notification;
-    handleAnswer: (answer: YesNoAcknowledgement) => void;
 };
 
 export type OkModal = {
@@ -131,8 +130,6 @@ export type OkModal = {
 export type DisappearingModal = {
     type: ModalKinds.Disappearing;
     notification: Notification;
-    timer?: number;
-    handleAnswer?: (answer: Action) => void;
 };
 
 export type ModalUnion = YesNoModal | OkModal | DisappearingModal;
@@ -196,3 +193,8 @@ export interface CanvasElement {
 }
 
 export type Cell = "0" | "chips" | "player-seat" | "dealer-seat" | "dealer-points" | "player-points" | "bet";
+
+export enum CardAnimation {
+    Deal = "Deal",
+    Remove = "Remove",
+}

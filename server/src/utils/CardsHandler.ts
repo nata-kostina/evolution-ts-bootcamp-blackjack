@@ -24,6 +24,7 @@ export const CardsHandler: Handler = {
     try {
       const player = store.getPlayer({ playerID, roomID });
       const { cards } = player;
+      console.log('PLAYER CARDS: ', cards);
       if (cards.length === 2) {
         const [first, second] = cards;
         if (

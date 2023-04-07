@@ -1,5 +1,6 @@
 import React from "react";
 import Modal from "react-modal";
+import styles from "../styles.module.css";
 
 export interface WithModalProps {
     isOpen: boolean;
@@ -8,16 +9,18 @@ export interface WithModalProps {
 
 export function withModal<P extends WithModalProps = WithModalProps>(Component: React.FC<P>): React.FC<P> {
     const NotificationWithModal: React.FC<P> = ({ isOpen, ...props }) => {
-        const { onClose } = props;
         return (
             <Modal
                 isOpen={isOpen}
                 shouldCloseOnOverlayClick={false}
                 contentLabel="Example Modal"
                 shouldCloseOnEsc={false}
+                className={styles.modal}
             >
-                <Component {...props as P} />
-                <button type="button" onClick={onClose}>X</button>
+                <div className={styles.inner}>
+                    <Component {...props as P} />
+                    {/* <button type="button" onClick={onClose} className={styles.closeBtn}>X</button> */}
+                </div>
             </Modal>
         );
     };

@@ -21,6 +21,7 @@ export class ChipSetCanvasElement implements CanvasElement {
     private readonly controller: Controller;
 
     public constructor(base: CanvasBase, matrix: GameMatrix, controller: Controller) {
+        console.log("CHIPSET CONSTRUCTOR");
         this.controller = controller;
         this.base = base;
         const mtx = matrix.getMatrix();
@@ -62,6 +63,7 @@ export class ChipSetCanvasElement implements CanvasElement {
     }
 
     public addContent(): void {
+        console.log("CHIPSET addcontent");
         for (let j = 0; j < chipSet.length; j++) {
             const x = this.position.x + j * chipRadius * 1.4;
 
@@ -78,6 +80,7 @@ export class ChipSetCanvasElement implements CanvasElement {
     }
 
     public toggleChipAction(register: boolean): void {
+        console.log("CHIPSET toggleChipAction: ", register);
         this.chipSet.forEach((chip) => chip.toggleChipAction(register));
     }
 }

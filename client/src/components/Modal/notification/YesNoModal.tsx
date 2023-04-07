@@ -1,6 +1,7 @@
 import React from "react";
 import { YesNoAcknowledgement } from "../../../types/types";
 import { withModal, WithModalProps } from "./hoc/withModal";
+import styles from "./styles.module.css";
 
 interface YesNoNotificationProps extends WithModalProps {
     text: string;
@@ -9,21 +10,18 @@ interface YesNoNotificationProps extends WithModalProps {
 }
 
 export const YesNoNotification = ({ text, handleAnswer, onClose }: YesNoNotificationProps) => {
-    const handleYesClick = () => {
-        handleAnswer("yes");
+    const handleClick = (response: YesNoAcknowledgement) => {
+        handleAnswer(response);
         onClose();
     };
-    const handleNoClick = () => {
-        handleAnswer("no");
-        onClose();
-    };
-
     return (
-        <div>
-            <div>{text}</div>
-            <button onClick={handleYesClick}>Yes</button>
-            <button onClick={handleNoClick}>No</button>
-        </div>
+        <>
+            <div className={styles.text}>{text}</div>
+            <div className={styles.controls}>
+                <button className={styles.btnAnswer} onClick={() => handleClick("yes")}>Yes</button>
+                <button className={styles.btnAnswer} onClick={() => handleClick("no")}>No</button>
+            </div>
+        </>
     );
 };
 

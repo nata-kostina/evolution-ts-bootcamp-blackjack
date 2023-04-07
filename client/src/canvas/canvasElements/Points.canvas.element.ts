@@ -1,20 +1,9 @@
-/* eslint-disable import/no-cycle */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-floating-promises */
-/* eslint-disable @typescript-eslint/no-empty-function */
 import {
-    ActionManager,
-    BackgroundMaterial,
-    Color3,
-    DynamicTexture,
-    ExecuteCodeAction,
-    InterpolateValueAction,
     MeshBuilder,
-    StandardMaterial,
-    Texture,
+    GroundMesh,
     Vector3,
 } from "@babylonjs/core";
-import { AdvancedDynamicTexture, Button, TextBlock } from "@babylonjs/gui/2D";
+import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui/2D";
 import { Cell } from "../../types/types";
 import { CanvasBase } from "../CanvasBase";
 import { GameMatrix } from "../GameMatrix";
@@ -22,8 +11,9 @@ import { GameMatrix } from "../GameMatrix";
 export class PointsCanvasElement {
     private id: Cell;
     private position: Vector3;
+    private textBlock: TextBlock | null = null;
+    private skin: GroundMesh | null = null;
     private readonly base: CanvasBase;
-    private textBlock: TextBlock;
 
     public constructor(base: CanvasBase, id: Cell, matrix: GameMatrix) {
         this.base = base;
@@ -46,16 +36,17 @@ export class PointsCanvasElement {
             matrixHeight * 0.5 - cellHeight * 0.5 - cellHeight * row,
             0,
         );
+        this.addContent();
+    }
 
-        // this.position = new Vector3(0, 0, 0);
-
-        const points = MeshBuilder.CreateGround(`points-${this.id}`, { width: 0.5, height: 0.2 }, this.base.scene);
+    public addContent(): void {
+        this.skin = MeshBuilder.CreateGround(`points-${this.id}`, { width: 0.5, height: 0.2 }, this.base.scene);
         // points.scaling = new Vector3(0.2, 0.2, 0.2);
-        points.position.x = this.position.x;
-        points.position.y = this.position.y;
-        points.rotation.x = -Math.PI * 0.5;
+        this.skin.position.x = this.position.x;
+        this.skin.position.y = this.position.y;
+        this.skin.rotation.x = -Math.PI * 0.5;
 
-        const texture = AdvancedDynamicTexture.CreateForMesh(points);
+        const texture = AdvancedDynamicTexture.CreateForMesh(this.skin);
         texture.background = "#17515E";
         this.textBlock = new TextBlock(`text-points-${this.id}`, "0");
         this.textBlock.color = "white";
@@ -64,17 +55,15 @@ export class PointsCanvasElement {
         texture.addControl(this.textBlock);
     }
 
-    public addContent(): void {
-        // console.log("CardCanvasElement addContent");
-        // const points = MeshBuilder.CreateGround(`points-${this.id}`, { width: 0.2, height: 0.15 }, this.base.scene);
-        // points.position.x = this.position.x;
-        // points.position.y = this.position.y;
-
-        // const advancedTexture = GUI.AdvancedDynamicTexture.CreateForMesh(points);
-        // advancedTexture.background = "green";
+    public update(points: number): void {
+        if (this.textBlock) {
+            this.textBlock.text = points.toString();
+        }
     }
 
-    public update(points: number): void {
-        this.textBlock.text = points.toString();
+    public dispose(): void {
+        if (this.skin) {
+            this.skin.dispose();
+        }
     }
 }

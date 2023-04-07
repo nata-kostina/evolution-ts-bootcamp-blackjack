@@ -2,9 +2,9 @@ import { makeAutoObservable } from "mobx";
 import { ModalUnion } from "../../types/types";
 
 export class UINotification {
-    public currentModal: ModalUnion | null = null;
-    public queue: ModalUnion[] = [];
-    public isShown = false;
+    private currentModal: ModalUnion | null = null;
+    private queue: Array<ModalUnion> = [];
+    private isShown = false;
 
     public constructor() {
         makeAutoObservable(this);
@@ -29,5 +29,17 @@ export class UINotification {
         this.isShown = false;
         this.currentModal = null;
         this.queue = this.queue.slice(1);
+    }
+
+    public getCurrentModal(): ModalUnion | null {
+        return this.currentModal;
+    }
+
+    public isModalShown(): boolean {
+        return this.isShown;
+    }
+
+    public getModalQueue(): Array<ModalUnion> {
+        return this.queue;
     }
 }

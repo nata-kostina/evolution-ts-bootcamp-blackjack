@@ -12,6 +12,7 @@ import {
     Bet,
     Acknowledgment,
     NewCard,
+    NotificationVariant,
 } from "../types/types";
 import { PlayerID, RoomID, SocketResponse } from "../types/socketTypes";
 import { UIStore } from "./ui/UIstore";
@@ -79,7 +80,7 @@ export class Game {
                 this.ui.setDealer(response.payload.dealer);
                 this.ui.setPlayer(player);
                 this.ui.toggleActionBtns(player.availableActions);
-                this.ui.togglePlaceBetBtnDisabled(false);
+                // this.ui.togglePlaceBetBtnDisabled(false);
                 this.scene.toggleChipAction(true);
             }
         } else {
@@ -98,7 +99,7 @@ export class Game {
     // }
 
     public updateGameSession(response: SocketResponse<GameSession>): void {
-        console.log(response);
+        console.log("updateGameSession: ", response);
         if (response.ok && response.payload && this.playerID) {
             const player = pickPlayerInstance({ playerID: this.playerID, players: response.payload.players });
             if (player) {
@@ -107,7 +108,7 @@ export class Game {
                 this.ui.setDealer(response.payload.dealer);
                 this.ui.setPlayer(player);
                 this.ui.toggleActionBtns(player.availableActions);
-                this.scene.toggleChipAction(true);
+                // this.scene.toggleChipAction(true);
             }
         } else {
             this.status = "error";
@@ -132,39 +133,55 @@ export class Game {
         }
     }
 
-    // private handleNotificate(
-    //     response: SocketResponse<Notification>,
-    //     acknowledge?: (ack: Acknowledgment<YesNoAcknowledgement>) => void,
-    // ): void {
-    //     if (response.ok) {
-    //         switch (response.payload.kind) {
-    //             case NotificationKind.Ok: {
-    //                 this.ui.notification.add({
-    //                     type: ModalKinds.Disappearing,
-    //                     notification: response.payload,
-    //                 });
-    //                 break;
-    //             }
-    //             case NotificationKind.YesNo: {
-    //                 this.ui.notification.add({
-    //                     type: ModalKinds.YesNo,
-    //                     notification: response.payload,
-    //                     handleAnswer: (ack: YesNoAcknowledgement) => {
-    //                         if (acknowledge && this.playerID) {
-    //                             acknowledge({ playerID: this.playerID, answer: ack });
-    //                         }
-    //                     },
-    //                 });
-    //                 break;
-    //             }
-    //             default:
-    //                 break;
-    //         }
-    //         this.status = changeStatus(this.status, response.payload.variant);
-    //     } else {
-    //         this.status = "error";
-    //     }
-    // }
+    public handleNotificate(
+        response: SocketResponse<Notification>,
+    ): void {
+        if (response.ok) {
+            console.log("handleNotificate");
+            switch (response.payload.variant) {
+                case NotificationVariant.Blackjack:
+                    this.scene.addBlackjackNotification();
+                    break;
+                case NotificationVariant.StandOrTakeMoney:
+                    this.ui.addNotificationModal({
+                        type: ModalKinds.YesNo,
+                        notification: response.payload,
+                    });
+                    break;
+                case NotificationVariant.Insurance:
+                    this.ui.addHelper(Action.INSURANCE);
+                    break;
+                default:
+                    break;
+            }
+            // switch (response.payload.kind) {
+            //     case NotificationKind.Ok: {
+            //         this.ui.addNotificationModal({
+            //             type: ModalKinds.Disappearing,
+            //             notification: response.payload,
+            //         });
+            //         break;
+            //     }
+            //     case NotificationKind.YesNo: {
+            //         // this.ui.notification.add({
+            //         //     type: ModalKinds.YesNo,
+            //         //     notification: response.payload,
+            //         //     handleAnswer: (ack: YesNoAcknowledgement) => {
+            //         //         if (acknowledge && this.playerID) {
+            //         //             acknowledge({ playerID: this.playerID, answer: ack });
+            //         //         }
+            //         //     },
+            //         // });
+            //         break;
+            //     }
+            //     default:
+            //         break;
+            // }
+            // this.status = changeStatus(this.status, response.payload.variant);
+        } else {
+            this.status = "error";
+        }
+    }
 
     // private handleGetDecision(
     //     response: SocketResponse<GameSession>,
@@ -183,20 +200,24 @@ export class Game {
     //     }
     // }
 
-    // private handleFinishRound(response: SocketResponse<GameSession>): void {
-    //     if (response.ok && response.payload) {
-    //         this.session = response.payload;
-    //         const player = this.getPlayerInstance(response.payload.players);
-    //         this.player = player;
-    //         this.roomID = response.payload.roomID;
-    //         this.ui.toggleNewBetDisabled(false);
-    //         this.ui.setGameSession(response.payload);
-    //         // this.ui.togglePlaceBetBtn(false);
-    //         // this.startGame(GameMode.Single);
-    //     } else {
-    //         this.status = "error";
-    //     }
-    // }
+    public handleFinishRound(response: SocketResponse<GameSession>): void {
+        if (response.ok && response.payload && this.playerID) {
+            console.log("handleFinishRound: ", response.payload);
+            const player = pickPlayerInstance({ playerID: this.playerID, players: response.payload.players });
+            if (player) {
+                this.session = response.payload;
+                this.ui.clearBets();
+                this.ui.setDealer(response.payload.dealer);
+                this.ui.setPlayer(player);
+                this.ui.toggleActionBtns(player.availableActions);
+                this.ui.resetHelperTarget();
+                this.scene.toggleChipAction(true);
+                this.scene.removeCards();
+            }
+        } else {
+            this.status = "error";
+        }
+    }
 
     public handleDealCard(response: SocketResponse<NewCard>): void {
         console.log("handleDealCard");

@@ -51,9 +51,9 @@ export class Connection {
         this.socket.on("placeBet", (reponse) => this.game.handlePlaceBetNotification(reponse));
         this.socket.on("updateSession", (response) => this.game.updateGameSession(response));
         this.socket.on("dealCard", (reponse) => this.game.handleDealCard(reponse));
-        // this.socket.on("notificate", (response, acknowledge) => this.handleNotificate(response, acknowledge));
+        this.socket.on("notificate", (response) => this.game.handleNotificate(response));
         // this.socket.on("getDecision", (response, acknowledgement) => this.handleGetDecision(response, acknowledgement));
-        // this.socket.on("finishRound", (response) => this.handleFinishRound(response));
+        this.socket.on("finishRound", (response) => this.game.handleFinishRound(response));
 
         makeAutoObservable(this);
     }

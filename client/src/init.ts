@@ -22,5 +22,3 @@ export const { connection, game } = (
             connection, game,
         };
     }());
-
-// export const controller = new Controller(game);

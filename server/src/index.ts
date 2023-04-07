@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { isError } from './utils/isError.js';
 import { Store } from './store/Store.class.js';
-import { actionSchema, betSchema, playerSchema, roomSchema } from './utils/validation.js';
+import { actionSchema, betSchema, playerSchema, roomSchema, yesNoResponseSchema } from './utils/validation.js';
 import { ClientToServerEvents, ServerToClientEvents } from './types/socketTypes.js';
 import { SinglePlayerController } from './instances/SinglePlayerController.js';
 import { PlayersStore } from './store/PlayersStore.class.js';
@@ -76,6 +76,20 @@ io.on('connection', (socket) => {
         throw new Error('Invalid parameter');
       }
       controller.handlePlaceBet({ roomID, playerID, bet });
+      console.log(`Socket ${socket.id} placed bet`);
+    } catch (e: unknown) {
+      console.log(isError(e) ? e.message : `Socket ${socket.id} failed to place bet`);
+    }
+  });
+  socket.on('takeMoneyDecision', ({ roomID, playerID, response }) => {
+    try {
+      const { error: roomSchemaError } = roomSchema.validate(playerID);
+      const { error: playerSchemaError } = playerSchema.validate(playerID);
+      const { error: responseSchemaError } = yesNoResponseSchema.validate(response);
+      if (roomSchemaError || playerSchemaError || responseSchemaError) {
+        throw new Error('Invalid parameter');
+      }
+      controller.handleTakeMoneyDecision({ roomID, playerID, response });
       console.log(`Socket ${socket.id} placed bet`);
     } catch (e: unknown) {
       console.log(isError(e) ? e.message : `Socket ${socket.id} failed to place bet`);

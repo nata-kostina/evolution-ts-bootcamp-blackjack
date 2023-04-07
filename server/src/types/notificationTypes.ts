@@ -1,5 +1,3 @@
-import { NotificationKind } from '../constants/notifications';
-
 export enum NotificationVariant {
   PlaceBet = 'place-bet',
   MakeDecision = 'make-decision',
@@ -18,7 +16,6 @@ export enum NotificationVariant {
   Move = 'move',
 }
 export type Notification = {
-  kind: NotificationKind;
   variant: NotificationVariant;
   text: string;
 };

@@ -18,19 +18,17 @@ export interface ServerToClientEvents {
     response: SocketResponse<GameSession>,
     acknowledgement: (err: any, responses: Acknowledgment<Action>[]) => Promise<void>
   ) => void;
-  notificate: (
-    response: SocketResponse<Notification>,
-    ack?: (err: any, responses: Acknowledgment<YesNoAcknowledgement>[]) => void
-  ) => void;
+  notificate: (response: SocketResponse<Notification>) => void;
   updateSession: (response: SocketResponse<GameSession>) => void;
   finishRound: (response: SocketResponse<GameSession>) => void;
 }
 
 export interface ClientToServerEvents {
-    startGame: ({ playerID, mode }: { playerID: PlayerID; mode: GameMode; }) => void;
-  finishGame: ({roomID, playerID}: SpecificID) => void;
-  placeBet: ({ roomID, playerID, bet }: SpecificID & { bet: Bet; }) => void;
-  makeDecision: ({ roomID, playerID, action }: SpecificID & { action: Action; }) => void;
+  startGame: ({ playerID, mode }: { playerID: PlayerID; mode: GameMode }) => void;
+  finishGame: ({ roomID, playerID }: SpecificID) => void;
+  placeBet: ({ roomID, playerID, bet }: SpecificID & { bet: Bet }) => void;
+  makeDecision: ({ roomID, playerID, action }: SpecificID & { action: Action }) => void;
+  takeMoneyDecision: ({ roomID, playerID }: SpecificID & { response: YesNoAcknowledgement }) => void;
 }
 
 export type ClientPayload<T extends keyof ClientToServerEvents> = Parameters<ClientToServerEvents[T]>[0];
@@ -57,7 +55,10 @@ export type SpecificID = {
   readonly playerID: PlayerID;
 };
 
-export type YesNoAcknowledgement = 'yes' | 'no';
+export enum YesNoAcknowledgement {
+    Yes = 'yes',
+    No = 'no'
+}
 
 export enum GameMode {
   Single = 'single',

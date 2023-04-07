@@ -13,6 +13,8 @@ import { DealerSeatCanvasElement } from "./DealerSeat.canvas.element copy";
 import { GameMatrix } from "../GameMatrix";
 import { ChipSetCanvasElement } from "./ChipSet.canvas.element";
 import { Controller } from "../Controller";
+import { BlackjackNotificationCanvasElement } from "./BlackjackNotification.canvas.element";
+import { isHoleCard } from "../../utils/gameUtils/isHoleCard";
 
 export class SceneCanvasElement {
     public playerSeat: PlayerSeatCanvasElement;
@@ -22,6 +24,7 @@ export class SceneCanvasElement {
     private readonly gameMatrix: GameMatrix;
 
     public constructor(base: CanvasBase, matrix: GameMatrix, controller: Controller) {
+        console.log("SCENE CONSTRUCTOR");
         this.base = base;
         this.gameMatrix = matrix;
         this.addContent();
@@ -54,26 +57,6 @@ export class SceneCanvasElement {
                 //     this.chipSet.addContent();
                 // }
             }
-
-            // const card = new CardCanvasElement(this.base);
-            // card.addContent();
-            // const chip = new ChipCanvasElement(this.base);
-            // chip.addContent();
-            // const ground = MeshBuilder.CreateGround(
-            //     "ground",
-            //     { width: 4, height: 4 },
-            //     this.scene,
-            // );
-            // ground.parent = this.camera;
-            // const groundMaterial = new BackgroundMaterial(
-            //     "ground-material",
-            //     this.scene,
-            // );
-            // groundMaterial.diffuseTexture = new Texture(
-            //     Background,
-            // );
-            // ground.material = groundMaterial;
-            // console.log("add ground");
         });
     }
 
@@ -84,13 +67,22 @@ export class SceneCanvasElement {
 
     public dealDealerCard(newCard: NewCard): void {
         this.dealerSeat.dealCard(newCard.card);
-        // if (!isHoleCard(newCard.card)) {
-        //     this.dealerSeat.updatePoints(newCard.points);
-        // }
+        if (!isHoleCard(newCard.card)) {
+            this.dealerSeat.updatePoints(newCard.points);
+        }
     }
 
     public toggleChipAction(register: boolean): void {
         this.chipSet.toggleChipAction(register);
+    }
+
+    public addBlackjackNotification(): void {
+        const notification = new BlackjackNotificationCanvasElement(this.base);
+    }
+
+    public removeCards(): void {
+        this.playerSeat.removeCards();
+        this.dealerSeat.removeCards();
     }
 
     private async boot(): Promise<void> {}

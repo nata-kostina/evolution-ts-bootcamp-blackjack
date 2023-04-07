@@ -1,27 +1,24 @@
 import {
-    BackgroundMaterial,
-    MeshBuilder,
-    Texture,
     Vector3,
 } from "@babylonjs/core";
 import { CanvasBase } from "../CanvasBase";
-import { Card, Cell, HoleCard } from "../../types/types";
-import { ImgPath } from "../../constants/imgPaths.constants";
+import { Card, CardAnimation, HoleCard } from "../../types/types";
 import { PointsCanvasElement } from "./Points.canvas.element";
 import { GameMatrix } from "../GameMatrix";
-import { getDealCardAnimation } from "../utils/animation/card.animation";
+import { CardCanvasElement } from "./Card.canvas.element";
 
 export class SeatBaseCanvasElement {
     private readonly base: CanvasBase;
     private position: Vector3;
-    private cards: Array<Card | HoleCard> = [];
-    private points = 0;
+    private cards: Array<CardCanvasElement> = [];
     private pointsElement: PointsCanvasElement | null = null;
     private matrix: GameMatrix;
+    private playerType: "player" | "dealer";
 
-    public constructor(base: CanvasBase, matrix: GameMatrix, type: Cell) {
+    public constructor(base: CanvasBase, matrix: GameMatrix, playerType: "player" | "dealer") {
         this.base = base;
         this.matrix = matrix;
+        this.playerType = playerType;
 
         const mtx = matrix.getMatrix();
         const mtxSize = matrix.getMatrixSize();
@@ -29,7 +26,7 @@ export class SeatBaseCanvasElement {
         const cellHeight = matrix.getCellHeight();
         const matrixWidth = matrix.getMatrixWidth();
         const matrixHeight = matrix.getMatrixHeight();
-        const index = mtx.indexOf(type);
+        const index = mtx.indexOf(playerType === "player" ? "player-seat" : "dealer-seat");
 
         const row = Math.floor(index / mtxSize);
         const column = index % mtxSize;
@@ -41,34 +38,21 @@ export class SeatBaseCanvasElement {
     }
 
     public dealCard(card: Card | HoleCard): void {
-        const box = MeshBuilder.CreateGround("box", { width: 0.3, height: 0.5 }, this.base.scene);
-        box.rotation.x = -Math.PI * 0.5;
-        box.position.z = -this.cards.length * 0.1;
-
-        const boxMaterial = new BackgroundMaterial("material", this.base.scene);
-        if (isHoleCard(card)) {
-            // this.holeCard
-            boxMaterial.diffuseTexture = new Texture(ImgPath.Hole);
-            // boxMaterial.diffuseTexture.hasAlpha = true;
-        }
-        if (isNormalCard(card)) {
-            boxMaterial.diffuseTexture = new Texture(ImgPath[`${card.value}${card.suit}`]);
-        }
-        // boxMaterial.diffuseTexture.hasAlpha = true;
-        box.material = boxMaterial;
-
-        const matrixWidth = this.matrix.getMatrixWidth();
-        const matrixHeight = this.matrix.getMatrixHeight();
-        const { frameRate, animationArray } = getDealCardAnimation(matrixWidth, matrixHeight, this.position, this.cards.length);
-
-        this.base.scene.beginDirectAnimation(box, animationArray, 0, frameRate, false, 3);
-
-        this.cards.push(card);
+        const cardElement = new CardCanvasElement(this.base, this.matrix, new Vector3(
+            this.position.x + this.cards.length * 0.13,
+            this.position.y,
+            0,
+        ), card);
+        this.cards.push(cardElement);
+        cardElement.animate(CardAnimation.Deal);
     }
 
     public updatePoints(points: number): void {
         if (!this.pointsElement) {
-            this.pointsElement = new PointsCanvasElement(this.base, "player-points", this.matrix);
+            this.pointsElement = new PointsCanvasElement(
+                this.base,
+                this.playerType === "player" ? "player-points" : "dealer-points",
+                this.matrix);
         }
         this.pointsElement.update(points);
     }
@@ -77,18 +61,16 @@ export class SeatBaseCanvasElement {
         return this.base;
     }
 
-    public getCards(): Array<Card | HoleCard> {
-        return this.cards;
-    }
-}
+    // public getCards(): Array<Card | HoleCard> {
+    //     return this.cards;
+    // }
 
-export function isHoleCard(
-    card: Card | HoleCard,
-): card is HoleCard {
-    return card.id === "hole";
-}
-export function isNormalCard(
-    card: Card | HoleCard,
-): card is Card {
-    return (card as Card).suit !== undefined;
+    public removeCards(): void {
+        this.cards.forEach((card) => card.animate(CardAnimation.Remove));
+        this.cards = [];
+        if (this.pointsElement) {
+            this.pointsElement.dispose();
+            this.pointsElement = null;
+        }
+    }
 }

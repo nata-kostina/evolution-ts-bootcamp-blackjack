@@ -7,14 +7,21 @@
     --controlItemImgInnerWidth: calc((var(--controlItemWidth) - 2*var(--controlItemImgBorder)) / 1.4);
     --controlItemTextHeight: 30px;
 
+    --goldBorder:  linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+
     --balanceContainerWidth: 200px;
     --balanceContainerHeight: 50px;
 
     --betActionWidth: 50px;
     --betActionBorder: 2px;
     --betActionImgInnerWidth: calc((var(--betActionWidth) - 2*var(--betActionBorder)) / 1.4);
+
+    --helperSize: 50px;
   }
 
+* {
+    box-sizing: border-box; 
+}
 
 body {
   margin: 0;
