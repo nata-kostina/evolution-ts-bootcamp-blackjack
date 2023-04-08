@@ -1,4 +1,4 @@
-import { SuccessResponse } from "../types/socketTypes.js";
+import { SuccessResponse } from "../types";
 
 export const successResponse = <T>(payload: T): SuccessResponse<T> => {
   return {

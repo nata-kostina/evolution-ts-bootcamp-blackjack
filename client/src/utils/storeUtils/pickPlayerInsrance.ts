@@ -1,5 +1,4 @@
-import { PlayerID } from "../../types/socketTypes";
-import { PlayerInstance } from "../../types/types";
+import { PlayerID, PlayerInstance } from "../../types/game.types";
 
 type PickPlayerInstanceFn = (payload: { playerID: PlayerID; players: Record<PlayerID, PlayerInstance>; }) => PlayerInstance;
 

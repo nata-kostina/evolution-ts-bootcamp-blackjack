@@ -12,9 +12,9 @@ import {
     Vector3,
 } from "@babylonjs/core";
 import { CanvasBase } from "../CanvasBase";
-import { ChipItem } from "../../types/types";
 import { chipRadius } from "../../constants/canvas.constants";
 import { Controller } from "../Controller";
+import { ChipItem } from "../../types/game.types";
 
 export class ChipCanvasElement {
     private skin: Mesh;
@@ -31,7 +31,7 @@ export class ChipCanvasElement {
             },
             (() => {
                 controller.addBet(this.chip.value);
-                // game.ui.addBet(this.chip.value);
+                // game.UI.addBet(this.chip.value);
             }),
         );
         this.skin = MeshBuilder.CreateDisc("chip", { radius: chipRadius }, this.base.scene);

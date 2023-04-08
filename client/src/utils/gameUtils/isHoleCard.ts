@@ -1,4 +1,4 @@
-import { Card, HoleCard } from "../../types/types";
+import { Card, HoleCard } from "../../types/game.types";
 
 export function isHoleCard(
     card: Card | HoleCard,

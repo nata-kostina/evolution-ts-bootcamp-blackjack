@@ -4,7 +4,7 @@ import {
     Vector3,
 } from "@babylonjs/core";
 import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui/2D";
-import { Cell } from "../../types/types";
+import { Cell } from "../../types/canvas.types";
 import { CanvasBase } from "../CanvasBase";
 import { GameMatrix } from "../GameMatrix";
 

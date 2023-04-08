@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from "react";
 import { game } from "../init";
-import { Game } from "../store/Game";
-import { ContextProviderProps } from "../types/types";
+import { Game } from "../stores/Game";
+import { ContextProviderProps } from "../types/context.types";
 
 const GameContext = createContext<Game>(game);
 

@@ -2,10 +2,8 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import {
-    BackgroundMaterial,
     MeshBuilder,
     Texture,
-    GroundMesh,
     Vector3,
     StandardMaterial,
     Vector4,
@@ -18,10 +16,11 @@ import {
     getRemoveCardAnimation,
     getUnholeCardAnimation,
 } from "../utils/animation/card.animation";
-import { Card, CardAnimation, HoleCard } from "../../types/types";
 import { assertUnreachable } from "../../utils/assertUnreachable";
 import { GameMatrix } from "../GameMatrix";
 import { isHoleCard, isNormalCard } from "../../utils/gameUtils/isHoleCard";
+import { CardAnimation } from "../../types/canvas.types";
+import { Card, HoleCard } from "../../types/game.types";
 
 export class CardCanvasElement {
     private readonly base: CanvasBase;
@@ -49,9 +48,9 @@ export class CardCanvasElement {
 
         const faceUV: Array<Vector4> = [];
 
-        for (let i = 0; i < 6; i++) {
-            faceUV[i] = new Vector4(i / columns, 0, (i + 1) / columns, 1 / rows);
-        }
+        // for (let i = 0; i < 6; i++) {
+        //     faceUV[i] = new Vector4(i / columns, 0, (i + 1) / columns, 1 / rows);
+        // }
 
         // if (this.isHoleCard) {
         //     const temp: Vector4 = faceUV[0];
@@ -94,16 +93,19 @@ export class CardCanvasElement {
         // this.skin.material = cardMaterial;
     }
 
-    public animate(type: CardAnimation): void {
+    public animate(type: CardAnimation, onFinish?: () => void): void {
         const matrixWidth = this.matrix.getMatrixWidth();
         const matrixHeight = this.matrix.getMatrixHeight();
         switch (type) {
             case CardAnimation.Deal:
                 const { frameRate, animationArray } = getDealCardAnimation(matrixWidth, matrixHeight, this.finalPosition);
                 this.base.scene.beginDirectAnimation(this.skin, animationArray, 0, frameRate, false, 3, () => {
-                    if (!this.isHoleCard) {
-                        this.animate(CardAnimation.Unhole);
+                    if (onFinish) {
+                        onFinish();
                     }
+                    // if (!this.isHoleCard) {
+                    //     this.animate(CardAnimation.Unhole);
+                    // }
                 });
                 break;
             case CardAnimation.Remove:

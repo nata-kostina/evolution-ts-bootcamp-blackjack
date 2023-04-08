@@ -2,8 +2,9 @@
 import { CanvasBase } from "../CanvasBase";
 import { SeatBaseCanvasElement } from "./SeatBase.canvas.element";
 import { GameMatrix } from "../GameMatrix";
-import { Card, CardAnimation } from "../../types/types";
 import { CardCanvasElement } from "./Card.canvas.element";
+import { Card } from "../../types/game.types";
+import { CardAnimation } from "../../types/canvas.types";
 
 export class DealerSeatCanvasElement extends SeatBaseCanvasElement {
     public constructor(base: CanvasBase, matrix: GameMatrix) {

@@ -1,8 +1,7 @@
 import { store } from '../index.js';
-import { SpecificID } from '../types/socketTypes.js';
-import { Card, CardValue } from '../types/gameTypes.js';
-import { TenSet, PointsMap, TWENTY_ONE, TEN, NINE } from '../constants/cards.js';
-import { ELEVEN } from './../constants/cards.js';
+import { TenSet, PointsMap, TWENTY_ONE, TEN, NINE } from '../constants/cards.constants.js';
+import { ELEVEN } from '../constants/cards.constants.js';
+import { Card, CardValue, SpecificID } from '../types/index.js';
 
 type Handler = {
   takeCardFromDeck: (deck: Card[]) => { card: Card; updatedDeck: Card[] };

@@ -7,7 +7,7 @@ import { TbTriangleInvertedFilled } from "react-icons/tb";
 import styles from "./styles.module.css";
 import { useGame } from "../../context/GameContext";
 import { useAction } from "./useAction";
-import { ActionBtn } from "../../types/types";
+import { ActionBtn } from "../../types/ui.types";
 
 interface Props {
     item: ActionBtn;
@@ -16,8 +16,8 @@ interface Props {
 export const ActionButton = observer(({ item }: Props) => {
     const { handleClick } = useAction();
     const game = useGame();
-    const disabled = game.ui.isPlayerActionBtnDisabled(item.action);
-    const helperEnabled = game.ui.helperTarget.includes(item.action);
+    const disabled = game.UI.isPlayerActionBtnDisabled(item.action);
+    // const helperEnabled = game.UI.helperTarget.includes(item.action);
 
     return (
         <button
@@ -26,7 +26,7 @@ export const ActionButton = observer(({ item }: Props) => {
             onClick={() => handleClick(item.action)}
             disabled={disabled}
         >
-            <div className={styles.helper} style={{ display: helperEnabled ? "block" : "none" }}>
+            <div className={styles.helper} style={{ display: "none" }}>
                 <svg width="50px" height="50px">
                     <defs>
                         <linearGradient

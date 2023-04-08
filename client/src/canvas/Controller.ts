@@ -1,5 +1,5 @@
-import { UIStore } from "../store/ui/UIstore";
-import { Action, Bet } from "../types/types";
+import { UIStore } from "../stores/UIstore";
+import { Action, Bet } from "../types/game.types";
 
 export class Controller {
     private readonly uiStore: UIStore;

@@ -1,6 +1,5 @@
 import Joi from 'joi';
-import { Action } from '../types/gameTypes.js';
-import { YesNoAcknowledgement } from '../types/socketTypes.js';
+import { Action, YesNoAcknowledgement } from '../types';
 
 export const roomSchema = Joi.string();
 export const playerSchema = Joi.string();

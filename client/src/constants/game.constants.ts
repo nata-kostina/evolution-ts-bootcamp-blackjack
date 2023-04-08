@@ -1,11 +1,5 @@
 import uuid from "react-uuid";
-import {
-    ChipItem,
-    ActionBtn,
-    Action,
-    BetAction,
-    BetActionBtn,
-} from "../types/types";
+
 import Chip1 from "../assets/img/chips/chip_1.png";
 import Chip5 from "../assets/img/chips/chip_5.png";
 import Chip10 from "../assets/img/chips/chip_10.png";
@@ -20,6 +14,8 @@ import InsuranceSVG from "../assets/img/actions/insurance.svg";
 import BetSVG from "../assets/img/actions/bet.svg";
 import UndoSVG from "../assets/img/actions/undo.svg";
 import ResetSVG from "../assets/img/actions/reset.svg";
+import { Action, ChipItem, BetAction } from "../types/game.types";
+import { ActionBtn, BetActionBtn } from "../types/ui.types";
 
 export const chipSet: ChipItem[] = [
     {

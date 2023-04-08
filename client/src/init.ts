@@ -2,9 +2,9 @@ import { CanvasBase } from "./canvas/CanvasBase";
 import { SceneCanvasElement } from "./canvas/canvasElements/Scene.canvas.element";
 import { Controller } from "./canvas/Controller";
 import { serverURL } from "./constants/connection.constants";
-import { Connection } from "./store/Connection";
-import { Game } from "./store/Game";
-import { UIStore } from "./store/ui/UIstore";
+import { Connection } from "./stores/Connection";
+import { Game } from "./stores/Game";
+import { UIStore } from "./stores/UIstore";
 
 export const { connection, game } = (
     function init(): { connection: Connection; game: Game; } {
@@ -15,10 +15,10 @@ export const { connection, game } = (
         const matrix = canvas.getGameMatrix();
         const scene = new SceneCanvasElement(canvas, matrix, controller);
 
-        const game = new Game(canvas, uiStore, scene);
-        const connection = new Connection(serverURL, game);
+        const newGame = new Game(canvas, uiStore, scene);
+        const newConnection = new Connection(serverURL, newGame);
 
         return {
-            connection, game,
+            connection: newConnection, game: newGame,
         };
     }());

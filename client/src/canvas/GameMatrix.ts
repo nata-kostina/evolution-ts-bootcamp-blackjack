@@ -1,22 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { CanvasElement, Cell } from "../types/types";
 
-const SceneMatrix: Cell[] = [
-    "0", "0", "0", "dealer-points", "0", "0", "0",
-    "chips", "0", "0", "dealer-seat", "0", "0", "0",
-    "0", "0", "0", "0", "0", "0", "0",
-    "0", "0", "player-points", "player-seat", "0", "0", "0",
-    "0", "0", "0", "bet", "0", "0", "0",
-    "0", "0", "0", "0", "0", "0", "0",
-    "0", "0", "0", "0", "0", "0", "0",
-    "0", "0", "0", "0", "0", "0", "0",
-    "0", "0", "0", "0", "0", "0", "0",
-
-];
-const matrixSize = 7;
-const matrixWidth = 3.5;
-const matrixHeight = 2.5;
-const cellSize = matrixWidth / matrixSize;
+import { CanvasElement, Cell } from "../types/canvas.types";
 
 export class GameMatrix {
     private width: number;

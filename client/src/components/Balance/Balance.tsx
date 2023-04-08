@@ -6,7 +6,7 @@ import styles from "./styles.module.css";
 
 export const Balance = observer(() => {
     const game = useGame();
-    const player = game.ui.getPlayer();
+    const player = game.UI.player;
     return (
         <div className={styles.balanceContainer}>
             {player && (

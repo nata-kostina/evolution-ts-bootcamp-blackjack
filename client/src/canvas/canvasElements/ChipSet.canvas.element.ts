@@ -10,8 +10,8 @@ import { chipRadius } from "../../constants/canvas.constants";
 import { GameMatrix } from "../GameMatrix";
 import { chipSet } from "../../constants/game.constants";
 import { ChipCanvasElement } from "./Chip.canvas.element";
-import { CanvasElement, MatrixProps } from "../../types/types";
 import { Controller } from "../Controller";
+import { CanvasElement, MatrixProps } from "../../types/canvas.types";
 
 export class ChipSetCanvasElement implements CanvasElement {
     private chipSet: Array<ChipCanvasElement> = [];

@@ -1,11 +1,11 @@
-import {
-    Vector3,
-} from "@babylonjs/core";
+import { Vector3 } from "@babylonjs/core";
 import { CanvasBase } from "../CanvasBase";
-import { Card, CardAnimation, HoleCard } from "../../types/types";
 import { PointsCanvasElement } from "./Points.canvas.element";
 import { GameMatrix } from "../GameMatrix";
 import { CardCanvasElement } from "./Card.canvas.element";
+import { isNormalCard } from "../../utils/gameUtils/isHoleCard";
+import { NewCard } from "../../types/game.types";
+import { CardAnimation } from "../../types/canvas.types";
 
 export class SeatBaseCanvasElement {
     private readonly base: CanvasBase;
@@ -37,14 +37,18 @@ export class SeatBaseCanvasElement {
         );
     }
 
-    public dealCard(card: Card | HoleCard): void {
+    public dealCard(newCard: NewCard): void {
         const cardElement = new CardCanvasElement(this.base, this.matrix, new Vector3(
             this.position.x + this.cards.length * 0.13,
             this.position.y,
             this.position.z - this.cards.length * 0.1,
-        ), card);
+        ), newCard.card);
         this.cards.push(cardElement);
-        cardElement.animate(CardAnimation.Deal);
+        cardElement.animate(CardAnimation.Deal, () => {
+            if (isNormalCard(newCard.card)) {
+                this.updatePoints(newCard.points);
+            }
+        });
     }
 
     public updatePoints(points: number): void {

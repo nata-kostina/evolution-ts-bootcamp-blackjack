@@ -1,20 +1,14 @@
-/* eslint-disable no-trailing-spaces */
-/* eslint-disable max-len */
-/* eslint-disable @typescript-eslint/prefer-for-of */
-/* eslint-disable import/no-cycle */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { Vector3 } from "@babylonjs/core";
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { CanvasBase } from "../CanvasBase";
-import { Card, NewCard, UnholeCardPayload } from "../../types/types";
 import { PlayerSeatCanvasElement } from "./PlayerSeat.canvas.element";
 import { DealerSeatCanvasElement } from "./DealerSeat.canvas.element copy";
 import { GameMatrix } from "../GameMatrix";
 import { ChipSetCanvasElement } from "./ChipSet.canvas.element";
 import { Controller } from "../Controller";
 import { BlackjackNotificationCanvasElement } from "./BlackjackNotification.canvas.element";
-import { isHoleCard } from "../../utils/gameUtils/isHoleCard";
+import { UnholeCardPayload } from "../../types/canvas.types";
+import { NewCard } from "../../types/game.types";
 
 export class SceneCanvasElement {
     public playerSeat: PlayerSeatCanvasElement;
@@ -36,40 +30,38 @@ export class SceneCanvasElement {
 
     public addContent(): void {
         this.boot().then(() => {
-            const matrix = this.gameMatrix.getMatrix();
-            const matrixSize = this.gameMatrix.getMatrixSize();
-            const cellWidth = this.gameMatrix.getCellWidth();
-            const cellHeight = this.gameMatrix.getCellHeight();
-            const matrixWidth = this.gameMatrix.getMatrixWidth();
-            const matrixHeight = this.gameMatrix.getMatrixHeight();
-        
-            for (let i = 0; i < matrix.length; i++) {
-                const cellType = matrix[i];
-                const row = Math.floor(i / matrixSize);
-                const column = i % matrixSize;
-                const position = new Vector3(
-                    -matrixWidth * 0.5 + cellWidth * 0.5 + cellWidth * column,
-                    matrixHeight * 0.5 - (cellHeight * 0.5 + cellHeight * row),
-                    0,
-                );
-                // console.log(`Row: ${row}, Column: ${column}, position: ${position}`);
-                // if (cellType === "chips") {
-                //     this.chipSet.addContent();
-                // }
-            }
+            // const matrix = this.gameMatrix.getMatrix();
+            // const matrixSize = this.gameMatrix.getMatrixSize();
+            // const cellWidth = this.gameMatrix.getCellWidth();
+            // const cellHeight = this.gameMatrix.getCellHeight();
+            // const matrixWidth = this.gameMatrix.getMatrixWidth();
+            // const matrixHeight = this.gameMatrix.getMatrixHeight();
+
+            // for (let i = 0; i < matrix.length; i++) {
+            //     const cellType = matrix[i];
+            //     const row = Math.floor(i / matrixSize);
+            //     const column = i % matrixSize;
+            //     const position = new Vector3(
+            //         -matrixWidth * 0.5 + cellWidth * 0.5 + cellWidth * column,
+            //         matrixHeight * 0.5 - (cellHeight * 0.5 + cellHeight * row),
+            //         0,
+            //     );
+            // }
         });
     }
 
     public dealPlayerCard(newCard: NewCard): void {
-        this.playerSeat.dealCard(newCard.card as Card);
-        this.playerSeat.updatePoints(newCard.points);
+        this.playerSeat.dealCard(newCard);
+        // this.playerSeat.updatePoints(newCard.points);
     }
 
     public dealDealerCard(newCard: NewCard): void {
-        this.dealerSeat.dealCard(newCard.card);
-        if (!isHoleCard(newCard.card)) {
-            this.dealerSeat.updatePoints(newCard.points);
-        }
+        this.dealerSeat.dealCard(newCard);
+        // , () => {
+        //     if (!isHoleCard(newCard.card)) {
+        //         this.dealerSeat.updatePoints(newCard.points);
+        //     }
+        // });
     }
 
     public toggleChipAction(register: boolean): void {

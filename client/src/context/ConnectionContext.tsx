@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from "react";
 import { connection } from "../init";
-import { Connection } from "../store/Connection";
-import { ContextProviderProps } from "../types/types";
+import { Connection } from "../stores/Connection";
+import { ContextProviderProps } from "../types/context.types";
 
 const ConnectionContext = createContext<Connection>(connection);
 
