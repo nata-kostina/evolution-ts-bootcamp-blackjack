@@ -12,7 +12,7 @@ import {
 } from '../constants/notifications.js';
 import { io, playersStore, store } from '../index.js';
 import { Controller, DealSingleCard } from '../types.js';
-import { PlayerID, GameSession, RoomID, CardValue, WinCoefficient, Action } from '../types/gameTypes.js';
+import { PlayerID, GameSession, RoomID, CardValue, WinCoefficient, Action, Suit } from '../types/gameTypes.js';
 import { Notification } from '../types/notificationTypes.js';
 import { Acknowledgment, SpecificID, YesNoAcknowledgement } from '../types/socketTypes.js';
 import { CardsHandler } from '../utils/CardsHandler.js';
@@ -106,53 +106,53 @@ export class MultiPlayersController {
                     event: 'placeBet',
                     response: [
                       successResponse<GameSession>(ld.cloneDeep(store.getSession(roomID))),
-                      async (err, responses) => {
-                          if (responses) {
-                              console.log(responses)
-                          }
-                        // if (responses) {
-                        //   const playerResponse = responses.find((response) => response.playerID === playerID);
-                        //   if (playerResponse && playerResponse.ack > 0) {
-                        //       const bet = playerResponse.ack;
-                        //       const player = store.getPlayer({ roomID, playerID });
+                    //   async (err, responses) => {
+                    //       if (responses) {
+                    //           console.log(responses)
+                    //       }
+                    //     // if (responses) {
+                    //     //   const playerResponse = responses.find((response) => response.playerID === playerID);
+                    //     //   if (playerResponse && playerResponse.ack > 0) {
+                    //     //       const bet = playerResponse.ack;
+                    //     //       const player = store.getPlayer({ roomID, playerID });
           
-                        //       store.updatePlayer({
-                        //         roomID,
-                        //         playerID,
-                        //         payload: { bet, balance: player.balance - bet },
-                        //       });
-                        //       await this.respond({
-                        //         roomID,
-                        //         event: 'updateSession',
-                        //         response: [successResponse<GameSession>(ld.cloneDeep(store.getSession(roomID)))],
-                        //       });
-                        //   }
-                        //   const thoseWhoPlacedBet = responses.filter((response) => response.ack > 0);
-                        //   if (thoseWhoPlacedBet.length === 0) {
-                        //     this.finishRound({ playerID, roomID });
-                        //   } else {
-                        //     for (let i = 0; i < thoseWhoPlacedBet.length; i++) {
-                        //       const bet = thoseWhoPlacedBet[i].ack;
-                        //       const player = store.getPlayer({ roomID, playerID: thoseWhoPlacedBet[i].playerID });
+                    //     //       store.updatePlayer({
+                    //     //         roomID,
+                    //     //         playerID,
+                    //     //         payload: { bet, balance: player.balance - bet },
+                    //     //       });
+                    //     //       await this.respond({
+                    //     //         roomID,
+                    //     //         event: 'updateSession',
+                    //     //         response: [successResponse<GameSession>(ld.cloneDeep(store.getSession(roomID)))],
+                    //     //       });
+                    //     //   }
+                    //     //   const thoseWhoPlacedBet = responses.filter((response) => response.ack > 0);
+                    //     //   if (thoseWhoPlacedBet.length === 0) {
+                    //     //     this.finishRound({ playerID, roomID });
+                    //     //   } else {
+                    //     //     for (let i = 0; i < thoseWhoPlacedBet.length; i++) {
+                    //     //       const bet = thoseWhoPlacedBet[i].ack;
+                    //     //       const player = store.getPlayer({ roomID, playerID: thoseWhoPlacedBet[i].playerID });
           
-                        //       store.updatePlayer({
-                        //         roomID,
-                        //         playerID: thoseWhoPlacedBet[i].playerID,
-                        //         payload: { bet, balance: player.balance - bet },
-                        //       });
-                        //       console.log(`${thoseWhoPlacedBet[i].playerID} was updated`);
-                        //       await this.respond({
-                        //         roomID,
-                        //         event: 'updateSession',
-                        //         response: [successResponse<GameSession>(ld.cloneDeep(store.getSession(roomID)))],
-                        //       });
-                        //     }
-                        //   }
-                        //   return resolve();
-                        // } else {
-                        //   throw new Error(`${playerID} failed to place a bet`);
-                        // }
-                      },
+                    //     //       store.updatePlayer({
+                    //     //         roomID,
+                    //     //         playerID: thoseWhoPlacedBet[i].playerID,
+                    //     //         payload: { bet, balance: player.balance - bet },
+                    //     //       });
+                    //     //       console.log(`${thoseWhoPlacedBet[i].playerID} was updated`);
+                    //     //       await this.respond({
+                    //     //         roomID,
+                    //     //         event: 'updateSession',
+                    //     //         response: [successResponse<GameSession>(ld.cloneDeep(store.getSession(roomID)))],
+                    //     //       });
+                    //     //     }
+                    //     //   }
+                    //     //   return resolve();
+                    //     // } else {
+                    //     //   throw new Error(`${playerID} failed to place a bet`);
+                    //     // }
+                    //   },
                     ],
                   });
             })
@@ -339,9 +339,7 @@ export class MultiPlayersController {
     await this.respond({
       roomID,
       event: 'notificate',
-      response: acknowledge
-        ? [successResponse<Notification>(notification), acknowledge]
-        : [successResponse<Notification>(notification)],
+      response: [successResponse<Notification>(notification)],
     });
   }
 
@@ -587,7 +585,7 @@ export class MultiPlayersController {
       store.updatePlayer({
         roomID,
         playerID,
-        payload: { cards: [{ id: 'sjfajo;', suit: 'clubs', value: CardValue.K }] },
+        payload: { cards: [{ id: 'sjfajo;', suit:  Suit.Clubs, value: CardValue.K }] },
       });
       const session = store.getSession(roomID);
       await this.respond({
@@ -689,7 +687,7 @@ export class MultiPlayersController {
         const { card, updatedDeck } = CardsHandler.takeCardFromDeck(deck);
         store.updateDeck({ roomID, deck: updatedDeck });
 
-        store.updateDealer({ roomID, payload: { cards: [{ id: 'sodjh', suit: 'hearts', value: CardValue.FOUR }] } });
+        store.updateDealer({ roomID, payload: { cards: [{ id: 'sodjh', suit:  Suit.Clubs, value: CardValue.FOUR }] } });
         await this.respond({
           event: 'updateSession',
           roomID,
@@ -809,7 +807,7 @@ export class MultiPlayersController {
       playerID: player0.playerID,
       roomID,
       payload: {
-        cards: [{ id: '1sd23', suit: 'clubs', value: CardValue.TEN }],
+        cards: [{ id: '1sd23', suit:  Suit.Clubs, value: CardValue.TEN }],
       },
     });
     await this.respond({
@@ -823,7 +821,7 @@ export class MultiPlayersController {
       playerID: player1.playerID,
       roomID,
       payload: {
-        cards: [{ id: 'argv', suit: 'clubs', value: CardValue.TEN }],
+        cards: [{ id: 'argv', suit:  Suit.Clubs, value: CardValue.TEN }],
       },
     });
     await this.respond({
@@ -836,7 +834,7 @@ export class MultiPlayersController {
       roomID,
       payload: {
         hasHoleCard: false,
-        cards: [{ id: '1faf', suit: 'clubs', value: CardValue.Q }],
+        cards: [{ id: '1faf', suit:  Suit.Clubs, value: CardValue.Q }],
       },
     });
     await this.respond({
@@ -851,7 +849,7 @@ export class MultiPlayersController {
       playerID: player2.playerID,
       roomID,
       payload: {
-        cards: [{ id: '1sdыам23', suit: 'clubs', value: CardValue.Q }],
+        cards: [{ id: '1sdыам23', suit:  Suit.Clubs, value: CardValue.Q }],
       },
     });
     await this.respond({
@@ -866,7 +864,7 @@ export class MultiPlayersController {
       playerID: player3.playerID,
       roomID,
       payload: {
-        cards: [{ id: 'aваскrgv', suit: 'clubs', value: CardValue.EIGHT }],
+        cards: [{ id: 'aваскrgv', suit:  Suit.Clubs, value: CardValue.EIGHT }],
       },
     });
     await this.respond({
@@ -880,7 +878,7 @@ export class MultiPlayersController {
       roomID,
       payload: {
         hasHoleCard: true,
-        holeCard: { id: 'wegtq', suit: 'hearts', value: CardValue.EIGHT },
+        holeCard: { id: 'wegtq', suit: Suit.Clubs, value: CardValue.EIGHT },
       },
     });
     await this.respond({

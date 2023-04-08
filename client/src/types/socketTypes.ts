@@ -7,6 +7,7 @@ import {
     NewCard,
     Action,
     YesNoAcknowledgement,
+    UnholeCardPayload,
 } from "./types";
 
 export interface ServerToClientEvents {
@@ -20,6 +21,8 @@ export interface ServerToClientEvents {
         response: SocketResponse<GameSession>,
         acknowledgement: (responses: Acknowledgment<Action>) => void
     ) => void;
+    unholeCard: (response: SocketResponse<UnholeCardPayload>) => void;
+
 }
 
 export interface ClientToServerEvents {

@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Vector3 } from "@babylonjs/core";
 import { CanvasBase } from "../CanvasBase";
-import { Card, NewCard } from "../../types/types";
+import { Card, NewCard, UnholeCardPayload } from "../../types/types";
 import { PlayerSeatCanvasElement } from "./PlayerSeat.canvas.element";
 import { DealerSeatCanvasElement } from "./DealerSeat.canvas.element copy";
 import { GameMatrix } from "../GameMatrix";
@@ -83,6 +83,11 @@ export class SceneCanvasElement {
     public removeCards(): void {
         this.playerSeat.removeCards();
         this.dealerSeat.removeCards();
+    }
+
+    public unholeCard(payload: UnholeCardPayload): void {
+        this.dealerSeat.unholeCard(payload.card);
+        this.dealerSeat.updatePoints(payload.points);
     }
 
     private async boot(): Promise<void> {}

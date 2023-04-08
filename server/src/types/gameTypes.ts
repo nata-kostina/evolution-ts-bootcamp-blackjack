@@ -26,7 +26,7 @@ export type PlayerInstance = {
   bet: number;
   balance: number;
   points: number;
-  insurance?: number;
+  insurance: number;
   availableActions: Action[],
 };
 export type DealerInstance = {

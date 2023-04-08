@@ -188,7 +188,7 @@ export class Store {
     }
   }
 
-  public unholeCard(roomID: RoomID) {
+  public unholeCard(roomID: RoomID): void {
     try {
       const dealer = this.getDealer(roomID);
       const { holeCard, hasHoleCard } = dealer;
@@ -220,7 +220,7 @@ export class Store {
     try {
       const game = this.getGame(roomID);
       const player = this.getPlayer({ playerID, roomID });
-      const updatedPlayer: PlayerInstance = { ...player, cards: [], bet: 0, points: 0, insurance: undefined };
+      const updatedPlayer: PlayerInstance = { ...player, cards: [], bet: 0, points: 0, insurance: 0 };
 
       game.players[player.playerID] = updatedPlayer;
     } catch (e: unknown) {
@@ -259,7 +259,7 @@ export class Store {
         cards: [],
         bet: 0,
         points: 0,
-        insurance: undefined,
+        insurance: 0,
         availableActions: [],
       };
 

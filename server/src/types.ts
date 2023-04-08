@@ -50,7 +50,7 @@ export interface Controller {
 //   waitPlayersToPlaceBet: ({ roomID, playerID }: SpecificID) => Promise<void>;
   checkForBlackjack({ playerID, roomID }: SpecificID): Promise<void>;
   handleBlackjack({ playerID, roomID }: SpecificID): Promise<void>;
-  checkDealerFirstCard({roomID, playerID}: SpecificID): Promise<void>;
+  checkDealerFirstCard({roomID, playerID}: SpecificID): boolean;
   placeInsurance({ playerID, roomID }: SpecificID): void;
   checkForDouble({roomID, playerID}: SpecificID): Promise<void>;
   playWithSinglePlayer({ playerID, roomID }: SpecificID): Promise<void>;
@@ -77,3 +77,9 @@ export type NewCard = {
     card: Card | HoleCard,
     points: number,
 }
+
+export type UnholeCardPayload = {
+    target: "dealer";
+    card: Card;
+    points: number;
+};

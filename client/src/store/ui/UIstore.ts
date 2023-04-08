@@ -34,7 +34,7 @@ export class UIStore {
 
     private errorHandler: ErrorHandler = new ErrorHandler();
     private notification: UINotification = new UINotification();
-    private _helperTarget: Action | null = null;
+    private _helperTarget: Array<Action> = [];
 
     public constructor() {
         makeAutoObservable(this);
@@ -146,14 +146,14 @@ export class UIStore {
     }
 
     public addHelper(action: Action): void {
-        this._helperTarget = action;
+        this._helperTarget.push(action);
     }
 
-    public get helperTarget(): Action | null {
+    public get helperTarget(): Array<Action> {
         return this._helperTarget;
     }
 
     public resetHelperTarget(): void {
-        this._helperTarget = null;
+        this._helperTarget = [];
     }
 }

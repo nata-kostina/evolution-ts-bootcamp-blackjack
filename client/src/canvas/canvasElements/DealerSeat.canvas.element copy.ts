@@ -1,9 +1,27 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { CanvasBase } from "../CanvasBase";
 import { SeatBaseCanvasElement } from "./SeatBase.canvas.element";
 import { GameMatrix } from "../GameMatrix";
+import { Card, CardAnimation } from "../../types/types";
+import { CardCanvasElement } from "./Card.canvas.element";
 
 export class DealerSeatCanvasElement extends SeatBaseCanvasElement {
     public constructor(base: CanvasBase, matrix: GameMatrix) {
         super(base, matrix, "dealer");
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public unholeCard(_card: Card): void {
+        const cards = this.getCards();
+        if (cards.length === 2) {
+            const holeCard = cards[1];
+            // eslint-disable-next-line max-len
+            const card = new CardCanvasElement(this.getBase(), this.getMatrix(), holeCard.getPosition(), _card);
+            this.addCard(card);
+            holeCard.dispose();
+
+            card.setMeshPosition(holeCard.getPosition());
+            card.animate(CardAnimation.Unhole);
+        }
     }
 }

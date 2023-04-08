@@ -19,7 +19,12 @@ export const Balance = observer(() => {
                     <div className={styles.amount}>
                         <div className={styles.amountKey}>Bet Amount:</div>
                         {/* <span className={styles.amountValue}>20$</span> */}
-                        <span className={styles.amountValue}>{player.bet}</span>
+                        <span className={styles.amountValue}>{player.bet}$</span>
+                    </div>
+                    <div className={styles.amount}>
+                        <div className={styles.amountKey}>Insurance:</div>
+                        {/* <span className={styles.amountValue}>20$</span> */}
+                        <span className={styles.amountValue}>{player.insurance}$</span>
                     </div>
                 </div>
             )}

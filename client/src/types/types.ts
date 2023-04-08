@@ -41,7 +41,7 @@ export type PlayerInstance = {
     bet: number;
     balance: number;
     points: number;
-    insurance?: number;
+    insurance: number;
     availableActions: Action[];
 };
 
@@ -197,4 +197,10 @@ export type Cell = "0" | "chips" | "player-seat" | "dealer-seat" | "dealer-point
 export enum CardAnimation {
     Deal = "Deal",
     Remove = "Remove",
+    Unhole = "Unhole",
 }
+export type UnholeCardPayload = {
+    target: "dealer";
+    card: Card;
+    points: number;
+};

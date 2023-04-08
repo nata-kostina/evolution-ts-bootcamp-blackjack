@@ -13,6 +13,7 @@ import {
     Acknowledgment,
     NewCard,
     NotificationVariant,
+    UnholeCardPayload,
 } from "../types/types";
 import { PlayerID, RoomID, SocketResponse } from "../types/socketTypes";
 import { UIStore } from "./ui/UIstore";
@@ -151,6 +152,9 @@ export class Game {
                 case NotificationVariant.Insurance:
                     this.ui.addHelper(Action.INSURANCE);
                     break;
+                case NotificationVariant.Double:
+                    this.ui.addHelper(Action.DOUBLE);
+                    break;
                 default:
                     break;
             }
@@ -227,6 +231,15 @@ export class Game {
             } else {
                 this.scene.dealDealerCard(response.payload);
             }
+        } else {
+            this.status = "error";
+        }
+    }
+
+    public handleUnholeCard(response: SocketResponse<UnholeCardPayload>): void {
+        console.log("handleUnholeCard");
+        if (response.ok && response.payload) {
+            this.scene.unholeCard(response.payload);
         } else {
             this.status = "error";
         }

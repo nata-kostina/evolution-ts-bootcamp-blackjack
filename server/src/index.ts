@@ -54,12 +54,13 @@ io.on('connection', (socket) => {
   });
   socket.on('makeDecision', ({ roomID, playerID, action }) => {
     try {
+      const { error: roomSchemaError } = roomSchema.validate(roomID);
       const { error: playerSchemaError } = playerSchema.validate(playerID);
       const { error: actionSchemaError } = actionSchema.validate(action);
-      if (playerSchemaError || actionSchemaError) {
+      if (roomSchemaError || playerSchemaError || actionSchemaError) {
         throw new Error('Invalid parameter');
       }
-      // controller.handleDecision({ roomID, playerID, action });
+      controller.handleDecision({ roomID, playerID, action });
       console.log(`Socket ${socket.id} finished a game`);
     } catch (e: unknown) {
       console.log(isError(e) ? e.message : `Socket ${socket.id} failed to send decision`);
@@ -67,7 +68,7 @@ io.on('connection', (socket) => {
   });
   socket.on('placeBet', ({ roomID, playerID, bet }) => {
     try {
-      const { error: roomSchemaError } = roomSchema.validate(playerID);
+      const { error: roomSchemaError } = roomSchema.validate(roomID);
       const { error: playerSchemaError } = playerSchema.validate(playerID);
       const { error: betSchemaError } = betSchema.validate(bet, {
         context: { min: 0.1, max: playersStore.getPlayerBalance(playerID) },

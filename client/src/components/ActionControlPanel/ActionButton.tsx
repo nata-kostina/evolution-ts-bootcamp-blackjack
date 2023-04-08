@@ -5,50 +5,27 @@ import { ReactSVG } from "react-svg";
 import { observer } from "mobx-react-lite";
 import { TbTriangleInvertedFilled } from "react-icons/tb";
 import styles from "./styles.module.css";
-import { Action, ActionBtn } from "../../types/types";
 import { useGame } from "../../context/GameContext";
-import { useConnection } from "../../context/ConnectionContext";
+import { useAction } from "./useAction";
+import { ActionBtn } from "../../types/types";
 
 interface Props {
     item: ActionBtn;
 }
 
 export const ActionButton = observer(({ item }: Props) => {
-    const connection = useConnection();
+    const { handleClick } = useAction();
     const game = useGame();
     const disabled = game.ui.isPlayerActionBtnDisabled(item.action);
-    const handleClick = () => {
-        const playerID = connection.getConncetionID();
-        const roomID = connection.getRoomID();
-        if (playerID && roomID) {
-            if (item.action === Action.BET) {
-                const bet = game.ui.getBet();
-                if (bet) {
-                    console.log("emit placeBet");
-                    connection.sendRequest<"placeBet">({
-                        event: "placeBet",
-                        payload: [{
-                            playerID,
-                            bet,
-                            roomID,
-                        }],
-                    });
-                }
-            } else {
-                connection.sendRequest<"makeDecision">({
-                    event: "makeDecision",
-                    payload: [{
-                        playerID,
-                        action: item.action,
-                        roomID,
-                    }],
-                });
-            }
-        }
-    };
-    const helperEnabled = game.ui.helperTarget === item.action;
+    const helperEnabled = game.ui.helperTarget.includes(item.action);
+
     return (
-        <button type="button" className={styles.controlItem} onClick={handleClick} disabled={disabled}>
+        <button
+            type="button"
+            className={styles.controlItem}
+            onClick={() => handleClick(item.action)}
+            disabled={disabled}
+        >
             <div className={styles.helper} style={{ display: helperEnabled ? "block" : "none" }}>
                 <svg width="50px" height="50px">
                     <defs>

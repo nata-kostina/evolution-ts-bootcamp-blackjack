@@ -9,6 +9,7 @@ type Handler = {
   isBlackjack: (id: SpecificID) => boolean;
   canDouble: (id: SpecificID) => boolean;
   canSplit: (id: SpecificID) => boolean;
+  canPlaceInsurance: ({ playerID, roomID }: SpecificID) => boolean;
   getPointsSum: (cards: Card[]) => number;
 };
 
@@ -43,7 +44,7 @@ export const CardsHandler: Handler = {
     try {
       const player = store.getPlayer({ playerID, roomID });
       const { cards: playerCards, points } = player;
-      
+
       if (playerCards.length === 2) {
         return points === NINE || points === TEN || points === ELEVEN;
       }
@@ -63,6 +64,22 @@ export const CardsHandler: Handler = {
       return false;
     } catch (error) {
       throw new Error('Failed to check for double');
+    }
+  },
+
+  canPlaceInsurance: ({ playerID, roomID }: SpecificID) => {
+    try {
+      const { cards: dealerCards } = store.getDealer(roomID);
+      if (dealerCards.length !== 1) {
+        throw new Error("The number of dealer's must be one");
+      }
+      const [card] = dealerCards;
+      if (card.value === CardValue.ACE) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+        throw new Error('Failed to check for place insurance');
     }
   },
 

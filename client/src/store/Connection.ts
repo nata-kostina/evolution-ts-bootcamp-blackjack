@@ -52,6 +52,7 @@ export class Connection {
         this.socket.on("updateSession", (response) => this.game.updateGameSession(response));
         this.socket.on("dealCard", (reponse) => this.game.handleDealCard(reponse));
         this.socket.on("notificate", (response) => this.game.handleNotificate(response));
+        this.socket.on("unholeCard", (response) => this.game.handleUnholeCard(response));
         // this.socket.on("getDecision", (response, acknowledgement) => this.handleGetDecision(response, acknowledgement));
         this.socket.on("finishRound", (response) => this.game.handleFinishRound(response));
 

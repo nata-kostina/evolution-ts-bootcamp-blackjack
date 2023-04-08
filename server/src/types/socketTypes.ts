@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AvailableActions, DecisionRequest, NewCard, NewGameMode } from '../types.js';
+import { AvailableActions, DecisionRequest, NewCard, NewGameMode, UnholeCardPayload } from '../types.js';
 import { Notification } from './notificationTypes.js';
 import { Bet, Action, GameSession, PlayerID, PlayerInstance, RoomID } from './gameTypes.js';
 
@@ -21,13 +21,14 @@ export interface ServerToClientEvents {
   notificate: (response: SocketResponse<Notification>) => void;
   updateSession: (response: SocketResponse<GameSession>) => void;
   finishRound: (response: SocketResponse<GameSession>) => void;
+  unholeCard: (response: SocketResponse<UnholeCardPayload>) => void;
 }
 
 export interface ClientToServerEvents {
   startGame: ({ playerID, mode }: { playerID: PlayerID; mode: GameMode }) => void;
   finishGame: ({ roomID, playerID }: SpecificID) => void;
   placeBet: ({ roomID, playerID, bet }: SpecificID & { bet: Bet }) => void;
-  makeDecision: ({ roomID, playerID, action }: SpecificID & { action: Action }) => void;
+  makeDecision: ({ roomID, playerID, action }: SpecificID & { action: Action; }) => void;
   takeMoneyDecision: ({ roomID, playerID }: SpecificID & { response: YesNoAcknowledgement }) => void;
 }
 

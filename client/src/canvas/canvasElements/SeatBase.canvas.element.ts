@@ -41,7 +41,7 @@ export class SeatBaseCanvasElement {
         const cardElement = new CardCanvasElement(this.base, this.matrix, new Vector3(
             this.position.x + this.cards.length * 0.13,
             this.position.y,
-            0,
+            this.position.z - this.cards.length * 0.1,
         ), card);
         this.cards.push(cardElement);
         cardElement.animate(CardAnimation.Deal);
@@ -72,5 +72,17 @@ export class SeatBaseCanvasElement {
             this.pointsElement.dispose();
             this.pointsElement = null;
         }
+    }
+
+    public getCards(): Array<CardCanvasElement> {
+        return this.cards;
+    }
+
+    public getMatrix(): GameMatrix {
+        return this.matrix;
+    }
+
+    public addCard(card: CardCanvasElement): void {
+        this.cards.push(card);
     }
 }

@@ -41,7 +41,51 @@ export const getDealCardAnimation = (matrixWidth: number,
 
     ySlide.setKeys(keyFramesY);
 
-    return { frameRate, animationArray: [xSlide, ySlide] };
+    const yRotation = new Animation("rotationY", "rotation.y", frameRate, Animation.ANIMATIONTYPE_FLOAT);
+
+    const keyFramesYR = [];
+
+    keyFramesYR.push({
+        frame: 0,
+        value: Math.PI,
+    });
+    keyFramesYR.push({
+        frame: 7,
+        value: Math.PI,
+    });
+
+    keyFramesYR.push({
+        frame: frameRate,
+        // value: 1,
+        value: 0,
+    });
+
+    yRotation.setKeys(keyFramesYR);
+
+    return { frameRate, animationArray: [xSlide, ySlide, yRotation] };
+};
+
+export const getUnholeCardAnimation = (): { frameRate: number; animationArray: Array<Animation>; } => {
+    const frameRate = 5;
+
+    const yRotation = new Animation("rotationY", "rotation.y", frameRate, Animation.ANIMATIONTYPE_FLOAT);
+
+    const keyFramesYR = [];
+
+    keyFramesYR.push({
+        frame: 0,
+        value: Math.PI,
+    });
+
+    keyFramesYR.push({
+        frame: frameRate,
+        // value: 1,
+        value: 0,
+    });
+
+    yRotation.setKeys(keyFramesYR);
+
+    return { frameRate, animationArray: [yRotation] };
 };
 
 export const getRemoveCardAnimation = (matrixWidth: number,
