@@ -1,11 +1,9 @@
-/* eslint-disable no-empty */
-import { makeAutoObservable, toJS } from "mobx";
-import { Action, AvailableActions, Bet, DealerInstance, PlayerInstance } from "../types/game.types";
+import { makeAutoObservable } from "mobx";
+import { Action, AvailableActions, Bet, PlayerInstance } from "../types/game.types";
 import { Notification } from "../types/notification.types";
 
 export class UIStore {
     private _player: PlayerInstance | null = null;
-    private _dealer: DealerInstance | null = null;
     private _actionBtnsDisabled: Record<Action, boolean> = {
         hit: true,
         stand: true,
@@ -41,10 +39,6 @@ export class UIStore {
             return this.player.bet;
         }
         return null;
-    }
-
-    public set dealer(dealer: DealerInstance | null) {
-        this._dealer = dealer;
     }
 
     public get modalQueue(): Array<Notification> {
@@ -94,11 +88,9 @@ export class UIStore {
         console.log("add bet: ", bet);
         try {
             if (this.player) {
-                console.log("this.player: ", toJS(this.player));
                 this.player.bet += bet;
                 this.player.balance -= bet;
                 this._betHistory.push(bet);
-            } else {
             }
         } catch (error) {
             console.log("Failed to add bet");

@@ -1,5 +1,5 @@
 import React from "react";
-import { betActionBtns } from "../../constants/game.constants";
+import { betActionBtns } from "../../constants/ui.constants";
 import { BetActionButton } from "./BetActionButton";
 import styles from "./styles.module.css";
 

@@ -1,4 +1,4 @@
-import { initialDeck } from '../constants/cards.constants.js';
+import { initialDeck } from '../constants/index.js';
 import { GameState, PlayerInstance, SpecificID } from '../types/index.js';
 
 export function initializeGameState({ roomID, playerID }: SpecificID): GameState {

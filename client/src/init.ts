@@ -15,7 +15,7 @@ export const { connection, game } = (
         const matrix = canvas.getGameMatrix();
         const scene = new SceneCanvasElement(canvas, matrix, controller);
 
-        const newGame = new Game(canvas, uiStore, scene);
+        const newGame = new Game(uiStore, scene);
         const newConnection = new Connection(serverURL, newGame);
 
         return {

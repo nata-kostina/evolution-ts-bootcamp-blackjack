@@ -1,4 +1,4 @@
-import { AppServer } from './AppServer';
+import { AppServer } from './AppServer.js';
 
 (function init () {
   try {

@@ -1,12 +1,7 @@
-import { PlayerID } from "../types";
+import { IPlayersStore, PlayerID } from "../types/index.js";
 
 type PStore = Record<PlayerID, number>;
-export interface IPlayersStore {
-    isNewPlayer(playerID: PlayerID): boolean;
-    updatePlayerBalance({playerID, balance}: {playerID: PlayerID, balance: number}): void;
-    removePlayer(playerID: PlayerID): void;
-    getPlayerBalance(playerID: PlayerID): number;
-}
+
 
 class PlayersStore implements IPlayersStore {
   private store: PStore;

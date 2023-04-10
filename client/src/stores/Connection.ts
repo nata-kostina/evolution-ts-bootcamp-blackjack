@@ -1,11 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import { makeAutoObservable } from "mobx";
 import { io, Socket } from "socket.io-client";
 import { Game } from "./Game";
 import { errorConncetionNumLimit } from "../constants/connection.constants";
-import { ServerToClientEvents, ClientToServerEvents, RequestParameters, SocketStatus } from "../types/socket.types";
+import {
+    ServerToClientEvents,
+    ClientToServerEvents,
+    RequestParameters,
+    SocketStatus,
+} from "../types/socket.types";
 import { RoomID } from "../types/game.types";
-import { Notification } from "../types/notification.types";
 
 export class Connection {
     private _socket: Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -28,35 +32,49 @@ export class Connection {
             this._status = SocketStatus.Connected;
             this._connectionID = this._socket.id;
             this._game.playerID = this._socket.id;
-            console.log("Socket is connected");
         });
 
         this._socket.on("disconnect", () => {
-            console.log("Socket is disconnected");
             this._status = SocketStatus.Disconnected;
         });
 
         this._socket.on("connect_error", () => {
             this._connectionErrorCounter++;
-            const errorMsg = "Sorry, there seems to be an issue with the connection!";
-            console.log(errorMsg);
             if (this._connectionErrorCounter > errorConncetionNumLimit) {
                 this._status = SocketStatus.WithError;
             }
         });
 
-        this._socket.on("startGame", (response) => {
-            console.log("socket on start Game");
+        this._socket.on("startGame", async (response) => {
             this._roomID = response.payload.roomID;
             this._game.roomID = this._roomID;
             this._game.handleStartGame(response);
         });
-        this._socket.on("placeBet", (reponse) => this._game.handlePlaceBetNotification(reponse));
-        this._socket.on("updateSession", (response) => this._game.handleUpdateGameSession(response));
-        this._socket.on("dealCard", (reponse) => this._game.handleDealCard(reponse));
-        this._socket.on("notificate", (response) => this._game.handleNotificate(response));
-        this._socket.on("unholeCard", (response) => this._game.handleUnholeCard(response));
-        this._socket.on("finishRound", (response) => this._game.handleFinishRound(response));
+        this._socket.on("placeBet", (reponse) => {
+            this._game.handlePlaceBetNotification(reponse).then(() => {
+                if (this.roomID) {
+                    this.sendRequest<"startPlay">({
+                        event: "startPlay",
+                        payload: [{ roomID: this.roomID, playerID: this._socket.id }],
+                    });
+                }
+            });
+        });
+        this._socket.on("updateSession", async (response) =>
+      this._game.handleUpdateGameSession(response),
+        );
+        this._socket.on("dealCard", async (reponse) =>
+      this._game.handleDealCard(reponse),
+        );
+        this._socket.on("notificate", async (response) =>
+      this._game.handleNotificate(response),
+        );
+        this._socket.on("unholeCard", async (response) =>
+      this._game.handleUnholeCard(response),
+        );
+        this._socket.on("finishRound", async (response) =>
+      this._game.handleFinishRound(response),
+        );
 
         makeAutoObservable(this);
     }
@@ -77,7 +95,9 @@ export class Connection {
         return this._status === "waiting";
     }
 
-    public sendRequest<Event extends keyof ClientToServerEvents>(request: RequestParameters<Event>): void {
+    public sendRequest<Event extends keyof ClientToServerEvents>(
+        request: RequestParameters<Event>,
+    ): void {
         this._socket.emit(request.event, ...request.payload);
     }
 }

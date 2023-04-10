@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Vector3 } from "@babylonjs/core";
 import { CanvasBase } from "../CanvasBase";
 import { PointsCanvasElement } from "./Points.canvas.element";
@@ -37,13 +38,15 @@ export class SeatBaseCanvasElement {
         );
     }
 
-    public dealCard(newCard: NewCard): void {
+    public async dealCard(newCard: NewCard): Promise<void> {
         const cardElement = new CardCanvasElement(this.base, this.matrix, new Vector3(
             this.position.x + this.cards.length * 0.13,
             this.position.y,
             this.position.z - this.cards.length * 0.1,
         ), newCard.card);
         this.cards.push(cardElement);
+        await cardElement.addContent();
+        console.log("after await cardElement.addContent()");
         cardElement.animate(CardAnimation.Deal, () => {
             if (isNormalCard(newCard.card)) {
                 this.updatePoints(newCard.points);
@@ -69,8 +72,8 @@ export class SeatBaseCanvasElement {
     //     return this.cards;
     // }
 
-    public removeCards(): void {
-        this.cards.forEach((card) => card.animate(CardAnimation.Remove));
+    public async removeCards(): Promise<void> {
+        this.cards.forEach((card) => { card.animate(CardAnimation.Remove); });
         this.cards = [];
         if (this.pointsElement) {
             this.pointsElement.dispose();

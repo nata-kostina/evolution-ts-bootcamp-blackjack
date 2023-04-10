@@ -3,9 +3,9 @@ import React from "react";
 import { observer } from "mobx-react-lite";
 import { Balance } from "../Balance/Balance";
 import styles from "./styles.module.css";
-import { actionButtons } from "../../constants/game.constants";
 import { ActionPanel } from "./ActionPanel";
 import { BetControlPanel } from "../BetControlPanel/BetControlPanel";
+import { actionButtons } from "../../constants/ui.constants";
 
 export const ControlPanel = observer(() => {
     return (

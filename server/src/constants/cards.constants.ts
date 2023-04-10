@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import { Suit, CardValue, Card, Deck } from '../types';
+import { Suit, CardValue, Card, Deck } from '../types/index.js';
 
 const suits = [Suit.Clubs, Suit.Diamonds, Suit.Hearts, Suit.Spades] as const;
 const values = Object.values(CardValue);

@@ -5,6 +5,7 @@ import {
   Deck,
   GameSession,
   GameState,
+  IStore,
   PlayerID,
   PlayerInstance,
   RoomID,
@@ -13,29 +14,8 @@ import {
   UpdateDealerParams,
   UpdatePlayerParams,
 } from '../types/index.js';
-import { CardsHandler } from '../utils/CardsHandler.js';
 import { initializeGameState } from '../utils/initializers.js';
-
-export interface IStore {
-  updateDeck({ roomID, deck }: { roomID: RoomID; deck: Deck }): void;
-  joinPlayerToGameState({ player, roomID }: { roomID: RoomID; player: PlayerInstance }): void;
-  getGame(roomID: RoomID): GameState;
-  getPlayer({ roomID, playerID }: SpecificID): PlayerInstance;
-  removeRoomFromStore(roomID: RoomID): void;
-  removePlayerFromGame({ roomID, playerID }: SpecificID): void;
-  getSession(roomID: RoomID): GameSession;
-  getDeck(roomID: RoomID): Deck;
-  updatePlayer({ playerID, roomID, payload }: UpdatePlayerParams): void;
-  getDealer(roomID: RoomID): DealerInstance;
-  updateDealer({ roomID, payload }: UpdateDealerParams): void;
-
-  unholeCard(roomID: RoomID): void;
-  resetPlayer({ playerID, roomID }: SpecificID): void;
-  resetDealer(roomID: RoomID): void;
-  resetSession({ playerID, roomID }: SpecificID): void;
-  getResetSession({ playerID, roomID }: SpecificID): GameSession;
-  createNewRoom(playerID: PlayerID): RoomID;
-}
+import { CardsHandler } from '../utils/CardsHandler.js';
 
 class Store implements IStore{
   private store: State;

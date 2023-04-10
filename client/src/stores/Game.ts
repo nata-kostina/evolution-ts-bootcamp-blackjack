@@ -1,26 +1,30 @@
 /* eslint-disable no-empty */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { makeAutoObservable } from "mobx";
+import { ValidationError } from "yup";
 import { UIStore } from "./UIstore";
-import { CanvasBase } from "../canvas/CanvasBase";
 import { pickPlayerInstance } from "../utils/storeUtils/pickPlayerInsrance";
 import { SceneCanvasElement } from "../canvas/canvasElements/Scene.canvas.element";
 import { UnholeCardPayload } from "../types/canvas.types";
 import { GameSession, PlayerID, RoomID, NewCard, Action } from "../types/game.types";
 import { Notification, NotificationVariant } from "../types/notification.types";
 import { SocketResponse } from "../types/socket.types";
+import {
+    gameSessionSchema,
+    newCardSchema,
+    notificationSchema,
+    playerSchema,
+    unholedCardSchema,
+} from "../utils/validation/schemas";
 
 export class Game {
     private readonly _ui: UIStore;
-    private readonly _canvas: CanvasBase;
     private readonly _scene: SceneCanvasElement;
 
     private _session: GameSession | null = null;
     private _playerID: PlayerID | null = null;
     private _roomID: RoomID | null = null;
 
-    public constructor(canvas: CanvasBase, ui: UIStore, scene: SceneCanvasElement) {
-        this._canvas = canvas;
+    public constructor(ui: UIStore, scene: SceneCanvasElement) {
         this._scene = scene;
         this._ui = ui;
         makeAutoObservable(this);
@@ -53,104 +57,153 @@ export class Game {
         }
     }
 
-    public handleStartGame(response: SocketResponse<GameSession>): void {
-        if (response.ok && response.payload && this._playerID) {
-            const player = pickPlayerInstance({ playerID: this._playerID, players: response.payload.players });
-            if (player) {
-                this._session = response.payload;
-                this._roomID = response.payload.roomID;
-                this._ui.dealer = response.payload.dealer;
-                this._ui.player = player;
-                this._ui.toggleActionBtns(player.availableActions);
-                this._scene.toggleChipAction(true);
-            }
-        } else {
-        }
-    }
-
-    public handleUpdateGameSession(response: SocketResponse<GameSession>): void {
-        if (response.ok && response.payload && this._playerID) {
-            const player = pickPlayerInstance({ playerID: this._playerID, players: response.payload.players });
-            if (player) {
-                this._session = response.payload;
-                this._ui.dealer = response.payload.dealer;
-                this._ui.player = player;
-                this._ui.toggleActionBtns(player.availableActions);
-            }
-        } else {
-        }
-    }
-
-    public handlePlaceBetNotification(response: SocketResponse<GameSession>): void {
-        if (response.ok && response.payload && this._playerID) {
-            const player = pickPlayerInstance({ playerID: this._playerID, players: response.payload.players });
-            if (player) {
-                this._session = response.payload;
-                this._ui.dealer = response.payload.dealer;
-                this._ui.player = player;
-                this._ui.toggleActionBtns(player.availableActions);
-                this._ui.togglePlaceBetBtnDisabled(true);
-                this._ui.toggleBetEditBtnsDisabled(true);
-                this._scene.toggleChipAction(false);
-            }
-        } else {
-        }
-    }
-
-    public handleNotificate(response: SocketResponse<Notification>): void {
-        if (response.ok) {
-            switch (response.payload.variant) {
-                case NotificationVariant.Blackjack:
-                    this._scene.addBlackjackNotification();
-                    break;
-                case NotificationVariant.StandOrTakeMoney:
-                    this._ui.addModal(response.payload);
-                    break;
-                case NotificationVariant.Insurance:
-                    this._ui.addHelper(Action.INSURANCE);
-                    break;
-                case NotificationVariant.Double:
-                    this._ui.addHelper(Action.DOUBLE);
-                    break;
-                default:
-                    break;
-            }
-        } else {
-        }
-    }
-
-    public handleFinishRound(response: SocketResponse<GameSession>): void {
-        if (response.ok && response.payload && this._playerID) {
-            const player = pickPlayerInstance({ playerID: this._playerID, players: response.payload.players });
-            if (player) {
-                this._session = response.payload;
-                this._ui.resetBet();
-                this._ui.dealer = response.payload.dealer;
-                this._ui.player = player;
-                this._ui.toggleActionBtns(player.availableActions);
-                this._ui.resetHelperTarget();
-                this._scene.toggleChipAction(true);
-                this._scene.removeCards();
-            }
-        } else {
-        }
-    }
-
-    public handleDealCard(response: SocketResponse<NewCard>): void {
-        if (response.ok && response.payload) {
-            if (response.payload.target === "player") {
-                this._scene.dealPlayerCard(response.payload);
+    public async handleStartGame(response: SocketResponse<GameSession>): Promise<void> {
+        try {
+            if (response.ok && response.payload && this._playerID) {
+                const session = await gameSessionSchema.validate(response.payload);
+                const player = pickPlayerInstance({ playerID: this._playerID, players: session.players });
+                if (player) {
+                    const validatedPlayer = await playerSchema.validate(player, {
+                        stripUnknown: true,
+                    });
+                    this._session = session;
+                    this._roomID = session.roomID;
+                    this._ui.player = validatedPlayer;
+                    this._ui.toggleActionBtns(player.availableActions);
+                    this._scene.toggleChipAction(true);
+                }
             } else {
-                this._scene.dealDealerCard(response.payload);
             }
-        } else {
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                console.log("The response data is invalid");
+                return;
+            }
+            console.log("Uncaught error occured");
         }
     }
 
-    public handleUnholeCard(response: SocketResponse<UnholeCardPayload>): void {
-        if (response.ok && response.payload) {
-            this._scene.unholeCard(response.payload);
-        } else {
+    public async handleUpdateGameSession(response: SocketResponse<GameSession>): Promise<void> {
+        try {
+            if (response.ok && response.payload && this._playerID) {
+                const session = await gameSessionSchema.validate(response.payload);
+                const player = pickPlayerInstance({ playerID: this._playerID, players: session.players });
+                if (player) {
+                    const validatedPlayer = await playerSchema.validate(player, {
+                        stripUnknown: true,
+                    });
+                    this._session = session;
+                    this._ui.player = validatedPlayer;
+                    this._ui.toggleActionBtns(player.availableActions);
+                }
+            } else {
+            }
+        } catch (error) {
+
+        }
+    }
+
+    public async handlePlaceBetNotification(response: SocketResponse<GameSession>): Promise<void> {
+        try {
+            if (response.ok && response.payload && this._playerID) {
+                const session = await gameSessionSchema.validate(response.payload);
+
+                const player = pickPlayerInstance({ playerID: this._playerID, players: session.players });
+                if (player) {
+                    const validatedPlayer = await playerSchema.validate(player, {
+                        stripUnknown: true,
+                    });
+                    this._session = session;
+                    this._ui.player = validatedPlayer;
+                    this._ui.toggleActionBtns(validatedPlayer.availableActions);
+                    this._ui.togglePlaceBetBtnDisabled(true);
+                    this._ui.toggleBetEditBtnsDisabled(true);
+                    this._scene.toggleChipAction(false);
+                }
+            } else {
+            }
+        } catch (error) {
+
+        }
+    }
+
+    public async handleNotificate(response: SocketResponse<Notification>): Promise<void> {
+        try {
+            if (response.ok && response.payload) {
+                const notification = await notificationSchema.validate(response.payload);
+                switch (notification.variant) {
+                    case NotificationVariant.Blackjack:
+                        this._scene.addBlackjackNotification();
+                        break;
+                    case NotificationVariant.StandOrTakeMoney:
+                        this._ui.addModal(notification);
+                        break;
+                    case NotificationVariant.Insurance:
+                        this._ui.addHelper(Action.INSURANCE);
+                        break;
+                    case NotificationVariant.Double:
+                        this._ui.addHelper(Action.DOUBLE);
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+            }
+        } catch (error) {
+
+        }
+    }
+
+    public async handleFinishRound(response: SocketResponse<GameSession>): Promise<void> {
+        try {
+            if (response.ok && response.payload && this._playerID) {
+                const session = await gameSessionSchema.validate(response.payload);
+                const player = pickPlayerInstance({ playerID: this._playerID, players: session.players });
+                if (player) {
+                    const validatedPlayer = await playerSchema.validate(player, {
+                        stripUnknown: true,
+                    });
+                    this._session = session;
+                    this._ui.resetBet();
+                    this._ui.player = validatedPlayer;
+                    this._ui.toggleActionBtns(validatedPlayer.availableActions);
+                    this._ui.resetHelperTarget();
+                    this._scene.toggleChipAction(true);
+                    this._scene.removeCards();
+                }
+            } else {
+            }
+        } catch (error) {
+
+        }
+    }
+
+    public async handleDealCard(response: SocketResponse<NewCard>): Promise<void> {
+        console.log("handleDealCard");
+        try {
+            if (response.ok && response.payload) {
+                const newCard = await newCardSchema.validate(response.payload);
+                if (newCard.target === "player") {
+                    await this._scene.dealPlayerCard(newCard);
+                } else {
+                    await this._scene.dealDealerCard(newCard);
+                }
+            } else {
+            }
+        } catch (error) {
+
+        }
+    }
+
+    public async handleUnholeCard(response: SocketResponse<UnholeCardPayload>): Promise<void> {
+        try {
+            if (response.ok && response.payload) {
+                const unholedCard = await unholedCardSchema.validate(response.payload);
+                this._scene.unholeCard(unholedCard);
+            } else {
+            }
+        } catch (error) {
+
         }
     }
 }

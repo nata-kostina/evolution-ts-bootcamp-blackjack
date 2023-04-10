@@ -10,6 +10,7 @@ import {
     StandardMaterial,
     Texture,
     Vector3,
+    Vector4,
 } from "@babylonjs/core";
 import { CanvasBase } from "../CanvasBase";
 import { chipRadius } from "../../constants/canvas.constants";
@@ -31,17 +32,31 @@ export class ChipCanvasElement {
             },
             (() => {
                 controller.addBet(this.chip.value);
-                // game.UI.addBet(this.chip.value);
             }),
         );
-        this.skin = MeshBuilder.CreateDisc("chip", { radius: chipRadius }, this.base.scene);
-        this.skin.position = position;
 
-        const chipMaterial = new StandardMaterial("chip-material", this.base.scene);
-        const chipTexture = new Texture(this.chip.img, this.base.scene, undefined, false);
-        chipMaterial.diffuseTexture = chipTexture;
-        // chipTexture.hasAlpha = true;
+        const chipMaterial = new StandardMaterial("material", this.base.scene);
+        chipMaterial.diffuseTexture = new Texture(this.chip.img, this.base.scene, { invertY: true });
+
+        const faceUV = [];
+        faceUV[0] = new Vector4(0, 0, 0.25, 1);
+        faceUV[1] = new Vector4(0.25, 0, 0.75, 1);
+        faceUV[2] = new Vector4(0.75, 0, 1, 1);
+
+        this.skin = MeshBuilder.CreateCylinder(`chip-${chip.id}`,
+            { height: 0.02, diameter: chipRadius * 2, faceUV: faceUV },
+            this.base.scene);
         this.skin.material = chipMaterial;
+        this.skin.rotation.x = -Math.PI * 0.5;
+        this.skin.position = position;
+        // this.skin = MeshBuilder.CreateDisc("chip", { radius: chipRadius }, this.base.scene);
+        // this.skin.position = position;
+
+        // const chipMaterial = new StandardMaterial("chip-material", this.base.scene);
+        // const chipTexture = new Texture(this.chip.img, this.base.scene, undefined, false);
+        // chipMaterial.diffuseTexture = chipTexture;
+        // // chipTexture.hasAlpha = true;
+        // this.skin.material = chipMaterial;
         this.skin.actionManager = new ActionManager(this.base.scene);
     }
 
@@ -57,18 +72,5 @@ export class ChipCanvasElement {
                 this.skin.actionManager.unregisterAction(this.action);
             }
         }
-    }
-
-    private addContent(): void {
-        // this.chipMesh = MeshBuilder.CreateDisc("chip", { radius: chipRadius }, this.base.scene);
-        // this.chipMesh.position.x = this.position.x;
-        // this.chipMesh.position.y = this.position.y;
-
-        // const chipMaterial = new StandardMaterial("chip-material", this.base.scene);
-        // const chipTexture = new Texture(this.chip.img, this.base.scene, undefined, false);
-        // chipMaterial.diffuseTexture = chipTexture;
-        // // chipTexture.hasAlpha = true;
-        // this.chipMesh.material = chipMaterial;
-        // this.chipMesh.actionManager = new ActionManager(this.base.scene);
     }
 }

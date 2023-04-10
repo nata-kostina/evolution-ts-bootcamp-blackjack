@@ -21,7 +21,6 @@ export class ChipSetCanvasElement implements CanvasElement {
     private readonly controller: Controller;
 
     public constructor(base: CanvasBase, matrix: GameMatrix, controller: Controller) {
-        console.log("CHIPSET CONSTRUCTOR");
         this.controller = controller;
         this.base = base;
         const mtx = matrix.getMatrix();
@@ -30,7 +29,6 @@ export class ChipSetCanvasElement implements CanvasElement {
         const cellHeight = matrix.getCellHeight();
         const matrixWidth = matrix.getMatrixWidth();
         const matrixHeight = matrix.getMatrixHeight();
-        // console.log({ mtxSize, cellWidth, cellHeight, matrixWidth, matrixHeight });
         const index = mtx.indexOf("chips");
 
         const row = Math.floor(index / mtxSize);
@@ -44,43 +42,44 @@ export class ChipSetCanvasElement implements CanvasElement {
     }
 
     public update({ height, width, cellWidth, cellHeight, map, size }: MatrixProps): void {
-        const index = map.indexOf("chips");
-        const row = Math.floor(index / size);
-        const column = index % size;
-        this.position = new Vector3(
-            -width * 0.5 + cellWidth * 0.5 + cellWidth * column,
-            height * 0.5 - cellHeight * 0.5 - cellHeight * row,
-            0,
-        );
-        this.chipSet.forEach((chip, idx) => {
-            const x = this.position.x + idx * chipRadius * 1.5;
-            chip.update(new Vector3(
-                x,
-                this.position.y,
-                0,
-            ));
-        });
+        // const index = map.indexOf("chips");
+        // const row = Math.floor(index / size);
+        // const column = index % size;
+        // this.position = new Vector3(
+        //     -width * 0.5 + cellWidth * 0.5 + cellWidth * column,
+        //     height * 0.5 - cellHeight * 0.5 - cellHeight * row,
+        //     0,
+        // );
+        // this.chipSet.forEach((chip, idx) => {
+        //     const x = this.position.x + idx * chipRadius * 1.5;
+        //     chip.update(new Vector3(
+        //         x,
+        //         this.position.y,
+        //         0,
+        //     ));
+        // });
     }
 
     public addContent(): void {
-        console.log("CHIPSET addcontent");
         for (let j = 0; j < chipSet.length; j++) {
-            const x = this.position.x + j * chipRadius * 1.4;
+            const x = this.position.x + j * chipRadius * 2;
+            // const x = this.position.x;
 
-            const y = this.position.y - 0.09 * Math.sqrt(j * 1.5);
+            // const y = this.position.y - 0.09 * Math.sqrt(j * 1.5);
+            const y = this.position.y;
             // const y = this.position.y - j * 0.4 * ((0.5) / (x + 2));
             // console.log(`Single Chip Position: X: ${x}, Y: ${y}`);
+            const z = this.position.z - 0.1;
             const chip = new ChipCanvasElement(this.base, new Vector3(
                 x,
                 y,
-                0,
+                z,
             ), chipSet[j], this.controller);
             this.chipSet.push(chip);
         }
     }
 
     public toggleChipAction(register: boolean): void {
-        console.log("CHIPSET toggleChipAction: ", register);
         this.chipSet.forEach((chip) => chip.toggleChipAction(register));
     }
 }

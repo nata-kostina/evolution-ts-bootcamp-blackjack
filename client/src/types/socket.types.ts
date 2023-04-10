@@ -18,6 +18,7 @@ export interface ClientToServerEvents {
     takeMoneyDecision: ({ roomID, playerID }: SpecificID & { response: YesNoAcknowledgement; }) => void;
     placeBet: ({ roomID, playerID, bet }: SpecificID & { bet: Bet; }) => void;
     makeDecision: ({ roomID, playerID, action }: SpecificID & { action: Action; }) => void;
+    startPlay: ({ roomID, playerID }: SpecificID) => void;
 }
 
 export type SocketResponse<T> = {

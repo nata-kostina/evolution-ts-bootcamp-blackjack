@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { HemisphericLight, ArcRotateCamera, Engine, Scene, Vector3, Color4, Camera } from "@babylonjs/core";
-import Background from "../assets/img/background.jpg";
+import Background from "../assets/img/background34.jpg";
 import { GameMatrix } from "./GameMatrix";
 
 export class CanvasBase {
@@ -51,12 +51,10 @@ export class CanvasBase {
     }
 
     protected createCamera(scene: Scene): ArcRotateCamera {
-        const camera = new ArcRotateCamera("Camera", -Math.PI * 0.5, Math.PI * 0.5, 2.7, Vector3.Zero(), scene);
+        const camera = new ArcRotateCamera("Camera", -Math.PI * 0.5, Math.PI * 0.55, 3, Vector3.Zero(), scene);
         this.scene.setActiveCameraByName("Camera");
+        // camera.attachControl(true);
         // camera.setTarget(BABYLON.Vector3.Zero());
-
-        // const camera = new ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2, 3, Vector3.Zero(), scene);
-        // camera.setTarget(Vector3.Zero());
         return camera;
     }
 

@@ -6,16 +6,8 @@ import Chip10 from "../assets/img/chips/chip_10.png";
 import Chip15 from "../assets/img/chips/chip_15.png";
 import Chip50 from "../assets/img/chips/chip_50.png";
 import Chip100 from "../assets/img/chips/chip_100.png";
-import HitSVG from "../assets/img/actions/hit.svg";
-import StandSVG from "../assets/img/actions/stand.svg";
-import DoubleSVG from "../assets/img/actions/double.svg";
-import SurenderSVG from "../assets/img/actions/surender.svg";
-import InsuranceSVG from "../assets/img/actions/insurance.svg";
-import BetSVG from "../assets/img/actions/bet.svg";
-import UndoSVG from "../assets/img/actions/undo.svg";
-import ResetSVG from "../assets/img/actions/reset.svg";
-import { Action, ChipItem, BetAction } from "../types/game.types";
-import { ActionBtn, BetActionBtn } from "../types/ui.types";
+
+import { ChipItem } from "../types/game.types";
 
 export const chipSet: ChipItem[] = [
     {
@@ -51,38 +43,3 @@ export const chipSet: ChipItem[] = [
 ];
 
 export const maxPlayersNum = 1;
-
-export const actionButtons: ActionBtn[] = [
-    {
-        action: Action.BET,
-        svgPath: BetSVG,
-    },
-    {
-        action: Action.HIT,
-        svgPath: HitSVG,
-    },
-    {
-        action: Action.STAND,
-        svgPath: StandSVG,
-    },
-    {
-        action: Action.DOUBLE,
-        svgPath: DoubleSVG,
-    },
-    {
-        action: Action.INSURANCE,
-        svgPath: InsuranceSVG,
-    },
-    {
-        action: Action.SURENDER,
-        svgPath: SurenderSVG,
-    },
-];
-
-// type betActionBtn = {
-
-// }
-export const betActionBtns: BetActionBtn[] = [
-    { action: BetAction.Undo, svgPath: UndoSVG },
-    { action: BetAction.Reset, svgPath: ResetSVG },
-];

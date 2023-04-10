@@ -1,14 +1,12 @@
-import { store } from '../index.js';
-import { TenSet, PointsMap, TWENTY_ONE, TEN, NINE } from '../constants/cards.constants.js';
-import { ELEVEN } from '../constants/cards.constants.js';
-import { Card, CardValue, SpecificID } from '../types/index.js';
+import { ELEVEN, NINE, PointsMap, TEN, TenSet, TWENTY_ONE } from '../constants/index.js';
+import { Card, CardValue, IStore, RoomID, SpecificID } from '../types/index.js';
 
 type Handler = {
   takeCardFromDeck: (deck: Card[]) => { card: Card; updatedDeck: Card[] };
-  isBlackjack: (id: SpecificID) => boolean;
-  canDouble: (id: SpecificID) => boolean;
-  canSplit: (id: SpecificID) => boolean;
-  canPlaceInsurance: ({ playerID, roomID }: SpecificID) => boolean;
+  isBlackjack: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => boolean;
+  canDouble: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => boolean;
+  canSplit: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => boolean;
+  canPlaceInsurance: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => boolean;
   getPointsSum: (cards: Card[]) => number;
 };
 
@@ -20,11 +18,10 @@ export const CardsHandler: Handler = {
     return { card, updatedDeck: deck };
   },
 
-  isBlackjack: ({ playerID, roomID }: SpecificID) => {
+  isBlackjack: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => {
     try {
       const player = store.getPlayer({ playerID, roomID });
       const { cards } = player;
-      console.log('PLAYER CARDS: ', cards);
       if (cards.length === 2) {
         const [first, second] = cards;
         if (
@@ -39,7 +36,7 @@ export const CardsHandler: Handler = {
       throw new Error('Failed to check for blackjack');
     }
   },
-  canDouble: ({ playerID, roomID }: SpecificID) => {
+  canDouble: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => {
     try {
       const player = store.getPlayer({ playerID, roomID });
       const { cards: playerCards, points } = player;
@@ -52,7 +49,7 @@ export const CardsHandler: Handler = {
       throw new Error('Failed to check for double');
     }
   },
-  canSplit: ({ playerID, roomID }: SpecificID) => {
+  canSplit: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => {
     try {
       const player = store.getPlayer({ playerID, roomID });
       const { cards } = player;
@@ -66,7 +63,7 @@ export const CardsHandler: Handler = {
     }
   },
 
-  canPlaceInsurance: ({ playerID, roomID }: SpecificID) => {
+  canPlaceInsurance: ({ roomID, store }: { roomID: RoomID } & { store: IStore }) => {
     try {
       const { cards: dealerCards } = store.getDealer(roomID);
       if (dealerCards.length !== 1) {
@@ -78,18 +75,18 @@ export const CardsHandler: Handler = {
       }
       return false;
     } catch (error) {
-        throw new Error('Failed to check for place insurance');
+      throw new Error('Failed to check for place insurance');
     }
   },
 
   getPointsSum(cards: Card[]): number {
     return cards.reduce((sum, card) => {
-      let point = PointsMap[card.value];
+      const point = PointsMap[card.value];
+      sum += point;
       // special check for Ace
       if (card.value === CardValue.ACE && sum > TWENTY_ONE) {
-        point = 1;
+        sum = sum - point + 1;
       }
-      sum += point;
       return sum;
     }, 0);
   },
