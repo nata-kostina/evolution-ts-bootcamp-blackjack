@@ -10,7 +10,7 @@ export class UIStore {
         double: true,
         surender: true,
         insurance: true,
-        bet: false,
+        bet: true,
     };
 
     private _betEditBtnsDisabled = true;
@@ -87,7 +87,7 @@ export class UIStore {
     public addBet(bet: Bet): void {
         console.log("add bet: ", bet);
         try {
-            if (this.player) {
+            if (this.player && bet <= this.player.balance) {
                 this.player.bet += bet;
                 this.player.balance -= bet;
                 this._betHistory.push(bet);
@@ -99,10 +99,15 @@ export class UIStore {
 
     public undoBet(): void {
         try {
-            const lastBet = this._betHistory.pop();
-            if (lastBet && this.player) {
-                this.player.bet -= lastBet;
-                this.player.balance += lastBet;
+            if (this.player) {
+                const lastBet = this._betHistory.pop();
+                if (lastBet) {
+                    this.player.bet -= lastBet;
+                    this.player.balance += lastBet;
+                }
+                if (this.player.bet === 0) {
+                    this.toggleBetEditBtnsDisabled(true);
+                }
             }
         } catch (error) {
             console.log("Failed to undo bet");

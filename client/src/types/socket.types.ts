@@ -3,7 +3,7 @@ import { Notification, YesNoAcknowledgement } from "./notification.types";
 import { Action, Bet, GameMode, GameSession, NewCard, PlayerID, RoomID } from "./game.types";
 
 export interface ServerToClientEvents {
-    startGame: (response: SocketResponse<GameSession>) => void;
+    initGame: (response: SocketResponse<{ game: GameSession; playerID: PlayerID; }>) => void;
     placeBet: (response: SocketResponse<GameSession>) => void;
     updateSession: (response: SocketResponse<GameSession>) => void;
     dealCard: (response: SocketResponse<NewCard>) => void;
@@ -13,7 +13,7 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-    startGame: ({ playerID, mode }: { playerID: PlayerID; mode: GameMode; }) => void;
+    initGame: ({ playerID, mode }: { playerID: PlayerID | null; mode: GameMode; }) => void;
     finishGame: ({ roomID, playerID }: SpecificID) => void;
     takeMoneyDecision: ({ roomID, playerID }: SpecificID & { response: YesNoAcknowledgement; }) => void;
     placeBet: ({ roomID, playerID, bet }: SpecificID & { bet: Bet; }) => void;

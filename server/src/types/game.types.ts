@@ -19,6 +19,8 @@ export enum Suit {
   Clubs = 'C',
   Hearts = 'H',
 }
+
+// export type Hand
 export type PlayerInstance = {
   readonly playerID: PlayerID;
   readonly roomID: RoomID;
@@ -28,6 +30,10 @@ export type PlayerInstance = {
   points: number;
   insurance: number;
   availableActions: Action[];
+//   hands: {
+//       left: Card[];
+//       right: PlayerInstance;
+//   }
 };
 export type DealerInstance = {
   cards: Card[];
@@ -54,6 +60,7 @@ export enum Action {
   DOUBLE = 'double',
   SURENDER = 'surender',
   Insurance = 'insurance',
+  Split = 'split',
 }
 
 export const WinCoefficient = {

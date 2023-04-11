@@ -3,9 +3,10 @@ import React from "react";
 import { observer } from "mobx-react-lite";
 import { useGame } from "../../context/GameContext";
 import styles from "./styles.module.css";
+import { Game } from "../../stores/Game";
 
-export const Balance = observer(() => {
-    const game = useGame();
+export const BalancePanel = observer(() => {
+    const game = useGame() as Game;
     const player = game.UI.player;
     return (
         <div className={styles.balanceContainer}>

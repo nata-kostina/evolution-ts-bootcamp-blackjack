@@ -1,12 +1,16 @@
-import React, { createContext, useContext } from "react";
-import { game } from "../init";
+import React, { createContext, ReactNode, useContext } from "react";
 import { Game } from "../stores/Game";
-import { ContextProviderProps } from "../types/context.types";
 
-const GameContext = createContext<Game>(game);
+interface GameContextProviderProps {
+    children: ReactNode;
+    game: Game;
+}
 
-export const GameProvider: React.FC<ContextProviderProps> = ({
+const GameContext = createContext<Game | null>(null);
+
+export const GameProvider: React.FC<GameContextProviderProps> = ({
     children,
+    game,
 }) => {
     return (
         <GameContext.Provider value={game}>

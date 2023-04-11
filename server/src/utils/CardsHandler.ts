@@ -39,8 +39,10 @@ export const CardsHandler: Handler = {
   canDouble: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => {
     try {
       const player = store.getPlayer({ playerID, roomID });
-      const { cards: playerCards, points } = player;
-
+      const { cards: playerCards, points, balance, bet } = player;
+        if (bet * 2 > balance) {
+            return false;
+        }
       if (playerCards.length === 2) {
         return points === NINE || points === TEN || points === ELEVEN;
       }

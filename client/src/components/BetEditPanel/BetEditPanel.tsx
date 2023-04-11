@@ -3,7 +3,7 @@ import { betActionBtns } from "../../constants/ui.constants";
 import { BetActionButton } from "./BetActionButton";
 import styles from "./styles.module.css";
 
-export const BetControlPanel = () => {
+export const BetEditPanel = () => {
     return (
         <div className={styles.betControlPanel}>
             {betActionBtns.map((btn) => {

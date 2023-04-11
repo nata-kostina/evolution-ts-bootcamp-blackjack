@@ -2,6 +2,8 @@ import { string, number, array, object, boolean } from "yup";
 import { Action, CardValue, Suit } from "../../types/game.types";
 import { NotificationVariant } from "../../types/notification.types";
 
+export const playerIDSchema = string<Action>().required();
+
 const cardSchema = object().shape({
     value: string<CardValue>().required(),
     suit: string<Suit>().required(),

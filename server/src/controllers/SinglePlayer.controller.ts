@@ -14,6 +14,7 @@ import {
   IStore,
   NewCard,
   Notification,
+  PlayerID,
   RoomID,
   SpecificID,
   Suit,
@@ -34,6 +35,8 @@ import {
   VictoryNotification,
 } from '../constants/index.js';
 import { CardsHandler } from '../utils/CardsHandler.js';
+import { Socket } from 'socket.io';
+import { generatePlayerID } from '../utils/generatePlayerID.js';
 
 export class SinglePlayerController implements Controller {
   private readonly _playersStore: IPlayersStore;
@@ -46,9 +49,12 @@ export class SinglePlayerController implements Controller {
     this._respondManager = respondManager;
   }
 
-  public async handleStartGame({ roomID, playerID }: SpecificID): Promise<void> {
+  public async handleInitGame({ playerID, socket }: { playerID: PlayerID; socket: Socket }): Promise<void> {
     try {
-      if (this._playersStore.isNewPlayer(playerID)) {
+      const id = playerID ? playerID : generatePlayerID();
+      const roomID = this._gameStore.createNewRoom(id);
+      socket.join(roomID);
+      if (this._playersStore.isNewPlayer(id)) {
         this._playersStore.updatePlayerBalance({ playerID, balance: defaultBalance });
       }
       const player = initializePlayer({
@@ -57,15 +63,15 @@ export class SinglePlayerController implements Controller {
         balance: this._playersStore.getPlayerBalance(playerID),
       });
       this._gameStore.joinPlayerToGameState({ roomID, player });
-      return this._respondManager
-        .respondWithDelay({
-          roomID,
-          event: 'startGame',
-          response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
-        })
-        .catch((error: unknown) => {
-          throw new Error(isError(error) ? error.message : `Socket ${playerID}: Failed to handle game start`);
-        });
+        return this._respondManager
+          .respondWithDelay({
+            roomID,
+            event: 'initGame',
+            response: [successResponse({game: ld.cloneDeep(this._gameStore.getSession(roomID)), playerID: id})],
+          })
+          .catch((error: unknown) => {
+            throw new Error(isError(error) ? error.message : `Socket ${playerID}: Failed to handle game start`);
+          });
     } catch (error: unknown) {
       throw new Error(isError(error) ? error.message : `Socket ${playerID}: Failed to handle game start`);
     }
@@ -112,6 +118,7 @@ export class SinglePlayerController implements Controller {
   }
   public async handlePlaceBet({ playerID, roomID, bet }: SpecificID & { bet: Bet }): Promise<void> {
     try {
+        console.log("handlePlaceBet: ", { playerID, roomID, bet });
       const player = this._gameStore.getPlayer({ roomID, playerID });
       this._gameStore.updatePlayer({ roomID, playerID, payload: { bet, balance: player.balance - bet } });
 
@@ -120,8 +127,6 @@ export class SinglePlayerController implements Controller {
         event: 'placeBet',
         response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
       });
-
-    //   this.startPlay({ playerID, roomID });
       console.log(`Socket ${playerID}: handle place bet`);
     } catch (error: unknown) {
       console.log('Failed to handle place bet');
@@ -150,6 +155,7 @@ export class SinglePlayerController implements Controller {
   }
   public async startPlay({ roomID, playerID }: SpecificID): Promise<void> {
     try {
+        console.log("startPlay");
       await this.dealCards({ playerID, roomID });
       const isBlackjack = CardsHandler.isBlackjack({ roomID, playerID, store: this._gameStore });
 
@@ -207,11 +213,11 @@ export class SinglePlayerController implements Controller {
 
   private async dealCards({ playerID, roomID }: SpecificID): Promise<void> {
     try {
-      await this.dealPlayerCard({ roomID, playerID });
-      await this.dealDealerCard(roomID);
-      await this.dealPlayerCard({ roomID, playerID });
-      await this.dealDealerHoleCard(roomID);
-    //   await this.dealMockCards({ playerID, roomID });
+    //   await this.dealPlayerCard({ roomID, playerID });
+    //   await this.dealDealerCard(roomID);
+    //   await this.dealPlayerCard({ roomID, playerID });
+    //   await this.dealDealerHoleCard(roomID);
+        await this.dealMockCards({ playerID, roomID });
     } catch (error: unknown) {
       throw new Error(isError(error) ? error.message : `${playerID}: Failed to deal cards`);
     }
@@ -668,7 +674,7 @@ export class SinglePlayerController implements Controller {
 
   private async dealMockCards({ playerID, roomID }: SpecificID): Promise<void> {
     const player = this._gameStore.getPlayer({ playerID, roomID });
-    const card1 = { id: '1sd23', suit: Suit.Clubs, value: CardValue.ACE };
+    const card1 = { id: '1sd23', suit: Suit.Clubs, value: CardValue.FOUR };
     this._gameStore.updatePlayer({
       playerID: player.playerID,
       roomID,
@@ -709,7 +715,7 @@ export class SinglePlayerController implements Controller {
       ],
     });
 
-    const card3 = { id: 'ghjr', suit: Suit.Clubs, value: CardValue.TEN };
+    const card3 = { id: 'ghjr', suit: Suit.Clubs, value: CardValue.FIVE };
     this._gameStore.updatePlayer({
       playerID: player.playerID,
       roomID,

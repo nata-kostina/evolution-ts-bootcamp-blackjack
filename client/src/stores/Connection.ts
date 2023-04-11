@@ -10,6 +10,7 @@ import {
     SocketStatus,
 } from "../types/socket.types";
 import { RoomID } from "../types/game.types";
+import { ResponseQueue } from "./ResponseHandlerQueue";
 
 export class Connection {
     private _socket: Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -18,8 +19,11 @@ export class Connection {
     private _game: Game;
     private _connectionID: string | null = null;
     private _roomID: RoomID | null = null;
+    private readonly _responseHandlerQueue: ResponseQueue;
 
     public constructor(serverURL: string, game: Game) {
+        this._responseHandlerQueue = new ResponseQueue();
+
         this._game = game;
 
         this._socket = io(serverURL, {
@@ -45,41 +49,54 @@ export class Connection {
             }
         });
 
-        this._socket.on("startGame", async (response) => {
-            this._roomID = response.payload.roomID;
+        this._socket.on("initGame", (response) => {
+            this._roomID = response.payload.game.roomID;
             this._game.roomID = this._roomID;
-            this._game.handleStartGame(response);
-        });
-        this._socket.on("placeBet", (reponse) => {
-            this._game.handlePlaceBetNotification(reponse).then(() => {
-                if (this.roomID) {
-                    this.sendRequest<"startPlay">({
-                        event: "startPlay",
-                        payload: [{ roomID: this.roomID, playerID: this._socket.id }],
-                    });
-                }
+            this._responseHandlerQueue.enqueue(async () => {
+                await this._game.handleInitGame(response);
             });
         });
-        this._socket.on("updateSession", async (response) =>
-      this._game.handleUpdateGameSession(response),
-        );
-        this._socket.on("dealCard", async (reponse) =>
-      this._game.handleDealCard(reponse),
-        );
-        this._socket.on("notificate", async (response) =>
-      this._game.handleNotificate(response),
-        );
-        this._socket.on("unholeCard", async (response) =>
-      this._game.handleUnholeCard(response),
-        );
-        this._socket.on("finishRound", async (response) =>
-      this._game.handleFinishRound(response),
-        );
+
+        this._socket.on("placeBet", (reponse) => {
+            this._responseHandlerQueue.enqueue(async () => {
+                await this._game.handlePlaceBetNotification(reponse);
+            });
+        });
+
+        this._socket.on("updateSession", (response) => {
+            this._responseHandlerQueue.enqueue(async () => {
+                await this._game.handleUpdateGameSession(response);
+            });
+        });
+
+        this._socket.on("dealCard", (reponse) => {
+            this._responseHandlerQueue.enqueue(async () => {
+                await this._game.handleDealCard(reponse);
+            });
+        });
+
+        this._socket.on("notificate", (response) => {
+            this._responseHandlerQueue.enqueue(async () => {
+                await this._game.handleNotificate(response);
+            });
+        });
+
+        this._socket.on("unholeCard", (response) => {
+            this._responseHandlerQueue.enqueue(async () => {
+                await this._game.handleUnholeCard(response);
+            });
+        });
+
+        this._socket.on("finishRound", (response) => {
+            this._responseHandlerQueue.enqueue(async () => {
+                await this._game.handleFinishRound(response);
+            });
+        });
 
         makeAutoObservable(this);
     }
 
-    public get conncetionID(): string | null {
+    public get connectionID(): string | null {
         return this._connectionID;
     }
 

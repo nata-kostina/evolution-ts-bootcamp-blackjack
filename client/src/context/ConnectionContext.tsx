@@ -1,12 +1,16 @@
-import React, { createContext, useContext } from "react";
-import { connection } from "../init";
+import React, { createContext, ReactNode, useContext } from "react";
 import { Connection } from "../stores/Connection";
-import { ContextProviderProps } from "../types/context.types";
 
-const ConnectionContext = createContext<Connection>(connection);
+interface ConnectionContextProviderProps {
+    children: ReactNode;
+    connection: Connection;
+}
 
-export const ConnectionProvider: React.FC<ContextProviderProps> = ({
+const ConnectionContext = createContext<Connection | null>(null);
+
+export const ConnectionProvider: React.FC<ConnectionContextProviderProps> = ({
     children,
+    connection,
 }) => {
     return (
         <ConnectionContext.Provider value={connection}>

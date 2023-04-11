@@ -2,10 +2,18 @@ import { Server } from 'socket.io';
 import { SinglePlayerController } from './controllers/SinglePlayer.controller.js';
 import { PlayerStore } from './store/Players.store.class.js';
 import { ClientToServerEvents, Controller, ServerToClientEvents } from './types/index.js';
-import { actionSchema, betSchema, playerSchema, roomSchema, yesNoResponseSchema } from './utils/validation.js';
+import {
+  actionSchema,
+  betSchema,
+  modeSchema,
+  playerSchema,
+  roomSchema,
+  yesNoResponseSchema,
+} from './utils/validation.js';
 import { GameStore } from './store/Game.store.class.js';
 import { IResponseManager, ResponseManager } from './utils/responseManager.js';
 import { isError } from './utils/isError.js';
+import { generatePlayerID } from './utils/generatePlayerID.js';
 
 export class AppServer {
   private readonly _IO: Server<ClientToServerEvents, ServerToClientEvents>;
@@ -31,21 +39,19 @@ export class AppServer {
     this._IO.on('connection', (socket) => {
       console.log(`Socket ${socket.id} was connected`);
 
-      socket.on('startGame', async ({ playerID }) => {
-        const roomID = GameStore.createNewRoom(socket.id);
-        socket.join(roomID);
-
+      socket.on('initGame', async ({ playerID, mode }) => {
         try {
-          const { error } = playerSchema.validate(playerID);
+          const { error } = modeSchema.validate(mode);
           if (error) {
             throw new Error('Invalid parameter');
           }
-          await this._controller.handleStartGame({ roomID, playerID });
-          console.log(`Socket ${socket.id} started a game`);
+          console.log('playerID: ', playerID);
+          await this._controller.handleInitGame({ playerID, socket });
+          console.log(`Socket ${socket.id} initialized a game`);
         } catch (e: unknown) {
-          this._IO
-            .to(roomID)
-            .emit('startGame', { ok: false, statusText: isError(e) ? e.message : 'Failed to start a game' });
+          //   this._IO
+          //     .to(roomID)
+          //     .emit('startGame', { ok: false, statusText: isError(e) ? e.message : 'Failed to start a game' });
         }
       });
 
@@ -78,7 +84,7 @@ export class AppServer {
         }
       });
 
-      socket.on('placeBet', ({ roomID, playerID, bet }) => {
+      socket.on('placeBet', async ({ roomID, playerID, bet }) => {
         try {
           const { error: roomSchemaError } = roomSchema.validate(roomID);
           const { error: playerSchemaError } = playerSchema.validate(playerID);
@@ -88,7 +94,8 @@ export class AppServer {
           if (roomSchemaError || playerSchemaError || betSchemaError) {
             throw new Error('Invalid parameter');
           }
-          this._controller.handlePlaceBet({ roomID, playerID, bet });
+          await this._controller.handlePlaceBet({ roomID, playerID, bet });
+          await this._controller.startPlay({ roomID, playerID });
           console.log(`Socket ${socket.id} placed bet`);
         } catch (e: unknown) {
           console.log(isError(e) ? e.message : `Socket ${socket.id} failed to place bet`);

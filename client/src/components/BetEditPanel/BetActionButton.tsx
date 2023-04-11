@@ -7,13 +7,14 @@ import styles from "./styles.module.css";
 import { useGame } from "../../context/GameContext";
 import { BetActionBtn } from "../../types/ui.types";
 import { BetAction } from "../../types/game.types";
+import { Game } from "../../stores/Game";
 
 interface Props {
     item: BetActionBtn;
 }
 
 export const BetActionButton = observer(({ item }: Props) => {
-    const game = useGame();
+    const game = useGame() as Game;
     const disabled = game.UI.isBetEditBtnDisabled();
     const handleClick = () => {
         switch (item.action) {

@@ -82,26 +82,27 @@ export class SceneCanvasElement {
             // table.rotation.z = -Math.PI;
             // table.rotation.x = Math.PI * 0.5;
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            // SceneLoader.ImportMeshAsync(
-            //     "",
-            //     "https://dl.dropbox.com/s/hape3mtsidna11m/table.glb?dl=0",
-            //     "table.glb",
-            //     this.base.scene)
-            //     .then((result) => {
-            //         const table = result.meshes[0];
-            //         table.position = new Vector3(0, 0, 0);
-            //         table.rotationQuaternion = null;
-            //         table.setPivotPoint(new Vector3(0, 0, 0));
-            //         table.position.y = -0.5;
-            //         table.position.z = 1.7;
-            //         // table.rotation.y = Math.PI * 1;
-            //         // table.rotation.x = Math.PI * 0.4;
-            //         table.rotation.x = -Math.PI * 0.5;
-            //         table.scaling = new Vector3(1.7, 1.7, 1.7);
+            SceneLoader.ImportMeshAsync(
+                "",
+                "https://dl.dropbox.com/s/b52khhmuw47ano4/blackjack_table.glb?dl=0",
+                "blackjack_table.glb",
+                this.base.scene)
+                .then((result) => {
+                    const table = result.meshes[0];
+                    // table.position = new Vector3(0, 0, 0);
+                    // table.rotationQuaternion = null;
+                    // table.setPivotPoint(new Vector3(0, 0, 0));
+                    // table.position.y = -0.5;
+                    // table.position.z = 1.7;
+                    // // table.rotation.y = Math.PI * 1;
+                    // // table.rotation.x = Math.PI * 0.4;
+                    // table.rotation.x = -Math.PI * 0.5;
+                    // table.scaling = new Vector3(1.7, 1.7, 1.7);
 
-            //         const size = table.getBoundingInfo().boundingBox.extendSize;
-            //         console.log(size);
-            //     });
+                    // const size = table.getBoundingInfo().boundingBox.extendSize;
+                    // console.log(size);
+                })
+                .catch((error) => console.log(error));
 
             // const ground = MeshBuilder.CreateGround(
             //     "ground",

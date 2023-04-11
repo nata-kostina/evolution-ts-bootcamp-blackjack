@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { useGame } from "../context/GameContext";
+import { Game } from "../stores/Game";
 
 export const useModal = () => {
-    const game = useGame();
+    const game = useGame() as Game;
     const isOpen = game.UI.isModalShown;
     const notification = game.UI.currentModal;
     const notificationQueue = game.UI.modalQueue;

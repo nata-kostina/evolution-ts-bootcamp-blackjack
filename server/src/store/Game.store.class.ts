@@ -266,6 +266,7 @@ class Store implements IStore{
     this.store[roomID] = gameState;
     return roomID;
   }
+
 }
 
 export const GameStore = new Store();

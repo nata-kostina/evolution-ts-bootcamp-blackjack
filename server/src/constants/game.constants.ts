@@ -1,3 +1,3 @@
 export const maxPlayersNum = 1;
 
-export const defaultBalance = 2000;
+export const defaultBalance = 100;

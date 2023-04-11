@@ -8,7 +8,7 @@ export type ResponseParameters<Event extends keyof ServerToClientEvents> = {
 };
 
 export interface ServerToClientEvents {
-  startGame: (response: SocketResponse<GameSession>) => void;
+    initGame: (response: SocketResponse<{ game: GameSession, playerID: PlayerID }>) => void;
   placeBet: (response: SocketResponse<GameSession>) => void;
   updateSession: (response: SocketResponse<GameSession>) => void;
   dealCard: (response: SocketResponse<NewCard>) => void;
@@ -18,7 +18,7 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  startGame: ({ playerID, mode }: { playerID: PlayerID; mode: GameMode }) => void;
+    initGame: ({ playerID, mode }: { playerID: PlayerID | null; mode: GameMode; }) => void;
   finishGame: ({ roomID, playerID }: SpecificID) => void;
   takeMoneyDecision: ({ roomID, playerID }: SpecificID & { response: YesNoAcknowledgement }) => void;
   placeBet: ({ roomID, playerID, bet }: SpecificID & { bet: Bet }) => void;
@@ -49,13 +49,13 @@ export enum YesNoAcknowledgement {
 }
 
 export type NewCard = {
-    target: "dealer" | "player",
-    card: Card | HoleCard,
-    points: number,
-}
+  target: 'dealer' | 'player';
+  card: Card | HoleCard;
+  points: number;
+};
 
 export type UnholeCardPayload = {
-    target: "dealer";
-    card: Card;
-    points: number;
+  target: 'dealer';
+  card: Card;
+  points: number;
 };

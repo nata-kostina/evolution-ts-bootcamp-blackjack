@@ -12,6 +12,7 @@ import {
     gameSessionSchema,
     newCardSchema,
     notificationSchema,
+    playerIDSchema,
     playerSchema,
     unholedCardSchema,
 } from "../utils/validation/schemas";
@@ -50,22 +51,21 @@ export class Game {
         return this._roomID;
     }
 
-    public finishGame(): void {
-        if (this._roomID && this._playerID) {
-            // this._ui.notification.resetQueue();
-            // this.connection.socket.emit("finishGame", { roomID: this._roomID, playerID: this._playerID });
-        }
-    }
-
-    public async handleStartGame(response: SocketResponse<GameSession>): Promise<void> {
+    public async handleInitGame(response: SocketResponse<{ game: GameSession; playerID: PlayerID; }>): Promise<void> {
         try {
-            if (response.ok && response.payload && this._playerID) {
-                const session = await gameSessionSchema.validate(response.payload);
-                const player = pickPlayerInstance({ playerID: this._playerID, players: session.players });
+            if (response.ok && response.payload) {
+                const session = await gameSessionSchema.validate(response.payload.game);
+                const id = await playerIDSchema.validate(response.payload.playerID);
+                this.playerID = id;
+                localStorage.setItem("player_id", id);
+
+                const player = pickPlayerInstance({ playerID: id, players: session.players });
                 if (player) {
                     const validatedPlayer = await playerSchema.validate(player, {
                         stripUnknown: true,
                     });
+                    localStorage.setItem("player_id", validatedPlayer.playerID);
+
                     this._session = session;
                     this._roomID = session.roomID;
                     this._ui.player = validatedPlayer;
@@ -169,7 +169,7 @@ export class Game {
                     this._ui.toggleActionBtns(validatedPlayer.availableActions);
                     this._ui.resetHelperTarget();
                     this._scene.toggleChipAction(true);
-                    this._scene.removeCards();
+                    await this._scene.removeCards();
                 }
             } else {
             }
@@ -179,7 +179,7 @@ export class Game {
     }
 
     public async handleDealCard(response: SocketResponse<NewCard>): Promise<void> {
-        console.log("handleDealCard");
+        console.log("START handleDealCard");
         try {
             if (response.ok && response.payload) {
                 const newCard = await newCardSchema.validate(response.payload);
@@ -188,6 +188,7 @@ export class Game {
                 } else {
                     await this._scene.dealDealerCard(newCard);
                 }
+                console.log("AFTER handleDealCard");
             } else {
             }
         } catch (error) {

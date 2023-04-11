@@ -1,30 +1,3 @@
-.controlPanel {
-  position: fixed;
-  height: 80px;
-  left: 0;
-  bottom: 0;
-  right: 0;
-
-  display: flex;
-
-  padding: calc(var(--controlPanelBorder) + 8px);
-
-  border: solid var(--controlPanelBorder) transparent;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  background-image: linear-gradient(var(--controlPanel), var(--controlPanel)),
-    var(--goldBorder);
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-}
-
-.inner {
-  width: 100%;
-
-  display: flex;
-  justify-content: space-between;
-}
-
 .actionsPanel {
   position: absolute;
   top: -60px;
