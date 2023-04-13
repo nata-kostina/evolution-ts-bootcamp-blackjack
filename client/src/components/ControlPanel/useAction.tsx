@@ -14,11 +14,6 @@ export const useAction = () => {
             if (action === Action.BET) {
                 const bet = game.UI.bet;
                 if (bet) {
-                    console.log("emit placeBet: ", {
-                        playerID,
-                        bet,
-                        roomID,
-                    });
                     connection.sendRequest<"placeBet">({
                         event: "placeBet",
                         payload: [{
@@ -29,6 +24,9 @@ export const useAction = () => {
                     });
                 }
             } else {
+                if (action === Action.DOUBLE && game.UI.bet) {
+                    game.UI.addBet({ value: game.UI.bet });
+                }
                 connection.sendRequest<"makeDecision">({
                     event: "makeDecision",
                     payload: [{

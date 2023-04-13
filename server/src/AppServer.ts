@@ -101,16 +101,17 @@ export class AppServer {
           console.log(isError(e) ? e.message : `Socket ${socket.id} failed to place bet`);
         }
       });
-      socket.on('takeMoneyDecision', ({ roomID, playerID, response }) => {
+      socket.on('takeMoneyDecision', async ({ roomID, playerID, response }) => {
         try {
+            console.log('on takeMoneyDecision',{ roomID, playerID, response });
           const { error: roomSchemaError } = roomSchema.validate(roomID);
           const { error: playerSchemaError } = playerSchema.validate(playerID);
           const { error: responseSchemaError } = yesNoResponseSchema.validate(response);
           if (roomSchemaError || playerSchemaError || responseSchemaError) {
             throw new Error('Invalid parameter');
           }
-          this._controller.handleTakeMoneyDecision({ roomID, playerID, response });
-          console.log(`Socket ${socket.id} placed bet`);
+          await this._controller.handleTakeMoneyDecision({ roomID, playerID, response });
+          console.log(`Socket ${socket.id} made decision`);
         } catch (e: unknown) {
           console.log(isError(e) ? e.message : `Socket ${socket.id} failed to place bet`);
         }

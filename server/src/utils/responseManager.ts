@@ -42,6 +42,7 @@ export class ResponseManager implements IResponseManager {
     response,
     event,
     roomID,
+    delay
   }: ResponseParameters<T>): Promise<void> {
     return new Promise<void>((resolve) => {
       setTimeout(() => {
@@ -54,7 +55,7 @@ export class ResponseManager implements IResponseManager {
         } catch (error) {
           console.log('Error respond with delay');
         }
-      }, 800);
+      }, delay ? delay : 800);
     });
   }
 }

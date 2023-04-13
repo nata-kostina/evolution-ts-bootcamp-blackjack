@@ -7,6 +7,7 @@ import {
     StandardMaterial,
     Vector4,
     Mesh,
+    TransformNode,
 } from "@babylonjs/core";
 import { CanvasBase } from "../CanvasBase";
 import { ImgPath } from "../../constants/imgPaths.constants";
@@ -20,6 +21,7 @@ import { GameMatrix } from "../GameMatrix";
 import { isHoleCard } from "../../utils/gameUtils/isHoleCard";
 import { CardAnimation } from "../../types/canvas.types";
 import { Card, HoleCard } from "../../types/game.types";
+import { cardSize } from "../../constants/canvas.constants";
 
 export class CardCanvasElement {
     private readonly base: CanvasBase;
@@ -28,6 +30,7 @@ export class CardCanvasElement {
     private finalPosition: Vector3;
     private isHoleCard: boolean;
     private texturePath: string;
+    private readonly _cardObj: Card | HoleCard;
 
     public constructor(
         base: CanvasBase,
@@ -39,7 +42,7 @@ export class CardCanvasElement {
         this.matrix = matrix;
         this.finalPosition = position;
         this.isHoleCard = isHoleCard(card);
-
+        this._cardObj = card;
         const columns = 6;
         const rows = 1;
 
@@ -52,9 +55,9 @@ export class CardCanvasElement {
         const options = {
             faceUV,
             wrap: true,
-            width: 0.3,
-            height: 0.5,
-            depth: 0.001,
+            width: cardSize.width,
+            height: cardSize.height,
+            depth: cardSize.depth,
         };
 
         this.skin = MeshBuilder.CreateBox(
@@ -69,11 +72,15 @@ export class CardCanvasElement {
             : ImgPath[`${(card as Card).value}${(card as Card).suit}`];
     }
 
+    public get cardID(): string {
+        return this._cardObj.id;
+    }
+
     public async addContent(): Promise<void> {
         return new Promise<void>((resolve) => {
             const material = new StandardMaterial(
-                `material-${this.texturePath}- ${Date.now()}`,
-                this.base.scene,
+        `material-${this.texturePath}- ${Date.now()}`,
+        this.base.scene,
             );
             const texture = new Texture(this.texturePath, this.base.scene);
             texture.onLoadObservable.addOnce(() => {
@@ -84,7 +91,10 @@ export class CardCanvasElement {
         });
     }
 
-    public async animate(type: CardAnimation, onFinish?: () => void): Promise<void> {
+    public async animate(
+        type: CardAnimation,
+        onFinish?: () => void,
+    ): Promise<void> {
         const matrixWidth = this.matrix.getMatrixWidth();
         const matrixHeight = this.matrix.getMatrixHeight();
         switch (type) {
@@ -94,55 +104,60 @@ export class CardCanvasElement {
                     matrixHeight,
                     this.finalPosition,
                 );
-                this.base.scene.beginDirectAnimation(
+                const dealAnim = this.base.scene.beginDirectAnimation(
                     this.skin,
                     animationArray,
                     0,
                     frameRate,
                     false,
                     3,
-          () => {
-              if (!this.isHoleCard) {
-                  this.animate(CardAnimation.Unhole, onFinish);
-              } else if (onFinish) {
-                  onFinish();
-              }
-          },
                 );
+                await dealAnim.waitAsync();
+                if (!this.isHoleCard) {
+                    await this.animate(CardAnimation.Unhole, onFinish);
+                } else if (onFinish) {
+                    onFinish();
+                }
                 break;
             case CardAnimation.Remove:
-                const { frameRate: removeFR, animationArray: removeAnim } =
+                const { frameRate: removeFR, animationArray: removeAnimation } =
           getRemoveCardAnimation(matrixWidth, matrixHeight, this.finalPosition);
-                this.base.scene.beginDirectAnimation(
+                const removeAnim = this.base.scene.beginDirectAnimation(
                     this.skin,
-                    removeAnim,
+                    removeAnimation,
                     0,
                     removeFR,
                     false,
                     3,
-          () => this.skin.dispose(),
+                    () => this.skin.dispose(),
                 );
+                await removeAnim.waitAsync();
                 break;
             case CardAnimation.Unhole:
                 const { frameRate: FRUnhole, animationArray: unholeAnimation } =
           getUnholeCardAnimation();
-                this.base.scene.beginDirectAnimation(
+                const unholeAnim = this.base.scene.beginDirectAnimation(
                     this.skin,
                     unholeAnimation,
                     0,
                     FRUnhole,
                     false,
                     5,
-          () => {
-              if (onFinish) {
-                  onFinish();
-              }
-          },
+                    () => {
+                        if (onFinish) {
+                            onFinish();
+                        }
+                    },
                 );
+                await unholeAnim.waitAsync();
                 break;
             default:
                 assertUnreachable(type);
         }
+    }
+
+    public set position(position: Vector3) {
+        this.skin.position = new Vector3().copyFrom(position);
     }
 
     public getPosition(): Vector3 {
@@ -157,6 +172,9 @@ export class CardCanvasElement {
         this.skin.position = position;
     }
 
-    private async boot(): Promise<void> {
+    public setParent(parent: TransformNode): void {
+        this.skin.parent = parent;
     }
+
+    private async boot(): Promise<void> {}
 }

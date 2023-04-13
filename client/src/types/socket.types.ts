@@ -1,15 +1,18 @@
 import { UnholeCardPayload } from "./canvas.types";
 import { Notification, YesNoAcknowledgement } from "./notification.types";
-import { Action, Bet, GameMode, GameSession, NewCard, PlayerID, RoomID } from "./game.types";
+import { Action, Bet, DealPlayerCard, GameMode, GameSession, DealDealerCard, PlayerID, RoomID, GameResult } from "./game.types";
 
 export interface ServerToClientEvents {
     initGame: (response: SocketResponse<{ game: GameSession; playerID: PlayerID; }>) => void;
     placeBet: (response: SocketResponse<GameSession>) => void;
     updateSession: (response: SocketResponse<GameSession>) => void;
-    dealCard: (response: SocketResponse<NewCard>) => void;
+    dealDealerCard: (response: SocketResponse<DealDealerCard>) => void;
+    dealPlayerCard: (response: SocketResponse<DealPlayerCard>) => void;
     notificate: (response: SocketResponse<Notification>) => void;
     unholeCard: (response: SocketResponse<UnholeCardPayload>) => void;
     finishRound: (response: SocketResponse<GameSession>) => void;
+    split: (response: SocketResponse<GameSession>) => void;
+    finishRoundForHand: (response: SocketResponse<FinishRoundForHand>) => void;
 }
 
 export interface ClientToServerEvents {
@@ -43,3 +46,10 @@ export enum SocketStatus {
     Waiting = "waiting",
     WithError = "error",
 }
+
+export type FinishRoundForHand = {
+    roomID: RoomID;
+    playerID: PlayerID;
+    handID: string;
+    result: GameResult;
+};

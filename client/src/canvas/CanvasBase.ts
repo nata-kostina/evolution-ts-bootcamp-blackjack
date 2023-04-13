@@ -51,9 +51,9 @@ export class CanvasBase {
     }
 
     protected createCamera(scene: Scene): ArcRotateCamera {
-        const camera = new ArcRotateCamera("Camera", -Math.PI * 0.5, Math.PI * 0.55, 3, Vector3.Zero(), scene);
+        const camera = new ArcRotateCamera("Camera", -Math.PI * 0.5, Math.PI * 0.5, 3, Vector3.Zero(), scene);
         this.scene.setActiveCameraByName("Camera");
-        // camera.attachControl(true);
+        camera.attachControl(true);
         // camera.setTarget(BABYLON.Vector3.Zero());
         return camera;
     }

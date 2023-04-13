@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import randomstring from 'randomstring';
 import {
@@ -5,6 +6,7 @@ import {
   Deck,
   GameSession,
   GameState,
+  Hand,
   IStore,
   PlayerID,
   PlayerInstance,
@@ -12,12 +14,15 @@ import {
   SpecificID,
   State,
   UpdateDealerParams,
+  UpdateHandParams,
   UpdatePlayerParams,
 } from '../types/index.js';
 import { initializeGameState } from '../utils/initializers.js';
 import { CardsHandler } from '../utils/CardsHandler.js';
+import { initializeHand } from './../utils/initializers.js';
+import ld from 'lodash';
 
-class Store implements IStore{
+class Store implements IStore {
   private store: State;
 
   constructor() {
@@ -66,6 +71,7 @@ class Store implements IStore{
 
   public getPlayer({ roomID, playerID }: SpecificID): PlayerInstance {
     try {
+        console.log("store players: ", this.store[roomID].players)
       const game = this.getGame(roomID);
       const player = game.players[playerID];
       if (player) {
@@ -127,24 +133,92 @@ class Store implements IStore{
     }
   }
 
+  public getActiveHand({ roomID, playerID }: SpecificID): Hand {
+    try {
+      const game = this.getGame(roomID);
+      const player = game.players[playerID];
+      if (player) {
+        const activeHand = player.hands.find((hand) => hand.handID === player.activeHandID);
+        if (activeHand) {
+          return activeHand;
+        } else {
+          throw new Error('There is no active hand');
+        }
+      } else {
+        throw new Error('There is no such player');
+      }
+    } catch (error) {
+      console.log('Failed to get a player');
+      throw new Error('Failed to get a player');
+    }
+  }
+
   public updatePlayer({ playerID, roomID, payload }: UpdatePlayerParams): void {
     try {
       const game = this.getGame(roomID);
       const player = this.getPlayer({ playerID, roomID });
-      const updatedCards = payload.cards ? [...player.cards, ...payload.cards] : player.cards;
-      const updatedPoints = CardsHandler.getPointsSum(updatedCards);
-      const updatedActions = payload.availableActions ? payload.availableActions : [];
+      //   const updatedHands = payload.hands ? [...player.hands, ...payload.hands] : [...player.hands];
       const updatedPlayer: PlayerInstance = {
         ...player,
         ...payload,
-        points: updatedPoints,
-        cards: [...updatedCards],
-        availableActions: updatedActions,
       };
 
       game.players[player.playerID] = updatedPlayer;
     } catch (e: unknown) {
       throw new Error('Player updation failed');
+    }
+  }
+
+  public updateHand({ playerID, roomID, handID, payload }: UpdateHandParams): void {
+    try {
+      const hand = this.getHand({ playerID, roomID, handID });
+      const player = this.getPlayer({ playerID, roomID });
+      const updatedPoints = payload.cards ? CardsHandler.getPointsSum(payload.cards) : hand.points;
+      const updatedHand: Hand = {
+        ...hand,
+        ...payload,
+        points: updatedPoints,
+      };
+
+      const updatedHands = player.hands.map((h) => {
+        if (h.handID === handID) {
+          return updatedHand;
+        } else {
+          return h;
+        }
+      });
+
+      this.updatePlayer({ roomID, playerID, payload: { hands: updatedHands } });
+    } catch (e: unknown) {
+      throw new Error('Player updation failed');
+    }
+  }
+
+  public getScore({ roomID, playerID, handID }: SpecificID & { handID: string }): number {
+    try {
+      const hand = this.getHand({ playerID, roomID, handID });
+      return hand.points;
+    } catch (e: unknown) {
+      throw new Error('Player updation failed');
+    }
+  }
+
+  public getHand({ roomID, playerID, handID }: SpecificID & { handID: string }): Hand {
+    try {
+      const game = this.getGame(roomID);
+      const player = game.players[playerID];
+      if (player) {
+        const hand = player.hands.find((h) => h.handID === handID);
+        if (hand) {
+          return hand;
+        } else {
+          throw new Error('There is no active hand');
+        }
+      } else {
+        throw new Error('There is no such player');
+      }
+    } catch (error) {
+      throw new Error(`Player ${playerID}: Failed to get hand`);
     }
   }
 
@@ -197,7 +271,15 @@ class Store implements IStore{
     try {
       const game = this.getGame(roomID);
       const player = this.getPlayer({ playerID, roomID });
-      const updatedPlayer: PlayerInstance = { ...player, cards: [], bet: 0, points: 0, insurance: 0 };
+      const activeHand = initializeHand(playerID);
+      const updatedPlayer: PlayerInstance = {
+        ...player,
+        hands: [activeHand],
+        bet: 0,
+        insurance: 0,
+        activeHandID: activeHand.handID,
+        availableActions: []
+      };
 
       game.players[player.playerID] = updatedPlayer;
     } catch (e: unknown) {
@@ -233,13 +315,14 @@ class Store implements IStore{
   public getResetSession({ playerID, roomID }: SpecificID): GameSession {
     try {
       const player = this.getPlayer({ playerID, roomID });
+      const activeHand = initializeHand(playerID);
+
       const updatedPlayer: PlayerInstance = {
         ...player,
-        cards: [],
+        hands: [activeHand],
         bet: 0,
-        points: 0,
         insurance: 0,
-        availableActions: [],
+        activeHandID: activeHand.handID,
       };
 
       const session: GameSession = {
@@ -259,6 +342,52 @@ class Store implements IStore{
     }
   }
 
+  public reassignActiveHand({ roomID, playerID }: SpecificID): void {
+    try {
+      const player = this.getPlayer({ roomID, playerID });
+      if (player.hands.length < 2) return;
+      const newActiveHand = player.hands.find((hand) => hand.parentID === player.activeHandID);
+      if (newActiveHand) {
+        this.updatePlayer({
+          roomID,
+          playerID,
+          payload: {
+            activeHandID: newActiveHand.handID,
+          },
+        });
+      }
+      //   if (activeHand) {
+      //     const index = player.hands.findIndex((hand) => hand.handID === player.activeHandID);
+      //     if (index >= 0) {
+      //       const updatedHands = ld.cloneDeep(player.hands.splice(index, 1));
+      //       const newActiveHand = updatedHands.find((hand) => hand.parentID === activeHand.handID);
+      //       if (newActiveHand) {
+      //         this.updatePlayer({
+      //           roomID,
+      //           playerID,
+      //           payload: {
+      //             activeHandID: newActiveHand.handID,
+      //             hands: updatedHands,
+      //           },
+      //         });
+      //       }
+      //     }
+      //   }
+    } catch (error) {
+      throw new Error(`Player ${playerID}: Failed to get reassign active hand`);
+    }
+  }
+
+  public removeHand({ roomID, playerID, handID }: SpecificID & { handID: string }): void {
+    try {
+      const { hands } = this.getPlayer({ roomID, playerID });
+      const updatedHands = hands.filter((hand) => hand.handID !== handID);
+      this.updatePlayer({ roomID, playerID, payload: { hands: updatedHands } });
+    } catch (error) {
+      throw new Error(`Player ${playerID}: Failed to get reassign active hand`);
+    }
+  }
+
   public createNewRoom(playerID: PlayerID): RoomID {
     const roomID = 'Room_id_' + randomstring.generate();
     const gameState = initializeGameState({ roomID, playerID });
@@ -266,7 +395,6 @@ class Store implements IStore{
     this.store[roomID] = gameState;
     return roomID;
   }
-
 }
 
 export const GameStore = new Store();

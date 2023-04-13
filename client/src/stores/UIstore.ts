@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { makeAutoObservable } from "mobx";
 import { Action, AvailableActions, Bet, PlayerInstance } from "../types/game.types";
 import { Notification } from "../types/notification.types";
+import { IBetCanvasElement } from "../types/canvas.types";
 
 export class UIStore {
     private _player: PlayerInstance | null = null;
@@ -11,6 +13,7 @@ export class UIStore {
         surender: true,
         insurance: true,
         bet: true,
+        split: true,
     };
 
     private _betEditBtnsDisabled = true;
@@ -21,6 +24,8 @@ export class UIStore {
     private _currentModal: Notification | null = null;
     private _modalQueue: Array<Notification> = [];
     private _isModalShown = false;
+
+    private _betElement: IBetCanvasElement | null = null;
 
     public constructor() {
         makeAutoObservable(this);
@@ -57,6 +62,10 @@ export class UIStore {
         return this._isModalShown;
     }
 
+    public set betElement(element: IBetCanvasElement) {
+        this._betElement = element;
+    }
+
     public isPlayerActionBtnDisabled(btn: Action): boolean {
         return this._actionBtnsDisabled[btn];
     }
@@ -66,7 +75,6 @@ export class UIStore {
     }
 
     public togglePlaceBetBtnDisabled(value: boolean): void {
-        console.log("togglePlaceBetBtnDisabled");
         this._actionBtnsDisabled.bet = value;
     }
 
@@ -84,13 +92,16 @@ export class UIStore {
         });
     }
 
-    public addBet(bet: Bet): void {
-        console.log("add bet: ", bet);
+    public addBet({ value }: { value: Bet; }): void {
         try {
-            if (this.player && bet <= this.player.balance) {
-                this.player.bet += bet;
-                this.player.balance -= bet;
-                this._betHistory.push(bet);
+            if (this.player && value <= this.player.balance) {
+                this.player.bet += value;
+                this.player.balance -= value;
+                this._betHistory.push(value);
+                if (this._betElement) {
+                    this._betElement.addChip(value);
+                    this._betElement.updateBet(this.player.bet);
+                }
             }
         } catch (error) {
             console.log("Failed to add bet");
@@ -108,6 +119,10 @@ export class UIStore {
                 if (this.player.bet === 0) {
                     this.toggleBetEditBtnsDisabled(true);
                 }
+                if (this._betElement) {
+                    this._betElement.removeChip();
+                    this._betElement.updateBet(this.player.bet);
+                }
             }
         } catch (error) {
             console.log("Failed to undo bet");
@@ -118,6 +133,10 @@ export class UIStore {
         while (this._betHistory.length > 0) {
             this.undoBet();
         }
+    }
+
+    public resetBetHistory(): void {
+        this._betHistory = [];
     }
 
     public addHelper(action: Action): void {

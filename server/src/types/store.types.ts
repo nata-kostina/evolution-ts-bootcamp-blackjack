@@ -1,4 +1,4 @@
-import { RoomID, Deck, PlayerInstance, DealerInstance, PlayerID, GameSession } from './game.types.js';
+import { RoomID, Deck, PlayerInstance, DealerInstance, PlayerID, GameSession, Hand } from './game.types.js';
 import { SpecificID } from './socket.types.js';
 
 export interface GameState {
@@ -19,6 +19,13 @@ export type UpdatePlayerParams = {
   payload: { [key in keyof Partial<Omit<PlayerInstance, 'playerID' | 'roomID'>>]: PlayerInstance[key] };
 };
 
+export type UpdateHandParams = {
+  playerID: PlayerID;
+  roomID: RoomID;
+  handID: string;
+  payload: { [key in keyof Partial<Hand>]: Hand[key] };
+};
+
 export type UpdateDealerParams = {
   roomID: RoomID;
   payload: { [key in keyof Partial<DealerInstance>]: DealerInstance[key] };
@@ -36,13 +43,18 @@ export interface IStore {
   updatePlayer({ playerID, roomID, payload }: UpdatePlayerParams): void;
   getDealer(roomID: RoomID): DealerInstance;
   updateDealer({ roomID, payload }: UpdateDealerParams): void;
-
+  getActiveHand({roomID, playerID}: SpecificID): Hand;
+  updateHand({ playerID, roomID, handID, payload }: UpdateHandParams): void;
+  getScore({ roomID, playerID, handID}: SpecificID & {handID: string}): number;
   unholeCard(roomID: RoomID): void;
   resetPlayer({ playerID, roomID }: SpecificID): void;
   resetDealer(roomID: RoomID): void;
   resetSession({ playerID, roomID }: SpecificID): void;
   getResetSession({ playerID, roomID }: SpecificID): GameSession;
   createNewRoom(playerID: PlayerID): RoomID;
+  reassignActiveHand({ roomID, playerID }: SpecificID): void;
+  removeHand({ roomID, playerID, handID }: SpecificID & {handID: string}): void;
+  getHand({ roomID, playerID, handID }: SpecificID & { handID: string }): Hand;
 }
 
 export interface IPlayersStore {

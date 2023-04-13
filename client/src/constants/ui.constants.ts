@@ -34,6 +34,10 @@ export const actionButtons: ActionBtn[] = [
         action: Action.SURENDER,
         svgPath: SurenderSVG,
     },
+    {
+        action: Action.SPLIT,
+        svgPath: DoubleSVG,
+    },
 ];
 
 export const betActionBtns: BetActionBtn[] = [

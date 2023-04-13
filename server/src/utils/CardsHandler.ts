@@ -21,9 +21,9 @@ export const CardsHandler: Handler = {
   isBlackjack: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => {
     try {
       const player = store.getPlayer({ playerID, roomID });
-      const { cards } = player;
-      if (cards.length === 2) {
-        const [first, second] = cards;
+      const activeHand = store.getActiveHand({ roomID, playerID });
+      if (activeHand.cards.length === 2) {
+        const [first, second] = activeHand.cards;
         if (
           (first.value === CardValue.ACE && TenSet.has(second.value)) ||
           (second.value === CardValue.ACE && TenSet.has(first.value))
@@ -38,13 +38,14 @@ export const CardsHandler: Handler = {
   },
   canDouble: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => {
     try {
-      const player = store.getPlayer({ playerID, roomID });
-      const { cards: playerCards, points, balance, bet } = player;
-        if (bet * 2 > balance) {
-            return false;
-        }
-      if (playerCards.length === 2) {
-        return points === NINE || points === TEN || points === ELEVEN;
+      const { hands, balance, bet } = store.getPlayer({ playerID, roomID });
+      if (hands.length !== 1) return false;
+      if (bet * 2 > balance) {
+        return false;
+      }
+      const activeHand = hands[0];
+      if (activeHand.cards.length === 2) {
+        return activeHand.points === NINE || activeHand.points === TEN || activeHand.points === ELEVEN;
       }
       return false;
     } catch (error: unknown) {
@@ -54,10 +55,12 @@ export const CardsHandler: Handler = {
   canSplit: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => {
     try {
       const player = store.getPlayer({ playerID, roomID });
-      const { cards } = player;
-      if (cards.length === 2) {
-        const [first, second] = cards;
-        return first.value === first.value || (TenSet.has(first.value) && TenSet.has(second.value));
+      const activeHand = store.getActiveHand({ roomID, playerID });
+      if (activeHand.bet * 2 > player.balance) return false;
+      if (player.hands.length >= 4) return false;
+      if (activeHand.cards.length === 2) {
+        const [first, second] = activeHand.cards;
+        return first.value === second.value || (TenSet.has(first.value) && TenSet.has(second.value));
       }
       return false;
     } catch (error) {
@@ -65,7 +68,7 @@ export const CardsHandler: Handler = {
     }
   },
 
-  canPlaceInsurance: ({ roomID, store }: { roomID: RoomID } & { store: IStore }) => {
+  canPlaceInsurance: ({ roomID, store }: { roomID: RoomID; store: IStore }) => {
     try {
       const { cards: dealerCards } = store.getDealer(roomID);
       if (dealerCards.length !== 1) {

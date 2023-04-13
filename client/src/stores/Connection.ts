@@ -59,7 +59,7 @@ export class Connection {
 
         this._socket.on("placeBet", (reponse) => {
             this._responseHandlerQueue.enqueue(async () => {
-                await this._game.handlePlaceBetNotification(reponse);
+                await this._game.handlePlaceBet(reponse);
             });
         });
 
@@ -69,9 +69,15 @@ export class Connection {
             });
         });
 
-        this._socket.on("dealCard", (reponse) => {
+        this._socket.on("dealDealerCard", (reponse) => {
             this._responseHandlerQueue.enqueue(async () => {
-                await this._game.handleDealCard(reponse);
+                await this._game.handleDealDealerCard(reponse);
+            });
+        });
+
+        this._socket.on("dealPlayerCard", (reponse) => {
+            this._responseHandlerQueue.enqueue(async () => {
+                await this._game.handleDealPlayerCard(reponse);
             });
         });
 
@@ -90,6 +96,17 @@ export class Connection {
         this._socket.on("finishRound", (response) => {
             this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleFinishRound(response);
+            });
+        });
+
+        this._socket.on("split", (response) => {
+            this._responseHandlerQueue.enqueue(async () => {
+                await this._game.handleSplit(response);
+            });
+        });
+        this._socket.on("finishRoundForHand", (response) => {
+            this._responseHandlerQueue.enqueue(async () => {
+                await this._game.handleFinishRoundForHand(response);
             });
         });
 

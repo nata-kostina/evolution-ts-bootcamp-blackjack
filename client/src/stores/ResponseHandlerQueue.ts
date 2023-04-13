@@ -10,7 +10,6 @@ export class ResponseQueue {
     private _pendingPromise = false;
 
     public async enqueue(handler: Handler): Promise<void> {
-        console.log("Enqueue");
         return new Promise<void>((resolve, reject) => {
             this._queue.push({ handler, resolve, reject });
             this.dequeue();
@@ -18,8 +17,6 @@ export class ResponseQueue {
     }
 
     public async dequeue(): Promise<boolean> {
-        console.log("Dequeue, _pendingPromise: ", this._pendingPromise);
-
         if (this._pendingPromise) { return false; }
 
         const item = this._queue[0];
@@ -28,7 +25,6 @@ export class ResponseQueue {
 
         try {
             this._pendingPromise = true;
-            console.log("Execute handler");
             const payload = await item.handler();
 
             this._pendingPromise = false;

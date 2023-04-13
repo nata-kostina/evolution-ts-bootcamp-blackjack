@@ -20,21 +20,26 @@ export enum Suit {
   Hearts = 'H',
 }
 
-// export type Hand
+export type Hand = {
+  handID: string;
+  parentID: string;
+  cards: Card[];
+  bet: number;
+  points: number;
+  isStanding: boolean;
+};
+
 export type PlayerInstance = {
   readonly playerID: PlayerID;
   readonly roomID: RoomID;
-  cards: Card[];
   bet: number;
   balance: number;
-  points: number;
   insurance: number;
   availableActions: Action[];
-//   hands: {
-//       left: Card[];
-//       right: PlayerInstance;
-//   }
+  hands: Array<Hand>;
+  activeHandID: string;
 };
+
 export type DealerInstance = {
   cards: Card[];
   hasHoleCard: boolean;
@@ -78,4 +83,9 @@ export enum GameMode {
 
 export type AvailableActions = Action[];
 
-export type HoleCard = {id: string}
+export type HoleCard = { id: string };
+
+export enum GameResult {
+    Win = "win",
+    Lose = "lose",
+}

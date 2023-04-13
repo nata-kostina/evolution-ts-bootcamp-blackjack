@@ -13,11 +13,12 @@ import {
     Vector4,
 } from "@babylonjs/core";
 import { CanvasBase } from "../CanvasBase";
-import { chipRadius } from "../../constants/canvas.constants";
+import { chipRadius, chipSize } from "../../constants/canvas.constants";
 import { Controller } from "../Controller";
 import { ChipItem } from "../../types/game.types";
 
 export class ChipCanvasElement {
+    private readonly _id: string;
     private skin: Mesh;
     private action: ExecuteCodeAction;
     private readonly chip: ChipItem;
@@ -25,13 +26,14 @@ export class ChipCanvasElement {
 
     public constructor(base: CanvasBase, position: Vector3, chip: ChipItem, controller: Controller) {
         this.base = base;
+        this._id = chip.id;
         this.chip = chip;
         this.action = new ExecuteCodeAction(
             {
                 trigger: ActionManager.OnPickTrigger,
             },
             (() => {
-                controller.addBet(this.chip.value);
+                controller.addBet({ value: this.chip.value, id: this._id });
             }),
         );
 
@@ -44,19 +46,12 @@ export class ChipCanvasElement {
         faceUV[2] = new Vector4(0.75, 0, 1, 1);
 
         this.skin = MeshBuilder.CreateCylinder(`chip-${chip.id}`,
-            { height: 0.02, diameter: chipRadius * 2, faceUV: faceUV },
+            { height: chipSize.height, diameter: chipSize.diameter, faceUV: faceUV },
             this.base.scene);
         this.skin.material = chipMaterial;
         this.skin.rotation.x = -Math.PI * 0.5;
         this.skin.position = position;
-        // this.skin = MeshBuilder.CreateDisc("chip", { radius: chipRadius }, this.base.scene);
-        // this.skin.position = position;
 
-        // const chipMaterial = new StandardMaterial("chip-material", this.base.scene);
-        // const chipTexture = new Texture(this.chip.img, this.base.scene, undefined, false);
-        // chipMaterial.diffuseTexture = chipTexture;
-        // // chipTexture.hasAlpha = true;
-        // this.skin.material = chipMaterial;
         this.skin.actionManager = new ActionManager(this.base.scene);
     }
 

@@ -7,7 +7,6 @@ import { GameMode } from "../types/game.types";
 export const useLaunchGame = (connectionID: string | null): void => {
     const connection = useConnection() as Connection;
     useEffect(() => {
-        console.log("connectionID: ", connectionID);
         if (connectionID) {
             connection.sendRequest({
                 event: "initGame",

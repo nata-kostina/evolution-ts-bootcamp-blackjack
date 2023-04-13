@@ -1,5 +1,5 @@
 import { string, number, array, object, boolean } from "yup";
-import { Action, CardValue, Suit } from "../../types/game.types";
+import { Action, CardValue, GameResult, Suit } from "../../types/game.types";
 import { NotificationVariant } from "../../types/notification.types";
 
 export const playerIDSchema = string<Action>().required();
@@ -12,14 +12,22 @@ const cardSchema = object().shape({
 
 const actionsSchema = string<Action>().required();
 
+export const handSchema = object().shape({
+    handID: string().required(),
+    parentID: string().required(),
+    cards: array().of(cardSchema).required(),
+    bet: number().required(),
+    points: number().required(),
+});
+
 export const playerSchema = object().shape({
     playerID: string().required(),
     roomID: string().required(),
-    cards: array().of(cardSchema).required(),
     bet: number().required().min(0),
     balance: number().required(),
-    points: number().required().min(0),
     insurance: number().required().min(0),
+    hands: array().of(handSchema).required(),
+    activeHandID: string().required(),
     availableActions: array().of(actionsSchema).required(),
 });
 
@@ -48,6 +56,7 @@ export const newCardSchema = object().shape({
         id: string().required(),
     }),
     points: number().required().min(0),
+    handID: string(),
 });
 
 export const unholedCardSchema = object().shape({
@@ -55,3 +64,7 @@ export const unholedCardSchema = object().shape({
     card: cardSchema,
     points: number().required().min(0),
 });
+
+export const handIDSchema = string().required();
+
+export const gameResultSchema = string<GameResult>().required();

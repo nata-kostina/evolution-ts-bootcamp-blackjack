@@ -29,14 +29,22 @@ export type Bet = number;
 export type RoomID = string;
 export type PlayerID = string;
 
+export type Hand = {
+    handID: string;
+    parentID: string;
+    cards: Card[];
+    bet: number;
+    points: number;
+};
+
 export type PlayerInstance = {
     readonly playerID: PlayerID;
     readonly roomID: RoomID;
-    cards: Card[];
-    bet: Bet;
+    bet: number;
     balance: number;
-    points: number;
     insurance: number;
+    hands: Array<Hand>;
+    activeHandID: string;
     availableActions: Action[];
 };
 
@@ -58,6 +66,7 @@ export enum Action {
     SURENDER = "surender",
     INSURANCE = "insurance",
     BET = "bet",
+    SPLIT = "split",
 }
 
 export enum BetAction {
@@ -73,8 +82,20 @@ export enum GameMode {
 export type AvailableActions = Action[];
 export type HoleCard = { id: string; };
 
-export type NewCard = {
-    target: "dealer" | "player";
+export type DealDealerCard = {
+    target: "dealer";
     card: Card | HoleCard;
     points: number;
 };
+
+export type DealPlayerCard = {
+    target: "player";
+    card: Card;
+    points: number;
+    handID: string;
+};
+
+export enum GameResult {
+    Win = "win",
+    Lose = "lose",
+}

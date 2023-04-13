@@ -1,5 +1,5 @@
 import { CanvasBase } from "./canvas/CanvasBase";
-import { SceneCanvasElement } from "./canvas/canvasElements/Scene.canvas.element";
+import { SceneManager } from "./canvas/canvasElements/SceneManager";
 import { Controller } from "./canvas/Controller";
 import { serverURL } from "./constants/connection.constants";
 import { Connection } from "./stores/Connection";
@@ -13,7 +13,7 @@ export const init = (): { connection: Connection; game: Game; } => {
 
     const canvas = new CanvasBase();
     const matrix = canvas.getGameMatrix();
-    const scene = new SceneCanvasElement(canvas, matrix, controller);
+    const scene = new SceneManager(canvas, matrix, controller);
 
     const playerID: string | null = localStorage.getItem("player_id");
 
