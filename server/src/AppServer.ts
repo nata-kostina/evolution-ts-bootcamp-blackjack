@@ -78,9 +78,9 @@ export class AppServer {
             throw new Error('Invalid parameter');
           }
           this._controller.handleDecision({ roomID, playerID, action });
-          console.log(`Socket ${socket.id} finished a game`);
+          console.log(`Socket ${socket.id} made desicion a game`);
         } catch (e: unknown) {
-          console.log(isError(e) ? e.message : `Socket ${socket.id} failed to send decisthis._IOn`);
+          console.log(isError(e) ? e.message : `Socket ${socket.id} failed to make a decision`);
         }
       });
 

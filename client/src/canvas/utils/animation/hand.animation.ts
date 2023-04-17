@@ -6,8 +6,6 @@ import {
 import { HandAnimation } from "../../../types/canvas.types";
 
 export const getSplitHandAnimation = (
-    matrixWidth: number,
-    matrixHeight: number,
     type: HandAnimation,
     initPosition: Vector3,
 ): { frameRate: number; animationArray: Array<Animation>; } => {

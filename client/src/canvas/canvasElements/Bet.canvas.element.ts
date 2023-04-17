@@ -9,50 +9,52 @@ import {
     StandardMaterial,
     Color3,
     AxesViewer,
+    Scene,
 } from "@babylonjs/core";
 import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
 import { ChipAnimation, IBetCanvasElement } from "../../types/canvas.types";
 import { CanvasBase } from "../CanvasBase";
-import { ChipCanvasElement } from "./Chip.canvas.element";
 import { chipSet } from "../../constants/game.constants";
 import { BetChipCanvasElement } from "./BetChip.canvas.elemenr";
 import { getChipImg } from "../utils/getChipImg";
 import { chipSize, handSize, betGroundSize, betTextblockSize, chipRadius } from "../../constants/canvas.constants";
 
-export class BetCanvasElement implements IBetCanvasElement {
+export class BetCanvasElement extends TransformNode implements IBetCanvasElement {
+    private readonly scene: Scene;
     private readonly _handID: string;
-    private readonly _base: CanvasBase;
-    private _container: TransformNode;
-    private textGround: GroundMesh;
-    private textBlock: TextBlock;
-    private _chipsStack: Array<BetChipCanvasElement> = [];
+    private readonly _textGround: GroundMesh;
+    private readonly _textBlock: TextBlock;
+    private readonly _chipsStack: Array<BetChipCanvasElement> = [];
 
-    public constructor(base: CanvasBase, handPosition: Vector3, handID: string) {
-        this._base = base;
+    public constructor(scene: Scene, handPosition: Vector3, handID: string) {
+        super(`bet-${handID}`, scene);
+        this.scene = scene;
         this._handID = handID;
 
-        this._container = new TransformNode(`bet-container-${handID}`);
-        this._container.position = new Vector3(
-            handPosition.x,
-            handPosition.y - handSize.height * 0.5,
-            handPosition.z);
-        // const localAxes = new AxesViewer(this._base.scene, 1);
-        // localAxes.xAxis.parent = this._container;
-        // localAxes.yAxis.parent = this._container;
-        // localAxes.zAxis.parent = this._container;
-        this.textGround = MeshBuilder.CreateGround(`bet-text--${this._handID}`,
+        this._textGround = MeshBuilder.CreateGround(`bet-text--${this._handID}`,
             { width: betTextblockSize.width, height: betTextblockSize.height },
-            this._base.scene);
-        this.textGround.rotation.x = -Math.PI * 0.5;
-        this.textGround.parent = this._container;
-        this.textGround.position.y = -betTextblockSize.height * 0.5;
-        const texture = AdvancedDynamicTexture.CreateForMesh(this.textGround);
-        texture.background = "#17515E";
-        this.textBlock = new TextBlock(`text-points-${this._handID}`, "0$");
-        this.textBlock.color = "white";
-        this.textBlock.fontSize = 250;
+            this.scene);
+        this._textGround.setParent(this);
 
-        texture.addControl(this.textBlock);
+        this.position = new Vector3(
+            handPosition.x,
+            handPosition.y - handSize.height * 0.5 - betTextblockSize.height * 0.5,
+            handPosition.z);
+        // const localAxes = new AxesViewer(this.scene, 1);
+        // localAxes.xAxis.parent = this;
+        // localAxes.yAxis.parent = this;
+        // localAxes.zAxis.parent = this;
+        this._textGround.rotation.x = -Math.PI * 0.5;
+        this._textGround.setParent(this);
+
+        const texture = AdvancedDynamicTexture.CreateForMesh(this._textGround);
+        texture.background = "#17515E";
+
+        this._textBlock = new TextBlock(`text-points-${this._handID}`, "0$");
+        this._textBlock.color = "white";
+        this._textBlock.fontSize = 250;
+
+        texture.addControl(this._textBlock);
     }
 
     public get chips(): Array<BetChipCanvasElement> {
@@ -62,17 +64,22 @@ export class BetCanvasElement implements IBetCanvasElement {
     public async addChip(value: number): Promise<void> {
         const chipConstant = chipSet.find((chip) => chip.value === value);
         if (chipConstant) {
-            const setChip = this._base.scene.getMeshByName(`chip-${chipConstant.id}`) as Mesh;
+            const setChip = this.scene.getMeshByName(`chip-${chipConstant.id}`) as Mesh;
             if (setChip) {
-                const chip = new BetChipCanvasElement(this._base,
-                    new Vector3(
-                        (Math.random() * 0.08 - 0.05),
-                        -betTextblockSize.height - chipRadius + (Math.random() * 0.08 - 0.05),
-                        this._container.position.z - this._chipsStack.length * chipSize.height),
+                const chip = new BetChipCanvasElement(this.scene,
                     { id: uuid(), img: getChipImg(value), value },
-                    setChip.position,
                 );
-                chip.setParent(this._container);
+                chip.setParent(this);
+
+                chip.position = new Vector3(setChip.position.x - this.position.x,
+                    setChip.position.y - this.position.y,
+                    0,
+                );
+                chip.finalPosition = new Vector3(
+                    this.position.x + (Math.random() * 0.08 - 0.05),
+                    -betTextblockSize.height - chipRadius + (Math.random() * 0.08 - 0.05),
+                    this.position.z - this._chipsStack.length * chipSize.height);
+
                 this._chipsStack.push(chip);
                 await chip.animate(ChipAnimation.Add);
             }
@@ -82,19 +89,20 @@ export class BetCanvasElement implements IBetCanvasElement {
     public async removeChip(): Promise<void> {
         const lastChip = this._chipsStack.pop();
         if (lastChip) {
-            await lastChip.animate(ChipAnimation.Remove, () => {
-                lastChip.dispose();
-            });
+            const chipConstant = chipSet.find((chip) => chip.value === lastChip.chipValue);
+            if (chipConstant) {
+                const setChip = this.scene.getMeshByName(`chip-${chipConstant.id}`) as Mesh;
+                lastChip.finalPosition = new Vector3(setChip.position.x - this.position.x,
+                    setChip.position.y - this.position.y,
+                    0);
+                await lastChip.animate(ChipAnimation.Remove, () => {
+                    lastChip.dispose();
+                });
+            }
         }
     }
 
     public updateBet(bet: number): void {
-        this.textBlock.text = `${bet.toString()}$`;
-    }
-
-    public setParent(parent: TransformNode): void {
-        if (this._container) {
-            this._container.parent = parent;
-        }
+        this._textBlock.text = `${bet.toString()}$`;
     }
 }

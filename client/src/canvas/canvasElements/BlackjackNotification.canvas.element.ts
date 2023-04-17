@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// Collect the methods
 import { Vector2, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { Path2, Curve3 } from "@babylonjs/core/Maths/math.path";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
@@ -9,21 +8,19 @@ import { PolygonMeshBuilder } from "@babylonjs/core/Meshes/polygonMesh";
 import { SolidParticleSystem } from "@babylonjs/core/Particles/solidParticleSystem";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 
-// Methods assembled, onward!
 import MeshWriter from "meshwriter";
-import { CanvasBase } from "../CanvasBase";
+import { Scene } from "@babylonjs/core";
 import { getBlackjackAnimation } from "../utils/animation/blackjack.animation";
 
-// Put them in an object
 const methodsObj = { Vector2, Vector3, Path2, Curve3, Color3, SolidParticleSystem, PolygonMeshBuilder, CSG, StandardMaterial, Mesh };
 
 export class BlackjackNotificationCanvasElement {
-    private readonly base: CanvasBase;
+    private readonly scene: Scene;
 
-    public constructor(base: CanvasBase) {
-        this.base = base;
+    public constructor(scene: Scene) {
+        this.scene = scene;
 
-        const Writer = MeshWriter(this.base.scene, { scale: 0.1, methods: methodsObj });
+        const Writer = MeshWriter(scene, { scale: 0.1, methods: methodsObj });
         const text = new Writer(
             "BLACKJACK",
             {
@@ -37,7 +34,7 @@ export class BlackjackNotificationCanvasElement {
                 },
             },
         );
-        const textMesh = text.getMesh();
+        const textMesh = text.getMesh() as Mesh;
         const pivotAt = new Vector3(0, 0, 0);
         const relativePosition = pivotAt.subtract(textMesh.position);
         textMesh.setPivotPoint(relativePosition);
@@ -45,7 +42,7 @@ export class BlackjackNotificationCanvasElement {
         textMesh.rotation.x = -Math.PI / 2;
 
         const { frameRate, animationArray } = getBlackjackAnimation();
-        this.base.scene.beginDirectAnimation(textMesh, animationArray, 0, frameRate, false, 1, () => {
+        this.scene.beginDirectAnimation(textMesh, animationArray, 0, frameRate, false, 1, () => {
             textMesh.dispose();
         });
     }

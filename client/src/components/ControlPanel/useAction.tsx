@@ -10,6 +10,7 @@ export const useAction = () => {
     const handleClick = (action: Action) => {
         const playerID = game.playerID;
         const roomID = connection.roomID;
+        game.UI.toggleActionBtns([]);
         if (playerID && roomID) {
             if (action === Action.BET) {
                 const bet = game.UI.bet;
@@ -35,7 +36,6 @@ export const useAction = () => {
                         roomID,
                     }],
                 });
-                game.UI.resetHelperTarget();
             }
         }
     };

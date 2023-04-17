@@ -12,6 +12,8 @@ import {
     TransformNode,
     Vector3,
     Vector4,
+    Scene,
+    AxesViewer,
 } from "@babylonjs/core";
 import { CanvasBase } from "../CanvasBase";
 import { chipRadius } from "../../constants/canvas.constants";
@@ -20,23 +22,19 @@ import { ChipAnimation } from "../../types/canvas.types";
 import { getChipAnimation } from "../utils/animation/chip.animation";
 import { assertUnreachable } from "../../utils/assertUnreachable";
 
-export class BetChipCanvasElement {
-    public readonly chip: ChipItem;
-    private readonly _id: string;
-    private _skin: Mesh;
-    private readonly base: CanvasBase;
-    private readonly parentChipPosition: Vector3;
-    private readonly finalPosition: Vector3;
+export class BetChipCanvasElement extends Mesh {
+    private readonly scene: Scene;
+    private readonly _skin: Mesh;
+    private readonly chip: ChipItem;
+    private _finalPosition: Vector3 | null = null;
 
-    public constructor(base: CanvasBase, position: Vector3, chip: ChipItem, parentChipPosition: Vector3) {
-        this.base = base;
-        this._id = chip.id;
+    public constructor(scene: Scene, chip: ChipItem) {
+        super(`bet-chip-${chip.id}`, scene);
+        this.scene = scene;
         this.chip = chip;
-        this.parentChipPosition = parentChipPosition;
-        this.finalPosition = position;
 
-        const chipMaterial = new StandardMaterial("material", this.base.scene);
-        chipMaterial.diffuseTexture = new Texture(this.chip.img, this.base.scene, { invertY: true });
+        const chipMaterial = new StandardMaterial("material", this.scene);
+        chipMaterial.diffuseTexture = new Texture(this.chip.img, this.scene, { invertY: true });
 
         const faceUV = [];
         faceUV[0] = new Vector4(0, 0, 0.25, 1);
@@ -45,48 +43,59 @@ export class BetChipCanvasElement {
 
         this._skin = MeshBuilder.CreateCylinder(`chip-${chip.id}`,
             { height: 0.02, diameter: chipRadius * 2, faceUV: faceUV },
-            this.base.scene);
+            this.scene);
+        this._skin.setParent(this);
         this._skin.material = chipMaterial;
+
         this._skin.rotation.x = -Math.PI * 0.5;
-        this._skin.position = position;
+
+        // this.position = parentChipPosition;
+        // console.log("parentChipPosition: ", parentChipPosition);
+        // this.position = new Vector3(parentChipPosition.x, parentChipPosition.y + 0.01, parentChipPosition.z);
+
+        // const localAxes = new AxesViewer(this.scene, 1);
+        // localAxes.xAxis.parent = this;
+        // localAxes.yAxis.parent = this;
+        // localAxes.zAxis.parent = this;
     }
 
-    public update(position: Vector3): void {
-        this._skin.position = position;
+    public get chipValue(): number {
+        return this.chip.value;
+    }
+
+    public set finalPosition(position: Vector3) {
+        this._finalPosition = position;
     }
 
     public async animate(type: ChipAnimation, onFinish?: () => void): Promise<void> {
         let initPosition;
-        let finalPosition;
+        let finalPosition = this._finalPosition || new Vector3(-10, -10, -10);
         switch (type) {
             case ChipAnimation.Add:
-                initPosition = this.parentChipPosition;
-                finalPosition = this._skin.position;
+                initPosition = this.position;
                 break;
             case ChipAnimation.Remove:
-                initPosition = this._skin.position;
-                finalPosition = this.parentChipPosition;
+                initPosition = this.position;
                 break;
             case ChipAnimation.Lose:
-                initPosition = this._skin.position;
-                finalPosition = new Vector3(this._skin.position.x, 5, this._skin.position.z);
+                initPosition = this.position;
+                finalPosition = new Vector3(this.position.x, 5, this.position.z);
                 break;
             case ChipAnimation.Win:
-                initPosition = this._skin.position;
-                finalPosition = new Vector3(this._skin.position.x, -5, this._skin.position.z);
+                initPosition = this.position;
+                finalPosition = new Vector3(this.position.x, -5, this.position.z);
                 break;
             default:
                 assertUnreachable(type);
         }
 
         const { frameRate, animationArray } = getChipAnimation(
-            type,
             initPosition,
             finalPosition,
         );
 
-        const chipAnim = this.base.scene.beginDirectAnimation(
-            this._skin,
+        const chipAnim = this.scene.beginDirectAnimation(
+            this,
             animationArray,
             0,
             frameRate,
@@ -98,13 +107,5 @@ export class BetChipCanvasElement {
                 }
             });
         await chipAnim.waitAsync();
-    }
-
-    public dispose(): void {
-        this._skin.dispose();
-    }
-
-    public setParent(parent: TransformNode): void {
-        this._skin.parent = parent;
     }
 }

@@ -27,7 +27,15 @@ export const playerSchema = object().shape({
     balance: number().required(),
     insurance: number().required().min(0),
     hands: array().of(handSchema).required(),
-    activeHandID: string().required(),
+    activeHandID: string().defined().test(
+        "my test",
+        "error: name is not a string",
+        (text) => {
+            if (typeof text === "string") {
+                return true;
+            }
+            return false;
+        }),
     availableActions: array().of(actionsSchema).required(),
 });
 

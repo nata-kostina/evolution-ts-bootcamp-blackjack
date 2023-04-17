@@ -1,27 +1,25 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { GroundMesh, MeshBuilder, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
+import { Scene, GroundMesh, MeshBuilder, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
 import { CanvasBase } from "../CanvasBase";
 import { GameMatrix } from "../GameMatrix";
 import { HandCanvasElement } from "./Hand.canvas.element";
 import { Bet, DealPlayerCard, GameResult } from "../../types/game.types";
 import { CardCanvasElement } from "./Card.canvas.element";
 import { PointsCanvasElement } from "./Points.canvas.element";
-import { HandAnimation, SplitParams } from "../../types/canvas.types";
+import { CardAnimation, HandAnimation, SplitParams } from "../../types/canvas.types";
 import SeatSVG from "../../assets/img/seat/seat.svg";
 import { seatSize } from "../../constants/canvas.constants";
 
-export class PlayerSeatCanvasElement {
-    protected readonly base: CanvasBase;
+export class PlayerSeatCanvasElement extends GroundMesh {
+    protected readonly scene: Scene;
     protected matrix: GameMatrix;
-    protected position: Vector3;
     private hands: Array<HandCanvasElement> = [];
     private _activeHand: HandCanvasElement | null = null;
-    private _ground: GroundMesh;
-    private cards: Array<CardCanvasElement> = [];
-    private pointsElement: PointsCanvasElement | null = null;
+    private readonly _seat: GroundMesh;
 
-    public constructor(base: CanvasBase, matrix: GameMatrix) {
-        this.base = base;
+    public constructor(scene: Scene, matrix: GameMatrix) {
+        super(`player-seat`, scene);
+        this.scene = scene;
         this.matrix = matrix;
 
         const mtx = matrix.getMatrix();
@@ -34,37 +32,37 @@ export class PlayerSeatCanvasElement {
 
         const row = Math.floor(index / mtxSize);
         const column = index % mtxSize;
-        this.position = new Vector3(
+        const position = new Vector3(
             -matrixWidth * 0.5 + cellWidth * 0.5 + cellWidth * column,
             matrixHeight * 0.5 - cellHeight * 0.5 - cellHeight * row,
-            -0.1,
+            0,
         );
 
-        this._ground = MeshBuilder.CreateGround(
+        this._seat = MeshBuilder.CreateGround(
             `player-seat`,
             {
                 width: seatSize.width,
                 height: seatSize.height,
             },
-            this.base.scene,
+            this.scene,
         );
-
+        this._seat.setParent(this);
+        this.position = position;
+        this.rotation.x = -Math.PI * 0.5;
         const groundMaterial = new StandardMaterial(
             `material-player-seat`,
-            this.base.scene,
+            this.scene,
         );
-        groundMaterial.diffuseTexture = new Texture(SeatSVG, this.base.scene);
+        groundMaterial.diffuseTexture = new Texture(SeatSVG, this.scene);
         groundMaterial.diffuseTexture.hasAlpha = true;
-        this._ground.material = groundMaterial;
-        this._ground.rotation.x = -Math.PI * 0.5;
+        this._seat.material = groundMaterial;
     }
 
     public addHand(handID: string): void {
         const hand = new HandCanvasElement(
-            this.base,
-            this.matrix,
+            this.scene,
             handID,
-            this.position,
+            new Vector3().copyFrom(this._seat.position),
         );
         this.hands.push(hand);
     }
@@ -73,18 +71,11 @@ export class PlayerSeatCanvasElement {
         this._activeHand = this.hands.find((hand) => hand.handID === handID) || null;
     }
 
-    public async highlightActiveHand(): Promise<void> {
-        if (this._activeHand) {
-            await this._activeHand.animate(HandAnimation.Highlight);
-        }
-    }
-
     public async dealCard(newCard: DealPlayerCard): Promise<void> {
         const hand = this.getHand(newCard.handID) || new HandCanvasElement(
-            this.base,
-            this.matrix,
+            this.scene,
             newCard.handID,
-            this.position,
+            this._seat.position,
         );
         this.hands.push(hand);
         await hand.dealCard(newCard);
@@ -96,32 +87,28 @@ export class PlayerSeatCanvasElement {
             this._activeHand = hand;
 
             const newHand = new HandCanvasElement(
-                this.base,
-                this.matrix,
+                this.scene,
                 newHandID,
                 new Vector3().copyFrom(hand.position),
             );
 
-            const [firstCard, secondCard] = hand.getCards();
+            const [firstCard, secondCard] = hand.cards;
             hand.removeCard(secondCard);
             newHand.addCard(secondCard);
-            secondCard.setParent(newHand.node);
+            secondCard.setParent(newHand);
             secondCard.position = new Vector3(0, 0, 0);
 
             newHand.updatePoints(points);
             hand.updatePoints(points);
             newHand.updateBet(bet);
+            this.hands.push(newHand);
 
             await Promise.all([
-                hand.animate(HandAnimation.ToLeft, () => {
-                    hand.launchHelper();
-                }),
-                newHand.animate(HandAnimation.ToRight, () => {
-                    hand.chipsValue.forEach((chip) => {
-                        newHand.betElement.addChip(chip);
-                    });
-                }),
+                hand.animate(HandAnimation.ToLeft),
+                newHand.animate(HandAnimation.ToRight),
             ]);
+
+            await Promise.all(hand.chipsValue.map((chip) => newHand.betElement.addChip(chip)));
         }
     }
 
@@ -129,17 +116,21 @@ export class PlayerSeatCanvasElement {
         return this.hands.find((element) => element.handID === handID);
     }
 
-    public async highllightActiveHand(handID: string): Promise<void> {
-        const activeHand = this.getHand(handID);
-        if (activeHand) {
-            await activeHand.animate(HandAnimation.Highlight);
-        }
-    }
-
     public async removeHand(handID: string, gameResult: GameResult): Promise<void> {
         const hand = this.getHand(handID);
         if (hand) {
             await hand.remove(gameResult);
+            const index = this.hands.findIndex((hand) => hand.handID !== handID);
+            if (index) {
+                this.hands.slice(index, 1);
+            }
         }
+    }
+
+    public reset(): void {
+        this.hands.forEach((hand) => {
+            hand.reset();
+            hand.dispose();
+        });
     }
 }

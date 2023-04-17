@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import {
     Vector3,
+    Scene,
 } from "@babylonjs/core";
 import { CanvasBase } from "../CanvasBase";
 import { chipRadius } from "../../constants/canvas.constants";
@@ -15,14 +16,14 @@ import { CanvasElement, MatrixProps } from "../../types/canvas.types";
 
 export class ChipSetCanvasElement implements CanvasElement {
     private chipSet: Array<ChipCanvasElement> = [];
-    private position: Vector3;
-    private readonly base: CanvasBase;
+    private _position: Vector3;
+    private readonly scene: Scene;
     private readonly num = 0;
     private readonly controller: Controller;
 
-    public constructor(base: CanvasBase, matrix: GameMatrix, controller: Controller) {
+    public constructor(scene: Scene, matrix: GameMatrix, controller: Controller) {
         this.controller = controller;
-        this.base = base;
+        this.scene = scene;
         const mtx = matrix.getMatrix();
         const mtxSize = matrix.getMatrixSize();
         const cellWidth = matrix.getCellWidth();
@@ -33,12 +34,16 @@ export class ChipSetCanvasElement implements CanvasElement {
 
         const row = Math.floor(index / mtxSize);
         const column = index % mtxSize;
-        this.position = new Vector3(
+        this._position = new Vector3(
             -matrixWidth * 0.5 + cellWidth * 0.5 + cellWidth * column,
             matrixHeight * 0.5 - cellHeight * 0.5 - cellHeight * row,
             0,
         );
         this.addContent();
+    }
+
+    public get position(): Vector3 {
+        return this._position;
     }
 
     public update({ height, width, cellWidth, cellHeight, map, size }: MatrixProps): void {
@@ -62,15 +67,15 @@ export class ChipSetCanvasElement implements CanvasElement {
 
     public addContent(): void {
         for (let j = 0; j < chipSet.length; j++) {
-            const x = this.position.x + j * chipRadius * 2;
+            const x = this._position.x + j * chipRadius * 2;
             // const x = this.position.x;
 
             // const y = this.position.y - 0.09 * Math.sqrt(j * 1.5);
-            const y = this.position.y;
+            const y = this._position.y;
             // const y = this.position.y - j * 0.4 * ((0.5) / (x + 2));
             // console.log(`Single Chip Position: X: ${x}, Y: ${y}`);
-            const z = this.position.z - 0.1;
-            const chip = new ChipCanvasElement(this.base, new Vector3(
+            const z = this._position.z;
+            const chip = new ChipCanvasElement(this.scene, new Vector3(
                 x,
                 y,
                 z,

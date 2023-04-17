@@ -3,10 +3,7 @@ import {
     Vector3,
 } from "@babylonjs/core";
 
-export const getDealCardAnimation = (matrixWidth: number,
-    matrixHeight: number,
-    finalPosition: Vector3,
-): { frameRate: number; animationArray: Array<Animation>; } => {
+export const getDealCardAnimation = (finalPosition: Vector3): { frameRate: number; animationArray: Array<Animation>; } => {
     const frameRate = 8;
 
     const xSlide = new Animation("xSlide", "position.x", frameRate, Animation.ANIMATIONTYPE_FLOAT);
@@ -15,7 +12,7 @@ export const getDealCardAnimation = (matrixWidth: number,
 
     keyFramesX.push({
         frame: 0,
-        value: matrixWidth,
+        value: 5,
     });
 
     keyFramesX.push({
@@ -31,7 +28,7 @@ export const getDealCardAnimation = (matrixWidth: number,
 
     keyFramesY.push({
         frame: 0,
-        value: matrixHeight,
+        value: 5,
     });
 
     keyFramesY.push({
@@ -88,9 +85,7 @@ export const getUnholeCardAnimation = (): { frameRate: number; animationArray: A
     return { frameRate, animationArray: [yRotation] };
 };
 
-export const getRemoveCardAnimation = (matrixWidth: number,
-    matrixHeight: number,
-    position: Vector3,
+export const getRemoveCardAnimation = (position: Vector3,
 ): { frameRate: number; animationArray: Array<Animation>; } => {
     const frameRate = 8;
 
@@ -105,7 +100,7 @@ export const getRemoveCardAnimation = (matrixWidth: number,
 
     keyFramesX.push({
         frame: frameRate,
-        value: -matrixWidth,
+        value: -5,
     });
 
     xSlide.setKeys(keyFramesX);
@@ -121,7 +116,7 @@ export const getRemoveCardAnimation = (matrixWidth: number,
 
     keyFramesY.push({
         frame: frameRate,
-        value: matrixHeight,
+        value: 5,
     });
 
     ySlide.setKeys(keyFramesY);

@@ -71,7 +71,6 @@ class Store implements IStore {
 
   public getPlayer({ roomID, playerID }: SpecificID): PlayerInstance {
     try {
-        console.log("store players: ", this.store[roomID].players)
       const game = this.getGame(roomID);
       const player = game.players[playerID];
       if (player) {
@@ -271,13 +270,12 @@ class Store implements IStore {
     try {
       const game = this.getGame(roomID);
       const player = this.getPlayer({ playerID, roomID });
-      const activeHand = initializeHand(playerID);
       const updatedPlayer: PlayerInstance = {
         ...player,
-        hands: [activeHand],
+        hands: [],
         bet: 0,
         insurance: 0,
-        activeHandID: activeHand.handID,
+        activeHandID: "",
         availableActions: []
       };
 
@@ -345,7 +343,6 @@ class Store implements IStore {
   public reassignActiveHand({ roomID, playerID }: SpecificID): void {
     try {
       const player = this.getPlayer({ roomID, playerID });
-      if (player.hands.length < 2) return;
       const newActiveHand = player.hands.find((hand) => hand.parentID === player.activeHandID);
       if (newActiveHand) {
         this.updatePlayer({
@@ -356,23 +353,6 @@ class Store implements IStore {
           },
         });
       }
-      //   if (activeHand) {
-      //     const index = player.hands.findIndex((hand) => hand.handID === player.activeHandID);
-      //     if (index >= 0) {
-      //       const updatedHands = ld.cloneDeep(player.hands.splice(index, 1));
-      //       const newActiveHand = updatedHands.find((hand) => hand.parentID === activeHand.handID);
-      //       if (newActiveHand) {
-      //         this.updatePlayer({
-      //           roomID,
-      //           playerID,
-      //           payload: {
-      //             activeHandID: newActiveHand.handID,
-      //             hands: updatedHands,
-      //           },
-      //         });
-      //       }
-      //     }
-      //   }
     } catch (error) {
       throw new Error(`Player ${playerID}: Failed to get reassign active hand`);
     }
@@ -380,8 +360,11 @@ class Store implements IStore {
 
   public removeHand({ roomID, playerID, handID }: SpecificID & { handID: string }): void {
     try {
-      const { hands } = this.getPlayer({ roomID, playerID });
-      const updatedHands = hands.filter((hand) => hand.handID !== handID);
+        const { hands } = this.getPlayer({ roomID, playerID });
+        console.log("removeHand handID: ", handID);
+        console.log("removeHand hands: ", hands);
+        const updatedHands = hands.filter((hand) => hand.handID !== handID);
+        console.log("removeHand updatedHands: ", updatedHands);
       this.updatePlayer({ roomID, playerID, payload: { hands: updatedHands } });
     } catch (error) {
       throw new Error(`Player ${playerID}: Failed to get reassign active hand`);

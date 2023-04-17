@@ -109,6 +109,11 @@ export class Connection {
                 await this._game.handleFinishRoundForHand(response);
             });
         });
+        this._socket.on("reassignActiveHand", (response) => {
+            this._responseHandlerQueue.enqueue(async () => {
+                await this._game.handleReassignActiveHand(response);
+            });
+        });
 
         makeAutoObservable(this);
     }

@@ -1,8 +1,6 @@
 import { Vector3, Animation } from "@babylonjs/core";
-import { ChipAnimation } from "../../../types/canvas.types";
 
 export const getChipAnimation = (
-    type: ChipAnimation,
     initPosition: Vector3,
     finalPosition: Vector3,
 ): { frameRate: number; animationArray: Array<Animation>; } => {

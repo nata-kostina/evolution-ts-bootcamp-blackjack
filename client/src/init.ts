@@ -13,7 +13,7 @@ export const init = (): { connection: Connection; game: Game; } => {
 
     const canvas = new CanvasBase();
     const matrix = canvas.getGameMatrix();
-    const scene = new SceneManager(canvas, matrix, controller);
+    const scene = new SceneManager(canvas.scene, matrix, controller);
 
     const playerID: string | null = localStorage.getItem("player_id");
 
@@ -25,7 +25,7 @@ export const init = (): { connection: Connection; game: Game; } => {
             event: "initGame",
             payload: [{ playerID, mode: GameMode.Single }],
         });
-    }, 5000);
+    }, 0);
 
     return {
         connection,

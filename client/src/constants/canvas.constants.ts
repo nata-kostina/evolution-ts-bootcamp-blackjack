@@ -20,3 +20,4 @@ export const cardSize = {
     depth: 0.001,
 };
 export const helperSize = { height: 0.03, diameter: 0.2 };
+export const pointsTextblockSize = { width: 0.5, height: 0.2 };

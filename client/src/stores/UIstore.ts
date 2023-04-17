@@ -118,6 +118,7 @@ export class UIStore {
                 }
                 if (this.player.bet === 0) {
                     this.toggleBetEditBtnsDisabled(true);
+                    this.togglePlaceBetBtnDisabled(true);
                 }
                 if (this._betElement) {
                     this._betElement.removeChip();

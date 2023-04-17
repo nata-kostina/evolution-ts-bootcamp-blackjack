@@ -1,99 +1,65 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { CanvasBase } from "../CanvasBase";
+import { Scene, Vector3 } from "@babylonjs/core";
 import { PlayerSeatCanvasElement } from "./PlayerSeat.canvas.element";
 import { DealerSeatCanvasElement } from "./DealerSeat.canvas.element copy";
 import { GameMatrix } from "../GameMatrix";
 import { ChipSetCanvasElement } from "./ChipSet.canvas.element";
 import { Controller } from "../Controller";
 import { BlackjackNotificationCanvasElement } from "./BlackjackNotification.canvas.element";
-import { SplitParams, UnholeCardPayload } from "../../types/canvas.types";
-import { Bet, DealDealerCard, DealPlayerCard, GameResult } from "../../types/game.types";
+import { CardAnimation, HelperAnimation, SplitParams, UnholeCardPayload } from "../../types/canvas.types";
+import {
+    DealDealerCard,
+    DealPlayerCard,
+    GameResult,
+} from "../../types/game.types";
 // eslint-disable-next-line import/no-unassigned-import
 import "@babylonjs/loaders/glTF";
+import { HelperCanvasElement } from "./Helper.canvas.element";
 
 export class SceneManager {
     public playerSeat: PlayerSeatCanvasElement;
     public dealerSeat: DealerSeatCanvasElement;
     public chipSet: ChipSetCanvasElement;
-    private readonly base: CanvasBase;
+    private readonly scene: Scene;
     private readonly gameMatrix: GameMatrix;
     private readonly controller: Controller;
+    private _helper: HelperCanvasElement;
 
     public constructor(
-        base: CanvasBase,
+        scene: Scene,
         matrix: GameMatrix,
         controller: Controller,
     ) {
-        this.base = base;
+        this.scene = scene;
         this.gameMatrix = matrix;
         this.controller = controller;
-        this.playerSeat = new PlayerSeatCanvasElement(this.base, matrix);
-        this.dealerSeat = new DealerSeatCanvasElement(this.base, matrix);
+        this.playerSeat = new PlayerSeatCanvasElement(scene, matrix);
+        this.dealerSeat = new DealerSeatCanvasElement(scene, matrix);
         this.chipSet = new ChipSetCanvasElement(
-            this.base,
+            scene,
             this.gameMatrix,
             controller,
         );
-
-        // const dome = new PhotoDome(
-        //     "background",
-        //     Background,
-        //     {
-        //         resolution: 32,
-        //         size: 8,
-        //     },
-        //     this.base.scene,
-        // );
-        // dome.setPivotPoint(new Vector3(0, 0, -4));
-
-        // dome.rotation = new Vector3(-Math.PI * 0.5, 0, 0);
-        // dome.position.z = 2.5;
-        // dome.position.y = -3;
-        // dome.fovMultiplier = 1;
-        // dome.imageMode = PhotoDome.MODE_MONOSCOPIC;
-        // const localAxes = new AxesViewer(this.base.scene, 1);
-        // localAxes.xAxis.parent = dome;
-        // localAxes.yAxis.parent = dome;
-        // localAxes.zAxis.parent = dome;
-
+        this._helper = new HelperCanvasElement(scene, Vector3.Zero());
+        this._helper.skin.isVisible = false;
         this.gameMatrix.addSubscriber([this.chipSet]);
     }
 
     public addContent(): void {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.boot().then(() => {
             // const axes = new AxesViewer(this.base.scene, 1);
         });
     }
 
-    public async dealPlayerCard(newCard: DealPlayerCard): Promise<void> {
-        await this.playerSeat.dealCard(newCard);
-    }
-
-    public async dealDealerCard(newCard: DealDealerCard): Promise<void> {
-        await this.dealerSeat.dealCard(newCard);
-    }
-
-    public async split({ oldHandID, newHandID, bet, points }: SplitParams): Promise<void> {
-        await this.playerSeat.split({ oldHandID, newHandID, bet, points });
+    public init(activeHand: string): void {
+        this.toggleChipAction(true);
+        this.addInitialHand(activeHand);
     }
 
     public toggleChipAction(register: boolean): void {
         this.chipSet.toggleChipAction(register);
-    }
-
-    public addBlackjackNotification(): void {
-        const notification = new BlackjackNotificationCanvasElement(this.base);
-    }
-
-    public async removeCards(): Promise<void> {
-        // await this.playerSeat.removeCards();
-        await this.dealerSeat.removeCards();
-    }
-
-    public async unholeCard(payload: UnholeCardPayload): Promise<void> {
-        await this.dealerSeat.unholeCard(payload);
     }
 
     public addInitialHand(handID: string): void {
@@ -104,12 +70,57 @@ export class SceneManager {
         }
     }
 
-    public async highllightActiveHand(handID: string): Promise<void> {
-        await this.playerSeat.highllightActiveHand(handID);
+    public async dealPlayerCard(newCard: DealPlayerCard): Promise<void> {
+        await this.playerSeat.dealCard(newCard);
+    }
+
+    public async dealDealerCard(newCard: DealDealerCard): Promise<void> {
+        await this.dealerSeat.dealCard(newCard);
+    }
+
+    public async split({
+        oldHandID,
+        newHandID,
+        bet,
+        points,
+    }: SplitParams): Promise<void> {
+        await this.playerSeat.split({ oldHandID, newHandID, bet, points });
+        const hand = this.playerSeat.getHand(oldHandID);
+        if (hand) {
+            this._helper.update(hand.position);
+            this._helper.skin.isVisible = true;
+        }
+    }
+
+    public addBlackjackNotification(): void {
+        const notification = new BlackjackNotificationCanvasElement(this.scene);
+    }
+
+    public async unholeCard(payload: UnholeCardPayload): Promise<void> {
+        await this.dealerSeat.unholeCard(payload);
     }
 
     public async removeHand(handID: string, result: GameResult): Promise<void> {
         await this.playerSeat.removeHand(handID, result);
+    }
+
+    public async updateHelper({ handId }: { handId: string; }): Promise<void> {
+        const hand = this.playerSeat.getHand(handId);
+        console.log("update Helper hand: ", hand);
+        if (hand) {
+            this._helper.update(hand.position);
+            this._helper.skin.isVisible = true;
+        }
+    }
+
+    public async resetScene(): Promise<void> {
+        console.log("resetScene");
+        this.dealerSeat.reset();
+        this.toggleChipAction(false);
+        this._helper.skin.isVisible = false;
+        // this.playerSeat.dispose();
+        // this.dealerSeat.dispose(false, true);
+        // this._helper.dispose();
     }
 
     private async boot(): Promise<void> {}

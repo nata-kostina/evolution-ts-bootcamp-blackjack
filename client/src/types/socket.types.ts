@@ -1,6 +1,16 @@
 import { UnholeCardPayload } from "./canvas.types";
 import { Notification, YesNoAcknowledgement } from "./notification.types";
-import { Action, Bet, DealPlayerCard, GameMode, GameSession, DealDealerCard, PlayerID, RoomID, GameResult } from "./game.types";
+import {
+    Action,
+    Bet,
+    DealPlayerCard,
+    GameMode,
+    GameSession,
+    DealDealerCard,
+    PlayerID,
+    RoomID,
+    GameResult,
+} from "./game.types";
 
 export interface ServerToClientEvents {
     initGame: (response: SocketResponse<{ game: GameSession; playerID: PlayerID; }>) => void;
@@ -13,6 +23,7 @@ export interface ServerToClientEvents {
     finishRound: (response: SocketResponse<GameSession>) => void;
     split: (response: SocketResponse<GameSession>) => void;
     finishRoundForHand: (response: SocketResponse<FinishRoundForHand>) => void;
+    reassignActiveHand: (response: SocketResponse<ReassignActiveHand>) => void;
 }
 
 export interface ClientToServerEvents {
@@ -52,4 +63,10 @@ export type FinishRoundForHand = {
     playerID: PlayerID;
     handID: string;
     result: GameResult;
+};
+
+export type ReassignActiveHand = {
+    roomID: RoomID;
+    playerID: PlayerID;
+    handID: string;
 };

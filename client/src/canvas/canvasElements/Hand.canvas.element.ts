@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-redeclare */
 import {
+    AxesViewer,
     GroundMesh,
     MeshBuilder,
+    Scene,
     StandardMaterial,
     Texture,
     TransformNode,
@@ -22,38 +24,44 @@ import { CardCanvasElement } from "./Card.canvas.element";
 import { getSplitHandAnimation } from "../utils/animation/hand.animation";
 import { PointsCanvasElement } from "./Points.canvas.element";
 import { BetCanvasElement } from "./Bet.canvas.element";
-import { cardSize, handSize } from "../../constants/canvas.constants";
-import { HelperCanvasElement } from "./Helper.canvas.element";
+import { cardSize } from "../../constants/canvas.constants";
+import SeatSVG from "../../assets/img/seat/seat.svg";
 
-export class HandCanvasElement {
-    private readonly base: CanvasBase;
-    private matrix: GameMatrix;
+export class HandCanvasElement extends TransformNode {
+    private readonly scene: Scene;
     private _handID: string;
-    private cards: Array<CardCanvasElement> = [];
-    private _hand: TransformNode;
-    private _pointsElement: PointsCanvasElement | null = null;
+    private _cards: Array<CardCanvasElement> = [];
+    private _pointsElement: PointsCanvasElement;
     private _betElement: BetCanvasElement;
-    private _helper: HelperCanvasElement | null = null;
 
     public constructor(
-        base: CanvasBase,
-        matrix: GameMatrix,
+        scene: Scene,
         id: string,
         position: Vector3,
     ) {
-        this.base = base;
-        this.matrix = matrix;
+        super(`hand-${id}`, scene);
+        this.scene = scene;
         this._handID = id;
-
-        this._hand = new TransformNode(`node-hand-${id}`);
-        this._hand.position = position;
+        this.position = new Vector3(position.x, position.y, position.z);
+        // const localAxes = new AxesViewer(this.scene, 1);
+        // localAxes.xAxis.parent = this;
+        // localAxes.yAxis.parent = this;
+        // localAxes.zAxis.parent = this;
 
         this._betElement = new BetCanvasElement(
-            this.base,
-            this._hand.position,
+            scene,
+            this.position,
             this._handID,
         );
-        this._betElement.setParent(this._hand);
+        this._betElement.setParent(this);
+
+        this._pointsElement = new PointsCanvasElement(
+            this.scene,
+            this._handID,
+            this.position,
+        );
+        this._pointsElement.setParent(this);
+        this._pointsElement.skin.isVisible = false;
     }
 
     public get handID(): string {
@@ -61,46 +69,41 @@ export class HandCanvasElement {
     }
 
     public async dealCard(newCard: DealPlayerCard): Promise<void> {
+        this._pointsElement.skin.isVisible = true;
         const cardElement = new CardCanvasElement(
-            this.base,
-            this.matrix,
+            this.scene,
             new Vector3(
-                this._hand.position.x + this.cards.length * 0.13,
-                this._hand.position.y,
-                this._hand.position.z - this.cards.length * cardSize.depth - 0.04,
+                this._cards.length * 0.13,
+                this.position.y,
+                -this._cards.length * cardSize.depth - 0.04,
             ),
             newCard.card,
         );
-        cardElement.setParent(this._hand);
-        this.cards.push(cardElement);
+        cardElement.setParent(this);
+        this._cards.push(cardElement);
         await cardElement.addContent();
         await cardElement.animate(CardAnimation.Deal, () => {
             this.updatePoints(newCard.points);
         });
     }
 
-    public get position(): Vector3 {
-        return this._hand.position;
-    }
-
     public get chipsValue(): Array<number> {
-        return this._betElement.chips.map((chip) => chip.chip.value);
+        return this._betElement.chips.map((chip) => chip.chipValue);
     }
 
-    public getCards(): Array<CardCanvasElement> {
-        return this.cards;
+    public get cards(): Array<CardCanvasElement> {
+        return this._cards;
     }
 
     public addCard(card: CardCanvasElement): void {
-        this.cards.push(card);
+        this._cards.push(card);
     }
 
     public removeCard(card: CardCanvasElement): void {
-        this.cards.findIndex((c) => c.cardID === card.cardID);
-    }
-
-    public get node(): TransformNode {
-        return this._hand;
+        const index = this._cards.findIndex((c) => c.cardID === card.cardID);
+        if (index > -1) {
+            this._cards.splice(index, 1);
+        }
     }
 
     public get betElement(): BetCanvasElement {
@@ -108,14 +111,6 @@ export class HandCanvasElement {
     }
 
     public updatePoints(points: number): void {
-        if (!this._pointsElement) {
-            this._pointsElement = new PointsCanvasElement(
-                this.base,
-                this._handID,
-                this._hand.position,
-            );
-            this._pointsElement.setParent(this._hand);
-        }
         this._pointsElement.update(points);
     }
 
@@ -123,44 +118,34 @@ export class HandCanvasElement {
         this._betElement.updateBet(bet);
     }
 
-    public launchHelper(): void {
-        if (!this._helper) {
-            this._helper = new HelperCanvasElement(this.base, this.node.position);
-            this._helper.animate(HelperAnimation.Pulse);
-        }
-    }
-
     public async animate(
         type: HandAnimation,
         onFinish?: () => void,
     ): Promise<void> {
-        const matrixWidth = this.matrix.getMatrixWidth();
-        const matrixHeight = this.matrix.getMatrixHeight();
         if (type === HandAnimation.ToLeft || type === HandAnimation.ToRight) {
             const { frameRate, animationArray } = getSplitHandAnimation(
-                matrixWidth,
-                matrixHeight,
                 type,
                 this.position,
             );
-            this.base.scene.beginDirectAnimation(
-                this._hand,
+            const splitAnim = this.scene.beginDirectAnimation(
+                this,
                 animationArray,
                 0,
                 frameRate,
                 false,
                 2,
-        () => {
-            if (onFinish) {
-                onFinish();
-            }
-        },
+                () => {
+                    if (onFinish) {
+                        onFinish();
+                    }
+                },
             );
+            await splitAnim.waitAsync();
         }
     }
 
     public async remove(gameResult: GameResult): Promise<void> {
-        const pendingCardsAnimation = this.cards.map((card) => card.animate(CardAnimation.Remove));
+        const pendingCardsAnimation = this._cards.map((card) => card.animate(CardAnimation.Remove));
         await Promise.all(pendingCardsAnimation);
         const pendingAnimation = this._betElement.chips.map((chip) =>
             gameResult === GameResult.Lose
@@ -168,6 +153,13 @@ export class HandCanvasElement {
                 : chip.animate(ChipAnimation.Win),
         );
         await Promise.all(pendingAnimation);
-        this._hand.dispose();
+        this.dispose();
+    }
+
+    public async reset(): Promise<void> {
+        this._cards.forEach((card) => card.animate(CardAnimation.Remove, () => card.dispose()));
+        this._cards = [];
+        this._pointsElement.dispose();
+        this._betElement.dispose();
     }
 }

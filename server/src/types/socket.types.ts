@@ -19,6 +19,7 @@ export interface ServerToClientEvents {
   finishRound: (response: SocketResponse<GameSession>) => void;
   split: (response: SocketResponse<GameSession>) => void;
   finishRoundForHand: (response: SocketResponse<FinishRoundForHand>) => void;
+  reassignActiveHand: (response: SocketResponse<ReassignActiveHand>) => void;
 }
 
 export interface ClientToServerEvents {
@@ -75,4 +76,9 @@ export type FinishRoundForHand = {
     playerID: PlayerID,
     handID: string;
     result: GameResult;
+}
+export type ReassignActiveHand = {
+    roomID: RoomID,
+    playerID: PlayerID,
+    handID: string;
 }

@@ -56,7 +56,7 @@ export const CardsHandler: Handler = {
     try {
       const player = store.getPlayer({ playerID, roomID });
       const activeHand = store.getActiveHand({ roomID, playerID });
-      if (activeHand.bet * 2 > player.balance) return false;
+      if (activeHand.bet > player.balance) return false;
       if (player.hands.length >= 4) return false;
       if (activeHand.cards.length === 2) {
         const [first, second] = activeHand.cards;

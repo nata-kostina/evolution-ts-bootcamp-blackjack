@@ -1,40 +1,36 @@
 import {
-    MeshBuilder,
     GroundMesh,
     Vector3,
-    TransformNode,
+    Scene,
+    MeshBuilder,
 } from "@babylonjs/core";
 import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui/2D";
-import { handSize } from "../../constants/canvas.constants";
-import { CanvasBase } from "../CanvasBase";
+import { handSize, pointsTextblockSize } from "../../constants/canvas.constants";
 
-export class PointsCanvasElement {
+export class PointsCanvasElement extends GroundMesh {
+    private readonly scene: Scene;
+    private readonly _skin: GroundMesh;
     private _handID: string;
-    private _position: Vector3;
-    private textBlock: TextBlock | null = null;
-    private _skin: GroundMesh | null = null;
-    private readonly base: CanvasBase;
+    private textBlock: TextBlock;
 
-    public constructor(base: CanvasBase, handID: string, handPosition: Vector3) {
-        this.base = base;
+    public constructor(scene: Scene, handID: string, handPosition: Vector3) {
+        super(`points-container-${handID}`, scene);
+        this.scene = scene;
         this._handID = handID;
-        this._position = new Vector3(
+
+        this._skin = MeshBuilder.CreateGround(`points-${handID}`, {
+            width: pointsTextblockSize.width,
+            height: pointsTextblockSize.height,
+        });
+        this._skin.setParent(this);
+
+        this.position = new Vector3(
             handPosition.x - handSize.width * 1.3,
             handPosition.y + handSize.width * 0.45,
             handPosition.z,
         );
-        this.addContent();
-    }
 
-    public addContent(): void {
-        this._skin = MeshBuilder.CreateGround(
-      `points-${this._handID}`,
-      { width: 0.5, height: 0.2 },
-      this.base.scene,
-        );
-        this._skin.position.x = this._position.x;
-        this._skin.position.y = this._position.y;
-        this._skin.rotation.x = -Math.PI * 0.5;
+        this.rotation.x = -Math.PI * 0.5;
 
         const texture = AdvancedDynamicTexture.CreateForMesh(this._skin);
         texture.background = "#17515E";
@@ -45,25 +41,11 @@ export class PointsCanvasElement {
         texture.addControl(this.textBlock);
     }
 
-    public update(points: number): void {
-        if (this.textBlock) {
-            this.textBlock.text = points.toString();
-        }
-    }
-
-    public dispose(): void {
-        if (this._skin) {
-            this._skin.dispose();
-        }
-    }
-
-    public setParent(parent: TransformNode): void {
-        if (this._skin) {
-            this._skin.parent = parent;
-        }
-    }
-
-    public get skin(): GroundMesh | null {
+    public get skin(): GroundMesh {
         return this._skin;
+    }
+
+    public update(points: number): void {
+        this.textBlock.text = points.toString();
     }
 }

@@ -15,7 +15,7 @@ import {
     DealPlayerCard,
 } from "../types/game.types";
 import { Notification, NotificationVariant } from "../types/notification.types";
-import { FinishRoundForHand, SocketResponse } from "../types/socket.types";
+import { FinishRoundForHand, ReassignActiveHand, SocketResponse } from "../types/socket.types";
 import {
     gameResultSchema,
     gameSessionSchema,
@@ -62,6 +62,10 @@ export class Game {
         return this._roomID;
     }
 
+    public get scene(): SceneManager {
+        return this._scene;
+    }
+
     public async handleInitGame(
         response: SocketResponse<{ game: GameSession; playerID: PlayerID; }>,
     ): Promise<void> {
@@ -89,8 +93,7 @@ export class Game {
                     this._roomID = session.roomID;
                     this._ui.player = validatedPlayer;
                     this._ui.toggleActionBtns(validatedPlayer.availableActions);
-                    this._scene.toggleChipAction(true);
-                    this._scene.addInitialHand(validatedActiveHand.handID);
+                    this._scene.init(validatedActiveHand.handID);
                 }
             } else {
             }
@@ -116,11 +119,6 @@ export class Game {
                 });
                 if (player) {
                     const validatedPlayer = await playerSchema.validate(player);
-                    const validatedActiveHand = await handSchema.validate(
-                        validatedPlayer.hands.find(
-                            (hand) => hand.handID === player.activeHandID,
-                        ),
-                    );
                     this._session = session;
                     this._ui.player = validatedPlayer;
                     this._ui.toggleActionBtns(validatedPlayer.availableActions);
@@ -204,22 +202,21 @@ export class Game {
                     const validatedPlayer = await playerSchema.validate(player, {
                         stripUnknown: true,
                     });
-                    const validatedActiveHand = await handSchema.validate(
-                        validatedPlayer.hands.find(
-                            (hand) => hand.handID === player.activeHandID,
-                        ),
-                    );
                     this._session = session;
                     this._ui.resetBetHistory();
                     this._ui.player = validatedPlayer;
                     this._ui.toggleActionBtns(validatedPlayer.availableActions);
-                    await this._scene.removeCards();
-                    this._scene.toggleChipAction(true);
-                    this._scene.addInitialHand(validatedActiveHand.handID);
+                    this._scene.resetScene();
                 }
             } else {
             }
-        } catch (error) {}
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                console.log("The response data is invalid", error);
+                return;
+            }
+            console.log("Uncaught error occured");
+        }
     }
 
     public async handleDealDealerCard(
@@ -251,7 +248,7 @@ export class Game {
         try {
             if (response.ok && response.payload) {
                 const unholedCard = await unholedCardSchema.validate(response.payload);
-                this._scene.unholeCard(unholedCard);
+                await this._scene.unholeCard(unholedCard);
             }
         } catch (error) { }
     }
@@ -305,7 +302,7 @@ export class Game {
 
     public async handleFinishRoundForHand(
         response: SocketResponse<FinishRoundForHand>,
-    ) {
+    ): Promise<void> {
         try {
             if (response.ok && response.payload && this._playerID) {
                 console.log("handleFinishRoundForHand: ", response.payload);
@@ -315,9 +312,35 @@ export class Game {
                 const validatedGameResult = await gameResultSchema.validate(
                     response.payload.result,
                 );
-                this._scene.removeHand(validatedHandID, validatedGameResult);
+                await this._scene.removeHand(validatedHandID, validatedGameResult);
             } else {
             }
-        } catch (error) {}
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                console.log("The response data is invalid");
+                return;
+            }
+            console.log("Uncaught error occured");
+        }
+    }
+
+    public async handleReassignActiveHand(response: SocketResponse<ReassignActiveHand>): Promise<void> {
+        try {
+            console.log("handleReassignActiveHand: ", response.payload);
+            if (response.ok && response.payload) {
+                const validatedId = await handIDSchema.validate(response.payload.handID);
+                this._scene.updateHelper({ handId: validatedId });
+                await new Promise<void>((resolve) => {
+                    setTimeout(() => resolve(), 3000);
+                });
+            } else {
+            }
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                console.log("The response data is invalid");
+                return;
+            }
+            console.log("Uncaught error occured");
+        }
     }
 }
