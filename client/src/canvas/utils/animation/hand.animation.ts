@@ -1,8 +1,4 @@
-import {
-    Animation,
-    Color3,
-    Vector3,
-} from "@babylonjs/core";
+import { Animation, Vector3 } from "@babylonjs/core";
 import { HandAnimation } from "../../../types/canvas.types";
 
 export const getSplitHandAnimation = (
@@ -28,37 +24,4 @@ export const getSplitHandAnimation = (
     xSlide.setKeys(keyFramesX);
 
     return { frameRate, animationArray: [xSlide] };
-};
-
-export const getHighlightHandAnimation = (): { frameRate: number; animationArray: Array<Animation>; } => {
-    const frameRate = 8;
-
-    const colorChange = new Animation("highlight",
-        "diffuseColor",
-        frameRate,
-        Animation.ANIMATIONTYPE_COLOR3,
-        Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    const keyFrames = [];
-
-    const baseColor = Color3.FromHexString("#00531F");
-    const highlightedColor = new Color3(0.5, 0.71, 0.16);
-
-    keyFrames.push({
-        frame: 0,
-        value: baseColor,
-    });
-
-    keyFrames.push({
-        frame: frameRate,
-        value: highlightedColor,
-    });
-    keyFrames.push({
-        frame: frameRate * 2,
-        value: baseColor,
-    });
-
-    colorChange.setKeys(keyFrames);
-
-    return { frameRate, animationArray: [colorChange] };
 };

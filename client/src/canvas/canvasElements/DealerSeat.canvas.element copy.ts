@@ -10,7 +10,7 @@ import { cardSize } from "../../constants/canvas.constants";
 
 export class DealerSeatCanvasElement extends TransformNode {
     protected readonly scene: Scene;
-    protected matrix: GameMatrix;
+    protected readonly matrix: GameMatrix;
     private _cards: Array<CardCanvasElement> = [];
     private _pointsElement: PointsCanvasElement;
 
@@ -43,16 +43,10 @@ export class DealerSeatCanvasElement extends TransformNode {
         this._pointsElement.skin.isVisible = false;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public async unholeCard({ card, points }: UnholeCardPayload): Promise<void> {
         if (this._cards.length === 2) {
             const holeCard = this._cards[1];
-            // eslint-disable-next-line max-len
-            const unholedCard = new CardCanvasElement(
-                this.scene,
-                holeCard.position,
-                card,
-            );
+            const unholedCard = new CardCanvasElement(this.scene, holeCard.position, card);
             unholedCard.setParent(this);
 
             this.cards.pop();
@@ -60,14 +54,13 @@ export class DealerSeatCanvasElement extends TransformNode {
             holeCard.dispose();
 
             await unholedCard.addContent();
-            unholedCard.setMeshPosition(holeCard.position);
+            unholedCard.position = holeCard.position;
             await unholedCard.animate(CardAnimation.Unhole);
             this.updatePoints(points);
         }
     }
 
     public async dealCard(newCard: DealDealerCard): Promise<void> {
-        this._pointsElement.skin.isVisible = true;
         const cardElement = new CardCanvasElement(
             this.scene,
             new Vector3(
@@ -85,26 +78,21 @@ export class DealerSeatCanvasElement extends TransformNode {
                 this.updatePoints(newCard.points);
             }
         });
+        this._pointsElement.skin.isVisible = true;
     }
 
     public updatePoints(points: number): void {
         this._pointsElement.update(points);
     }
 
-    public async removeCards(): Promise<void> {
-        this.cards.forEach((card) => {
-            card.animate(CardAnimation.Remove);
-        });
+    public removeCards(): void {
+        this.cards.forEach((card) => card.animate(CardAnimation.Remove));
         this._cards = [];
         this._pointsElement.dispose();
     }
 
     public get cards(): Array<CardCanvasElement> {
         return this._cards;
-    }
-
-    public getMatrix(): GameMatrix {
-        return this.matrix;
     }
 
     public addCard(card: CardCanvasElement): void {

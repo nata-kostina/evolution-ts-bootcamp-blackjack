@@ -1,14 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
     Color3,
     Mesh,
     MeshBuilder,
     StandardMaterial,
-    TransformNode,
     Vector3,
     Scene,
 } from "@babylonjs/core";
-import { CanvasBase } from "../CanvasBase";
 import { HelperAnimation } from "../../types/canvas.types";
 import { getHelperAnimation } from "../utils/animation/helper.animation";
 import { handSize, helperSize } from "../../constants/canvas.constants";

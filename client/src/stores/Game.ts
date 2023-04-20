@@ -71,7 +71,6 @@ export class Game {
     ): Promise<void> {
         try {
             if (response.ok && response.payload) {
-                console.log("handleInitGame: ", response.payload);
                 const session = await gameSessionSchema.validate(response.payload.game);
                 const id = await playerIDSchema.validate(response.payload.playerID);
                 this.playerID = id;
@@ -92,7 +91,7 @@ export class Game {
                     this._session = session;
                     this._roomID = session.roomID;
                     this._ui.player = validatedPlayer;
-                    this._ui.toggleActionBtns(validatedPlayer.availableActions);
+                    this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
                     this._scene.init(validatedActiveHand.handID);
                 }
             } else {
@@ -110,7 +109,6 @@ export class Game {
         response: SocketResponse<GameSession>,
     ): Promise<void> {
         try {
-            console.log("handleUpdateGameSession: ", response.payload);
             if (response.ok && response.payload && this._playerID) {
                 const session = await gameSessionSchema.validate(response.payload);
                 const player = pickPlayerInstance({
@@ -121,7 +119,7 @@ export class Game {
                     const validatedPlayer = await playerSchema.validate(player);
                     this._session = session;
                     this._ui.player = validatedPlayer;
-                    this._ui.toggleActionBtns(validatedPlayer.availableActions);
+                    this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
                 }
             } else {
             }
@@ -133,7 +131,6 @@ export class Game {
     ): Promise<void> {
         try {
             if (response.ok && response.payload && this._playerID) {
-                console.log("handlePlaceBet: ", response.payload);
                 const session = await gameSessionSchema.validate(response.payload);
 
                 const player = pickPlayerInstance({
@@ -149,9 +146,10 @@ export class Game {
                     );
                     this._session = session;
                     this._ui.player = validatedPlayer;
-                    this._ui.toggleActionBtns(validatedPlayer.availableActions);
-                    this._ui.togglePlaceBetBtnDisabled(true);
-                    this._ui.toggleBetEditBtnsDisabled(true);
+                    this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
+                    this._ui.toggleVisibleActionBtnsDisabled(true);
+                    // this._ui.togglePlaceBetBtnDisabled(true);
+                    // this._ui.toggleBetEditBtnsDisabled(true);
                     this._scene.toggleChipAction(false);
                 }
             } else {
@@ -163,7 +161,6 @@ export class Game {
         response: SocketResponse<Notification>,
     ): Promise<void> {
         try {
-            console.log("handleNotificate: ", response.payload);
             if (response.ok && response.payload) {
                 const notification = await notificationSchema.validate(
                     response.payload,
@@ -174,12 +171,6 @@ export class Game {
                         break;
                     case NotificationVariant.StandOrTakeMoney:
                         this._ui.addModal(notification);
-                        break;
-                    case NotificationVariant.Insurance:
-                        this._ui.addHelper(Action.INSURANCE);
-                        break;
-                    case NotificationVariant.Double:
-                        this._ui.addHelper(Action.DOUBLE);
                         break;
                     default:
                         break;
@@ -193,8 +184,6 @@ export class Game {
         response: SocketResponse<GameSession>,
     ): Promise<void> {
         try {
-            console.log("handleFinishRound: ", response.payload);
-
             if (response.ok && response.payload && this._playerID) {
                 const session = await gameSessionSchema.validate(response.payload);
                 const player = pickPlayerInstance({ playerID: this._playerID, players: session.players });
@@ -205,7 +194,7 @@ export class Game {
                     this._session = session;
                     this._ui.resetBetHistory();
                     this._ui.player = validatedPlayer;
-                    this._ui.toggleActionBtns(validatedPlayer.availableActions);
+                    this._ui.toggleVisibleActionBtnsDisabled(false);
                     this._scene.resetScene();
                 }
             } else {
@@ -224,7 +213,6 @@ export class Game {
     ): Promise<void> {
         try {
             if (response.ok && response.payload) {
-                // const newCard = await newCardSchema.validate(response.payload);
                 await this._scene.dealDealerCard(response.payload);
             } else {
             }
@@ -258,9 +246,7 @@ export class Game {
     ): Promise<void> {
         try {
             if (response.ok && response.payload && this._playerID) {
-                console.log("handleSplit: ", response.payload);
                 const session = await gameSessionSchema.validate(response.payload);
-
                 const player = pickPlayerInstance({
                     playerID: this._playerID,
                     players: session.players,
@@ -281,7 +267,8 @@ export class Game {
                     }
                     this._session = session;
                     this._ui.player = validatedPlayer;
-                    this._ui.toggleActionBtns(validatedPlayer.availableActions);
+                    this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
+                    this._ui.toggleVisibleActionBtnsDisabled(true);
                     await this._scene.split({
                         oldHandID: validatedActiveHand.handID,
                         newHandID: newHand.handID,
@@ -305,13 +292,13 @@ export class Game {
     ): Promise<void> {
         try {
             if (response.ok && response.payload && this._playerID) {
-                console.log("handleFinishRoundForHand: ", response.payload);
                 const validatedHandID = await handIDSchema.validate(
                     response.payload.handID,
                 );
                 const validatedGameResult = await gameResultSchema.validate(
                     response.payload.result,
                 );
+                this._ui.togglePlayerActionsBtnsDisabled(true);
                 await this._scene.removeHand(validatedHandID, validatedGameResult);
             } else {
             }
@@ -330,9 +317,31 @@ export class Game {
             if (response.ok && response.payload) {
                 const validatedId = await handIDSchema.validate(response.payload.handID);
                 this._scene.updateHelper({ handId: validatedId });
-                await new Promise<void>((resolve) => {
-                    setTimeout(() => resolve(), 3000);
+            } else {
+            }
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                console.log("The response data is invalid");
+                return;
+            }
+            console.log("Uncaught error occured");
+        }
+    }
+
+    public async handleMakeDecision(response: SocketResponse<GameSession>): Promise<void> {
+        try {
+            if (response.ok && response.payload && this._playerID) {
+                const session = await gameSessionSchema.validate(response.payload);
+                const player = pickPlayerInstance({
+                    playerID: this._playerID,
+                    players: session.players,
                 });
+                if (player) {
+                    const validatedPlayer = await playerSchema.validate(player);
+                    this._session = session;
+                    this._ui.player = validatedPlayer;
+                    this._ui.toggleVisibleActionBtnsDisabled(false);
+                }
             } else {
             }
         } catch (error) {

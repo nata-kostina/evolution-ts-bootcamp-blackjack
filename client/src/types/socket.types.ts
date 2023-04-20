@@ -24,6 +24,8 @@ export interface ServerToClientEvents {
     split: (response: SocketResponse<GameSession>) => void;
     finishRoundForHand: (response: SocketResponse<FinishRoundForHand>) => void;
     reassignActiveHand: (response: SocketResponse<ReassignActiveHand>) => void;
+    makeDecision: (response: SocketResponse<GameSession>) => void;
+
 }
 
 export interface ClientToServerEvents {

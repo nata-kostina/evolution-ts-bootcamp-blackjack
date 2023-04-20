@@ -53,7 +53,6 @@ export const getDealCardAnimation = (finalPosition: Vector3): { frameRate: numbe
 
     keyFramesYR.push({
         frame: frameRate,
-        // value: 1,
         value: 0,
     });
 
@@ -76,7 +75,6 @@ export const getUnholeCardAnimation = (): { frameRate: number; animationArray: A
 
     keyFramesYR.push({
         frame: frameRate,
-        // value: 1,
         value: 0,
     });
 

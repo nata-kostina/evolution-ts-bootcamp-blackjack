@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="181.9989095898386" height="181.9989095898386" viewBox="138.86996849126126 132.34113280029288 181.9989095898386 181.9989095898386" xml:space="preserve">
-<desc>Created with Fabric.js 4.6.0</desc>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="291.6749192680303" height="386.81669930467865" viewBox="108.33369214208818 68.50592034445634 291.6749192680303 386.81669930467865" xml:space="preserve">
+<desc>Created with Fabric.js 5.3.0</desc>
 <defs>
 </defs>
-<g transform="matrix(1 0 0 1 229.87 223.34)" id="87Tp11QJ1zOlikBNSgrbq"  >
-<path style="stroke: rgb(208,205,30); stroke-width: 3; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-89.5, -89.5)" d="M 0 0 L 178.99891 0 L 178.99891 178.99891 L 0 178.99891 z" stroke-linecap="round" />
+<g transform="matrix(38.1785714286 0 0 50.8052448077 254.1711517761 261.9142699968)" id="kMPztK7G4am1BEiMwR4LH"  >
+<path style="stroke: rgb(224,241,242); stroke-width: 4; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(0, 0)" d="M -3.76749 -2.56634 C -3.76749 -3.22972 -3.05186 -3.7675 -2.16908 -3.7675 L 2.16908 -3.7675 L 2.16908 -3.7675 C 3.05186 -3.7675 3.7674900000000004 -3.22972 3.7674900000000004 -2.5663400000000003 L 3.7674900000000004 2.56633 L 3.7674900000000004 2.56633 C 3.7674900000000004 3.22971 3.0518600000000005 3.7674899999999996 2.16908 3.7674899999999996 L -2.16908 3.7674899999999996 L -2.16908 3.7674899999999996 C -3.05186 3.7674899999999996 -3.7674900000000004 3.2297099999999994 -3.7674900000000004 2.56633 z" stroke-linecap="round" />
 </g>
 </svg>

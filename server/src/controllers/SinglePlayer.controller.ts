@@ -91,12 +91,12 @@ export class SinglePlayerController implements Controller {
 
   public async handleDecision({ roomID, playerID, action }: SpecificID & { action: Action }): Promise<void> {
     try {
-        this._gameStore.updatePlayer({roomID, playerID, payload: {availableActions: []}})
-        await this._respondManager.respondWithDelay({
-            event: 'updateSession',
-            roomID,
-            response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
-          });
+        // this._gameStore.updatePlayer({roomID, playerID, payload: {availableActions: []}})
+        // await this._respondManager.respond({
+        //     event: 'updateSession',
+        //     roomID,
+        //     response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
+        //   });
         switch (action) {
         case Action.DOUBLE:
           await this.handleDouble({ roomID, playerID });
@@ -116,6 +116,8 @@ export class SinglePlayerController implements Controller {
           break;
         case Action.Split:
           await this.handleSplit({ roomID, playerID });
+          break;
+        case Action.Bet:
           break;
         default:
           assertUnreachable(action);
@@ -143,6 +145,24 @@ export class SinglePlayerController implements Controller {
         await this.checkDealerCombination({ playerID, roomID });
       } else {
         await this.reassignActiveHand({ roomID, playerID });
+        const canSplit = CardsHandler.canSplit({ roomID, playerID, store: this._gameStore });
+        const availableActions = [Action.HIT, Action.STAND];
+        if (canSplit) {
+            availableActions.push(Action.DOUBLE);
+        }
+        this._gameStore.updatePlayer({roomID, playerID, payload: {
+            availableActions,
+        }})
+        await this._respondManager.respond({
+          event: 'updateSession',
+          roomID,
+          response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
+        });
+        await this._respondManager.respond({
+            roomID,
+            event: 'makeDecision',
+            response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
+          });
       }
     } catch (error: unknown) {
       throw new Error(isError(error) ? error.message : `Player ${playerID}: Failed to handle stand`);
@@ -176,20 +196,33 @@ export class SinglePlayerController implements Controller {
       newHand.bet = bet;
       newHand.cards = [secondCard];
       newHand.points = PointsMap[secondCard.value];
+      
+      const canSplit = CardsHandler.canSplit({ roomID, playerID, store: this._gameStore });
+      const availableActions = [Action.HIT, Action.STAND];
+      if (canSplit) {
+          availableActions.push(Action.DOUBLE);
+      }
+
+      const player = this._gameStore.getPlayer({roomID, playerID});
 
       this._gameStore.updatePlayer({
         roomID,
         playerID,
         payload: {
           bet: bet * 2,
-          hands: ld.cloneDeep([updatedActiveHand, newHand]),
+          hands: ld.cloneDeep([...player.hands, newHand]),
           balance: balance - bet,
-          availableActions: [Action.HIT, Action.STAND],
+          availableActions,
         },
       });
       await this._respondManager.respondWithDelay({
         roomID,
         event: 'split',
+        response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
+      });
+      await this._respondManager.respondWithDelay({
+        roomID,
+        event: 'makeDecision',
         response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
       });
     } catch (error) {
@@ -379,6 +412,11 @@ export class SinglePlayerController implements Controller {
           roomID,
           response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
         });
+        await this._respondManager.respond({
+            roomID,
+            event: 'makeDecision',
+            response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
+          });
         //     // availableActions.forEach((action) => {
         //     //   if (action === Action.Insurance) {
         //     //     this.notificate({ roomID, notification: InsuranceNotification });
@@ -409,12 +447,11 @@ export class SinglePlayerController implements Controller {
   private async startNewRound({ roomID, playerID }: SpecificID): Promise<void> {
     try {
       const hand = initializeHand(playerID);
-      console.log("initialized hand: ", hand);
       this._gameStore.updatePlayer({roomID, playerID, payload: {
           hands: [hand],
-          activeHandID: hand.handID
+          activeHandID: hand.handID,
+          availableActions: [Action.Bet]
         }})
-        console.log("session: ", this._gameStore.getSession(roomID));
       await this._respondManager.respondWithDelay({
         roomID,
         event: 'initGame',
@@ -600,7 +637,7 @@ export class SinglePlayerController implements Controller {
       const deck = this._gameStore.getDeck(roomID);
       const { card, updatedDeck } = CardsHandler.takeCardFromDeck(deck);
       this._gameStore.updateDeck({ roomID, deck: updatedDeck });
-      const mockCard: Card = { id: 'dofs', suit: Suit.Clubs, value: CardValue.TEN };
+      const mockCard: Card = { id: 'dofs', suit: Suit.Clubs, value: CardValue.FOUR };
 
       const { handID, cards } = this._gameStore.getActiveHand({ roomID, playerID });
       this._gameStore.updateHand({
@@ -635,6 +672,11 @@ export class SinglePlayerController implements Controller {
             await this.checkDealerCombination({ playerID, roomID });
           } else {
             await this.reassignActiveHand({ roomID, playerID });
+            await this._respondManager.respond({
+                roomID,
+                event: 'makeDecision',
+                response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
+              });
           }
           break;
         case playerPoints > TWENTY_ONE:
@@ -658,6 +700,11 @@ export class SinglePlayerController implements Controller {
             roomID,
             response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
           });
+          await this._respondManager.respond({
+            roomID,
+            event: 'makeDecision',
+            response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
+          });
           break;
         default:
           throw new Error('Unreachable code');
@@ -669,12 +716,7 @@ export class SinglePlayerController implements Controller {
 
   private async reassignActiveHand({ playerID, roomID }: SpecificID): Promise<void> {
     try {
-      const { hands } = this._gameStore.getPlayer({ roomID, playerID });
-      //   if (hands.length < 2) {
-      //     return;
-      //   }
-      this._gameStore.reassignActiveHand({ playerID, roomID });
-
+       this._gameStore.reassignActiveHand({ playerID, roomID });
       const { activeHandID } = this._gameStore.getPlayer({ roomID, playerID });
       await this._respondManager.respond({
         event: 'reassignActiveHand',
@@ -688,18 +730,18 @@ export class SinglePlayerController implements Controller {
 
   private async checkDealerCombination({ playerID, roomID }: SpecificID): Promise<void> {
     try {
-      this._gameStore.updatePlayer({
-        playerID,
-        roomID,
-        payload: {
-          availableActions: [],
-        },
-      });
-      await this._respondManager.respond({
-        event: 'updateSession',
-        roomID,
-        response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
-      });
+    //   this._gameStore.updatePlayer({
+    //     playerID,
+    //     roomID,
+    //     payload: {
+    //       availableActions: [],
+    //     },
+    //   });
+    //   await this._respondManager.respond({
+    //     event: 'updateSession',
+    //     roomID,
+    //     response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
+    //   });
       const { holeCard } = this._gameStore.getDealer(roomID);
       this._gameStore.unholeCard(roomID);
       //   this.changeRespond(sendInSequence());
@@ -890,6 +932,7 @@ export class SinglePlayerController implements Controller {
   private async handleHandLose({ roomID, playerID, handID }: SpecificID & { handID: string }): Promise<void> {
     try {
       const player = this._gameStore.getPlayer({ playerID, roomID });
+      console.log("player available actions: ", player.availableActions);
       const hand = this._gameStore.getHand({ roomID, playerID, handID });
       this._playersStore.updatePlayerBalance({ playerID, balance: player.balance });
       this._gameStore.updatePlayer({
@@ -1014,7 +1057,7 @@ export class SinglePlayerController implements Controller {
 
   private async dealMockCards({ playerID, roomID }: SpecificID): Promise<void> {
     const player = this._gameStore.getPlayer({ playerID, roomID });
-    const card1 = { id: '1sd23', suit: Suit.Clubs, value: CardValue.ACE };
+    const card1 = { id: '1sd23', suit: Suit.Clubs, value: CardValue.FOUR };
 
     this._gameStore.updateHand({
       playerID: player.playerID,
@@ -1058,7 +1101,7 @@ export class SinglePlayerController implements Controller {
       ],
     });
 
-    const card3 = { id: 'ghjr', suit: Suit.Clubs, value: CardValue.ACE };
+    const card3 = { id: 'ghjr', suit: Suit.Clubs, value: CardValue.FOUR };
     this._gameStore.updateHand({
       playerID: player.playerID,
       roomID,

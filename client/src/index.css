@@ -1,14 +1,14 @@
 :root {
-    --controlPanel: #0c1007c7;
+    --controlPanel: #2B2B2D;
     --controlPanelBorder: 2px;
     --controlItemBg: radial-gradient(circle, rgba(253,253,179,1) 0%, rgba(211,195,155,1) 59%, rgba(229,214,180,1) 63%, rgba(229,214,180,1) 67%, rgba(107,92,66,1) 70%, rgba(107,92,66,1) 100%);
-    --controlItemWidth: 70px;
+    --controlItemWidth: 80px;
     --controlItemImgBorder: 6px;
     --controlItemImgInnerWidth: calc((var(--controlItemWidth) - 2*var(--controlItemImgBorder)) / 1.4);
     --controlItemTextHeight: 30px;
 
     --goldBorder:  linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-
+    --silverBorder: linear-gradient(315deg, #b8c6db 0%, #f5f7fa 74%);
     --balanceContainerWidth: 200px;
     --balanceContainerHeight: 50px;
 

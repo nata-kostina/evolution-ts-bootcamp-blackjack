@@ -68,30 +68,17 @@ export class BetChipCanvasElement extends Mesh {
     }
 
     public async animate(type: ChipAnimation, onFinish?: () => void): Promise<void> {
-        let initPosition;
-        let finalPosition = this._finalPosition || new Vector3(-10, -10, -10);
-        switch (type) {
-            case ChipAnimation.Add:
-                initPosition = this.position;
-                break;
-            case ChipAnimation.Remove:
-                initPosition = this.position;
-                break;
-            case ChipAnimation.Lose:
-                initPosition = this.position;
-                finalPosition = new Vector3(this.position.x, 5, this.position.z);
-                break;
-            case ChipAnimation.Win:
-                initPosition = this.position;
-                finalPosition = new Vector3(this.position.x, -5, this.position.z);
-                break;
-            default:
-                assertUnreachable(type);
+        if (type === ChipAnimation.Lose) {
+            this._finalPosition = new Vector3(this.position.x, 5, this.position.z);
+        }
+
+        if (type === ChipAnimation.Win) {
+            this._finalPosition = new Vector3(this.position.x, -5, this.position.z);
         }
 
         const { frameRate, animationArray } = getChipAnimation(
-            initPosition,
-            finalPosition,
+            this.position,
+            this._finalPosition || new Vector3(-10, -10, -10),
         );
 
         const chipAnim = this.scene.beginDirectAnimation(

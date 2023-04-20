@@ -15,21 +15,21 @@ interface Props {
 export const PlayerActionButton = observer(({ item }: Props) => {
     const { handleClick } = useAction();
     const game = useGame() as Game;
-    const disabled = game.UI.isPlayerActionBtnDisabled(item.action);
-    // if (disabled) {
-    //     return null;
-    // }
+    const btnState = game.UI.getPlayerActionBtnstate(item.action);
     return (
-        <button
-            type="button"
-            className={styles.controlItem}
-            onClick={() => handleClick(item.action)}
-            disabled={disabled}
-        >
-            <div className={styles.imgContainer}>
-                <ReactSVG className={styles.imgContainerInner} src={item.svgPath} />
-            </div>
-            <div className={styles.textContainer}>{item.action}</div>
-        </button>
+        <>{btnState.isVisible && (
+            <button
+                type="button"
+                className={styles.controlItem}
+                onClick={() => handleClick(item.action)}
+                disabled={btnState.isDisabled}
+            >
+                <div className={styles.imgContainer}>
+                    <ReactSVG className={styles.imgContainerInner} src={item.svgPath} />
+                </div>
+                <div className={styles.textContainer}>{item.action}</div>
+            </button>
+        )}
+        </>
     );
 });

@@ -36,6 +36,21 @@ export const getChipAnimation = (
     });
 
     ySlide.setKeys(keyFramesY);
+    const zSlide = new Animation("zSlide", "position.z", frameRate, Animation.ANIMATIONTYPE_FLOAT);
 
-    return { frameRate, animationArray: [xSlide, ySlide] };
+    const keyFramesZ = [];
+
+    keyFramesZ.push({
+        frame: 0,
+        value: initPosition.z,
+    });
+
+    keyFramesZ.push({
+        frame: frameRate,
+        value: finalPosition.z,
+    });
+
+    zSlide.setKeys(keyFramesZ);
+
+    return { frameRate, animationArray: [xSlide, ySlide, zSlide] };
 };

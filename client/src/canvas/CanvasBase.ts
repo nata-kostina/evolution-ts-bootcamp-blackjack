@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { HemisphericLight, ArcRotateCamera, Engine, Scene, Vector3, Color4, Camera } from "@babylonjs/core";
-import Background from "../assets/img/background34.jpg";
+import Background from "../assets/img/background5.jpg";
 import { GameMatrix } from "./GameMatrix";
 
 export class CanvasBase {

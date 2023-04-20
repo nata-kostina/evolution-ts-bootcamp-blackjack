@@ -67,19 +67,10 @@ export class ChipSetCanvasElement implements CanvasElement {
 
     public addContent(): void {
         for (let j = 0; j < chipSet.length; j++) {
-            const x = this._position.x + j * chipRadius * 2;
-            // const x = this.position.x;
-
-            // const y = this.position.y - 0.09 * Math.sqrt(j * 1.5);
-            const y = this._position.y;
-            // const y = this.position.y - j * 0.4 * ((0.5) / (x + 2));
-            // console.log(`Single Chip Position: X: ${x}, Y: ${y}`);
+            const x = this._position.x;
+            const y = this._position.y - j * chipRadius * 2 * 1.1;
             const z = this._position.z;
-            const chip = new ChipCanvasElement(this.scene, new Vector3(
-                x,
-                y,
-                z,
-            ), chipSet[j], this.controller);
+            const chip = new ChipCanvasElement(this.scene, new Vector3(x, y, z), chipSet[j], this.controller);
             this.chipSet.push(chip);
         }
     }

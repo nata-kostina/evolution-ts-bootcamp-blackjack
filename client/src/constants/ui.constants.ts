@@ -1,13 +1,14 @@
-import HitSVG from "../assets/img/actions/hit.svg";
-import StandSVG from "../assets/img/actions/stand.svg";
+import HitSVG from "../assets/img/actions/hit3.svg";
+import StandSVG from "../assets/img/actions/stand2.svg";
 import DoubleSVG from "../assets/img/actions/double.svg";
-import SurenderSVG from "../assets/img/actions/surender.svg";
+import SurenderSVG from "../assets/img/actions/surender2.svg";
 import InsuranceSVG from "../assets/img/actions/insurance.svg";
-import BetSVG from "../assets/img/actions/bet.svg";
-import { ActionBtn, BetActionBtn } from "../types/ui.types";
+import BetSVG from "../assets/img/actions/bet4.svg";
+import { ActionBtn } from "../types/ui.types";
 import { Action, BetAction } from "../types/game.types";
-import UndoSVG from "../assets/img/actions/undo.svg";
-import ResetSVG from "../assets/img/actions/reset.svg";
+import UndoSVG from "../assets/img/actions/undo2.svg";
+import ResetSVG from "../assets/img/actions/reset2.svg";
+import SplitSVG from "../assets/img/actions/split.svg";
 
 export const actionButtons: ActionBtn[] = [
     {
@@ -36,11 +37,14 @@ export const actionButtons: ActionBtn[] = [
     },
     {
         action: Action.SPLIT,
-        svgPath: DoubleSVG,
+        svgPath: SplitSVG,
     },
-];
-
-export const betActionBtns: BetActionBtn[] = [
-    { action: BetAction.Undo, svgPath: UndoSVG },
-    { action: BetAction.Reset, svgPath: ResetSVG },
+    {
+        action: BetAction.Undo,
+        svgPath: UndoSVG,
+    },
+    {
+        action: BetAction.Reset,
+        svgPath: ResetSVG,
+    },
 ];

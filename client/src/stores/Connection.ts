@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { makeAutoObservable } from "mobx";
 import { io, Socket } from "socket.io-client";
@@ -112,6 +113,11 @@ export class Connection {
         this._socket.on("reassignActiveHand", (response) => {
             this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleReassignActiveHand(response);
+            });
+        });
+        this._socket.on("makeDecision", (response) => {
+            this._responseHandlerQueue.enqueue(async () => {
+                await this._game.handleMakeDecision(response);
             });
         });
 

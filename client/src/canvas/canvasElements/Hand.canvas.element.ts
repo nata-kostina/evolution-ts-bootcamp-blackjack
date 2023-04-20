@@ -1,12 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-redeclare */
 import {
-    AxesViewer,
-    GroundMesh,
-    MeshBuilder,
     Scene,
-    StandardMaterial,
-    Texture,
     TransformNode,
     Vector3,
 } from "@babylonjs/core";
@@ -14,22 +7,17 @@ import {
     CardAnimation,
     ChipAnimation,
     HandAnimation,
-    HelperAnimation,
 } from "../../types/canvas.types";
 import { Bet, DealPlayerCard, GameResult } from "../../types/game.types";
-// import { isNormalCard } from "../../utils/gameUtils/isHoleCard";
-import { CanvasBase } from "../CanvasBase";
-import { GameMatrix } from "../GameMatrix";
 import { CardCanvasElement } from "./Card.canvas.element";
 import { getSplitHandAnimation } from "../utils/animation/hand.animation";
 import { PointsCanvasElement } from "./Points.canvas.element";
 import { BetCanvasElement } from "./Bet.canvas.element";
 import { cardSize } from "../../constants/canvas.constants";
-import SeatSVG from "../../assets/img/seat/seat.svg";
 
 export class HandCanvasElement extends TransformNode {
     private readonly scene: Scene;
-    private _handID: string;
+    private readonly _handID: string;
     private _cards: Array<CardCanvasElement> = [];
     private _pointsElement: PointsCanvasElement;
     private _betElement: BetCanvasElement;
@@ -156,7 +144,7 @@ export class HandCanvasElement extends TransformNode {
         this.dispose();
     }
 
-    public async reset(): Promise<void> {
+    public reset(): void {
         this._cards.forEach((card) => card.animate(CardAnimation.Remove, () => card.dispose()));
         this._cards = [];
         this._pointsElement.dispose();

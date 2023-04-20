@@ -21,8 +21,8 @@ export class ChipCanvasElement extends Mesh {
     private readonly scene: Scene;
     private readonly _id: string;
     private readonly _skin: Mesh;
-    private action: ExecuteCodeAction;
     private readonly chip: ChipItem;
+    private action: ExecuteCodeAction;
 
     public constructor(scene: Scene, position: Vector3, chip: ChipItem, controller: Controller) {
         super(`chip-${chip.id}`, scene);

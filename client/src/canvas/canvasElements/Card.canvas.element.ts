@@ -39,6 +39,7 @@ export class CardCanvasElement {
         this.finalPosition = position;
         this.isHoleCard = isHoleCard(card);
         this._cardObj = card;
+
         const columns = 6;
         const rows = 1;
 
@@ -93,10 +94,7 @@ export class CardCanvasElement {
     ): Promise<void> {
         switch (type) {
             case CardAnimation.Deal:
-                const { frameRate, animationArray } = getDealCardAnimation(
-
-                    this.finalPosition,
-                );
+                const { frameRate, animationArray } = getDealCardAnimation(this.finalPosition);
                 const dealAnim = this.scene.beginDirectAnimation(
                     this.skin,
                     animationArray,
@@ -159,10 +157,6 @@ export class CardCanvasElement {
 
     public dispose(): void {
         this.skin.dispose();
-    }
-
-    public setMeshPosition(position: Vector3): void {
-        this.skin.position = position;
     }
 
     public setParent(parent: TransformNode): void {

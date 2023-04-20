@@ -57,7 +57,7 @@ export const CardsHandler: Handler = {
       const player = store.getPlayer({ playerID, roomID });
       const activeHand = store.getActiveHand({ roomID, playerID });
       if (activeHand.bet > player.balance) return false;
-      if (player.hands.length >= 4) return false;
+      if (player.hands.length >= 2) return false;
       if (activeHand.cards.length === 2) {
         const [first, second] = activeHand.cards;
         return first.value === second.value || (TenSet.has(first.value) && TenSet.has(second.value));

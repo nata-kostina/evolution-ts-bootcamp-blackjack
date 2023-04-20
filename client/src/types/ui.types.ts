@@ -1,7 +1,7 @@
 import { Action, BetAction } from "./game.types";
 
 export type ActionBtn = {
-    action: Action;
+    action: Action | BetAction;
     svgPath: string;
 };
 

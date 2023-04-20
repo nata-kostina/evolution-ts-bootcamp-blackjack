@@ -1,11 +1,6 @@
 export enum NotificationVariant {
     Blackjack = "blackjack",
     StandOrTakeMoney = "stand-or-take-money",
-    Victory = "victory",
-    Finish = "finish",
-    PlayerLose = "player-lose",
-    Double = "double",
-    Insurance = "insurance",
     Disconnection = "disconnection",
 }
 

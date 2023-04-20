@@ -48,11 +48,10 @@ export class BetCanvasElement extends TransformNode implements IBetCanvasElement
         this._textGround.setParent(this);
 
         const texture = AdvancedDynamicTexture.CreateForMesh(this._textGround);
-        texture.background = "#17515E";
 
         this._textBlock = new TextBlock(`text-points-${this._handID}`, "0$");
         this._textBlock.color = "white";
-        this._textBlock.fontSize = 250;
+        this._textBlock.fontSize = 450;
 
         texture.addControl(this._textBlock);
     }
@@ -75,12 +74,12 @@ export class BetCanvasElement extends TransformNode implements IBetCanvasElement
                     setChip.position.y - this.position.y,
                     0,
                 );
+                this._chipsStack.push(chip);
                 chip.finalPosition = new Vector3(
                     this.position.x + (Math.random() * 0.08 - 0.05),
-                    -betTextblockSize.height - chipRadius + (Math.random() * 0.08 - 0.05),
-                    this.position.z - this._chipsStack.length * chipSize.height);
+                    -betTextblockSize.height * 0.4 - chipRadius + (Math.random() * 0.08 - 0.05),
+                    this.position.z - this._chipsStack.length * chipSize.height * 1.1);
 
-                this._chipsStack.push(chip);
                 await chip.animate(ChipAnimation.Add);
             }
         }

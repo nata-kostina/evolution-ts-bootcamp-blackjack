@@ -1,11 +1,32 @@
 .actionsPanel {
   position: absolute;
+  /* top: -60px; */
   top: -60px;
-
   left: 50%;
   transform: translateX(-50%);
+  width: 55%;
+  height: 60px;
+  border: solid var(--controlPanelBorder) transparent;
+  border-top-left-radius: 45px;
+  border-top-right-radius: 45px;
+  border-bottom: none;
+  background-image: linear-gradient(var(--controlPanel) 0 0), var(--goldBorder);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
 
+  /* border: solid var(--controlPanelBorder) transparent; */
+  /* -moz-border-image: -moz-linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+  -webkit-border-image: -webkit-linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+  border-image: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+  border-image-slice: 1;
+  background: var(--controlPanel); */
+}
+
+.inner {
   display: flex;
+  position: relative;
+  top: -40px;
+  justify-content: center;
 }
 
 .controlItem {
@@ -103,6 +124,11 @@
   height: var(--controlItemImgInnerWidth);
 }
 
+.imgContainerInner svg {
+    width: 100%;
+    height: 100%;
+}
+
 .textContainer {
   position: absolute;
   bottom: -18px;
@@ -118,13 +144,22 @@
   border: solid 2px transparent;
   border-radius: 20px;
 
+  background: rgb(25, 25, 26);
+  /* background: linear-gradient(
+    180deg,
+    rgba(25, 25, 26, 1) 0%,
+    rgba(96, 82, 25, 1) 36%,
+    rgba(103, 86, 18, 1) 50%,
+    rgba(92, 79, 25, 1) 69%,
+    rgba(25, 25, 26, 1) 100%
+  ); */
   background-image: linear-gradient(
       180deg,
-      rgba(86, 50, 15, 1) 0%,
-      rgba(145, 116, 56, 1) 40%,
-      rgba(145, 116, 56, 1) 50%,
-      rgba(145, 116, 56, 1) 60%,
-      rgba(86, 50, 15, 1) 100%
+      rgba(25, 25, 26, 1) 0%,
+      rgba(105, 100, 81, 1) 38%,
+      rgba(115, 109, 89, 1) 50%,
+      rgba(92, 87, 69, 1) 69%,
+      rgba(25, 25, 26, 1) 100%
     ),
     linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
   background-origin: border-box;
@@ -133,33 +168,6 @@
   color: #ffffff;
   text-transform: uppercase;
 }
-
-.helper {
-  position: absolute;
-  top: calc(var(--helperSize) / (-1) - var(--helperSize) / 2 );
-  left: 50%;
-
-  transform: translateX(-50%);
-
-  z-index: 10;
-
-  animation: .5s linear 0s infinite alternate point;
-}
-
-.helperIcon {
-    background: blue;
-}
-
-@keyframes point {
-    0% {
-        top: calc(var(--helperSize) / (-1) - var(--helperSize) / 3.5);
-     }
-
-      100% {
-        top: calc(var(--helperSize) / (-1));
-      }
-}
-
 
 @media screen and (max-width: 1024px) {
   .controlItem {

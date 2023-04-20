@@ -1,5 +1,5 @@
 import { initialDeck } from '../constants/index.js';
-import { GameState, Hand, PlayerInstance, SpecificID } from '../types/index.js';
+import { GameState, Hand, PlayerInstance, SpecificID, Action } from '../types/index.js';
 import { v4 } from 'uuid';
 
 export function initializeGameState({ roomID, playerID }: SpecificID): GameState {
@@ -28,7 +28,7 @@ export function initializePlayer({
     insurance: 0,
     hands: [activeHand],
     activeHandID: activeHand.handID,
-    availableActions: [],
+    availableActions: [Action.Bet],
   };
 }
 

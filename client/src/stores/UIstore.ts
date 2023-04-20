@@ -1,22 +1,60 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { makeAutoObservable } from "mobx";
-import { Action, AvailableActions, Bet, PlayerInstance } from "../types/game.types";
+import { makeAutoObservable, toJS } from "mobx";
+import {
+    Action,
+    AvailableActions,
+    Bet,
+    BetAction,
+    PlayerInstance,
+} from "../types/game.types";
 import { Notification } from "../types/notification.types";
 import { IBetCanvasElement } from "../types/canvas.types";
 
 export class UIStore {
     private _player: PlayerInstance | null = null;
-    private _actionBtnsDisabled: Record<Action, boolean> = {
-        hit: true,
-        stand: true,
-        double: true,
-        surender: true,
-        insurance: true,
-        bet: true,
-        split: true,
-    };
+    private _actionBtnsState: Record<
+    Action | BetAction,
+    { isVisible: boolean; isDisabled: boolean; }
+  > = {
+            hit: {
+                isVisible: false,
+                isDisabled: true,
+            },
+            stand: {
+                isVisible: false,
+                isDisabled: true,
+            },
+            double: {
+                isVisible: false,
+                isDisabled: true,
+            },
+            surender: {
+                isVisible: false,
+                isDisabled: true,
+            },
+            insurance: {
+                isVisible: false,
+                isDisabled: true,
+            },
+            bet: {
+                isVisible: true,
+                isDisabled: true,
+            },
+            split: {
+                isVisible: false,
+                isDisabled: true,
+            },
+            reset: {
+                isVisible: true,
+                isDisabled: true,
+            },
+            undo: {
+                isVisible: true,
+                isDisabled: true,
+            },
+        };
 
-    private _betEditBtnsDisabled = true;
+    // private _betEditBtnsState = { isVisible: true, isDisabled: true };
     private _betHistory: Array<number> = [];
 
     private _helperTarget: Array<Action> = [];
@@ -67,27 +105,65 @@ export class UIStore {
     }
 
     public isPlayerActionBtnDisabled(btn: Action): boolean {
-        return this._actionBtnsDisabled[btn];
+        return this._actionBtnsState[btn].isDisabled;
     }
 
-    public isBetEditBtnDisabled(): boolean {
-        return this._betEditBtnsDisabled;
+    public getPlayerActionBtnstate(btn: Action | BetAction): {
+        isDisabled: boolean;
+        isVisible: boolean;
+    } {
+        return this._actionBtnsState[btn];
     }
+
+    // public isBetEditBtnDisabled(): boolean {
+    //     return this._betEditBtnsState.isDisabled;
+    // }
 
     public togglePlaceBetBtnDisabled(value: boolean): void {
-        this._actionBtnsDisabled.bet = value;
+        this._actionBtnsState.bet.isDisabled = value;
     }
 
     public toggleBetEditBtnsDisabled(value: boolean): void {
-        this._betEditBtnsDisabled = value;
+        this._actionBtnsState.undo.isDisabled = value;
+        this._actionBtnsState.reset.isDisabled = value;
     }
 
-    public toggleActionBtns(enabled: AvailableActions): void {
-        Object.keys(this._actionBtnsDisabled).forEach((btn) => {
-            if (enabled.includes(btn as Action)) {
-                this._actionBtnsDisabled[btn as Action] = false;
+    public togglePlayerActionsBtnsDisabled(value: boolean): void {
+        Object.values(this._actionBtnsState).forEach((btn) => {
+            btn.isDisabled = value;
+        });
+    }
+
+    public togglePlayerActionsBtnsVisible(value: boolean): void {
+        Object.values(this._actionBtnsState).forEach((btn) => {
+            btn.isVisible = value;
+        });
+    }
+
+    public toggleActionBtnsVisible(enabled: AvailableActions): void {
+        console.log("enabled: ", enabled);
+        Object.keys(this._actionBtnsState).forEach((btn) => {
+            if (btn === Action.BET) {
+                this._actionBtnsState.bet.isVisible = enabled.includes(Action.BET);
+            } else if (btn === BetAction.Reset || btn === BetAction.Undo) {
+                this._actionBtnsState.undo.isVisible = enabled.includes(Action.BET);
+                this._actionBtnsState.reset.isVisible = enabled.includes(Action.BET);
             } else {
-                this._actionBtnsDisabled[btn as Action] = true;
+                this._actionBtnsState[btn as Action].isVisible = enabled.includes(
+                    btn as Action,
+                );
+            }
+        });
+        console.log("this._actionBtnsState: ", toJS(this._actionBtnsState));
+    }
+
+    public toggleVisibleActionBtnsDisabled(value: boolean): void {
+        console.log("toggleVisibleActionBtnsDisabled");
+        console.log("this._actionBtnsState: ", toJS(this._actionBtnsState));
+        Object.values(this._actionBtnsState).forEach((btn) => {
+            if (btn.isVisible) {
+                btn.isDisabled = value;
+                console.log("btn: ", toJS(btn));
             }
         });
     }
@@ -98,6 +174,8 @@ export class UIStore {
                 this.player.bet += value;
                 this.player.balance -= value;
                 this._betHistory.push(value);
+                this.togglePlaceBetBtnDisabled(false);
+                this.toggleBetEditBtnsDisabled(false);
                 if (this._betElement) {
                     this._betElement.addChip(value);
                     this._betElement.updateBet(this.player.bet);
