@@ -1,14 +1,13 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { AdvancedDynamicTexture, TextBlock, Control } from "@babylonjs/gui";
-import { GroundMesh, MeshBuilder, Scene, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
+/* eslint-disable @typescript-eslint/no-empty-function */
+import { BackgroundMaterial, CreateGround, CreateSphere, Scene, Texture, Vector3 } from "@babylonjs/core";
 import { PlayerSeatCanvasElement } from "./PlayerSeat.canvas.element";
 import { DealerSeatCanvasElement } from "./DealerSeat.canvas.element copy";
 import { GameMatrix } from "../GameMatrix";
 import { ChipSetCanvasElement } from "./ChipSet.canvas.element";
 import { Controller } from "../Controller";
 import { BlackjackNotificationCanvasElement } from "./BlackjackNotification.canvas.element";
-import { CardAnimation, HelperAnimation, SplitParams, UnholeCardPayload } from "../../types/canvas.types";
+import { SplitParams, UnholeCardPayload } from "../../types/canvas.types";
 import {
     DealDealerCard,
     DealPlayerCard,
@@ -17,8 +16,7 @@ import {
 // eslint-disable-next-line import/no-unassigned-import
 import "@babylonjs/loaders/glTF";
 import { HelperCanvasElement } from "./Helper.canvas.element";
-import Border from "../../assets/img/scene/border.svg";
-// import Border from "../../assets/img/seat/seat.svg";
+import { assetsSrc } from "../../constants/assets.constants";
 
 export class SceneManager {
     public playerSeat: PlayerSeatCanvasElement;
@@ -28,7 +26,7 @@ export class SceneManager {
     private readonly gameMatrix: GameMatrix;
     private readonly controller: Controller;
     private _helper: HelperCanvasElement;
-    private _textGround: GroundMesh;
+
     public constructor(
         scene: Scene,
         matrix: GameMatrix,
@@ -42,52 +40,28 @@ export class SceneManager {
         this.chipSet = new ChipSetCanvasElement(scene, matrix, controller);
         this._helper = new HelperCanvasElement(scene, Vector3.Zero());
         this._helper.skin.isVisible = false;
-        this.gameMatrix.addSubscriber([this.chipSet]);
 
-        this._textGround = MeshBuilder.CreateGround(`rules-text-ground`,
-            { width: 3, height: 3 },
-            this.scene);
-        this._textGround.rotation.x = -Math.PI * 0.5;
-
-        const texture = AdvancedDynamicTexture.CreateForMesh(this._textGround);
-
-        const textBlockBlackjack = new TextBlock(`rules-text-blackjack`, "Blackjack pays 3 to 2");
-        textBlockBlackjack.color = "rgba(255, 255, 255, 0.25)";
-        textBlockBlackjack.fontSize = 50;
-        // textBlockBlackjack.x
-
-        const textBlockDealer = new TextBlock(`rules-text-dealer`, "Dealer must stand on 17");
-        textBlockDealer.color = "rgba(255, 255, 255, 0.25)";
-        textBlockDealer.fontSize = 50;
-
-        // texture.addControl(textBlock);
-
-        // const textGroundInsurance = MeshBuilder.CreateGround(`text-ground-insurance`,
-        //     { width: 2, height: 1 },
-        //     this.scene);
-
-        // textGroundInsurance.rotation.x = -Math.PI * 0.5;
-
-        const textBlockInsurance = new TextBlock(`rules-text-insurance`, "Insurance pays 2 to 1");
-        textBlockInsurance.color = "rgba(255, 255, 255, 0.425)";
-        textBlockInsurance.fontSize = 50;
-        textBlockInsurance.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-
-        texture.addControl(textBlockBlackjack);
-        texture.addControl(textBlockDealer);
-        texture.addControl(textBlockInsurance);
-
-        // const textGroundInsuranceMaterial = new StandardMaterial("material-insurance", this.scene);
-        // textGroundInsuranceMaterial.diffuseTexture = new Texture(Border, this.scene);
-        // textGroundInsuranceMaterial.diffuseTexture.hasAlpha = true;
-        // textGroundInsurance.material = textGroundInsuranceMaterial;
+        this.gameMatrix.addSubscriber([this.chipSet, this.playerSeat, this.dealerSeat]);
     }
 
     public addContent(): void {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.boot().then(() => {
-            // const axes = new AxesViewer(this.base.scene, 1);
-        });
+        console.log("scene manager add content");
+        // const sphere = CreateSphere("sphere", { diameter: 0.4 }, this.scene);
+        // console.log({ matrix: this.gameMatrix.matrixHeight, width: this.gameMatrix.matrixWidth });
+        // sphere.position = new Vector3(1, 0, 0);
+        const ground = CreateGround("ground1", { width: 2.1, height: 0.6 }, this.scene);
+        ground.position.y = 0.8;
+        ground.position.z = 0.3;
+        const backgroundMaterial = new BackgroundMaterial("backgroundMaterial", this.scene);
+        const rulesTexture = this.scene.getTextureByName(assetsSrc.rules) as Texture;
+        backgroundMaterial.diffuseTexture = rulesTexture;
+        backgroundMaterial.diffuseTexture.hasAlpha = true;
+        ground.material = backgroundMaterial;
+
+        ground.rotation.x = -Math.PI * 0.5;
+
+        this.chipSet.addContent();
+        this.playerSeat.addContent();
     }
 
     public init(activeHand: string): void {
@@ -122,6 +96,7 @@ export class SceneManager {
     }
 
     public addBlackjackNotification(): void {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const notification = new BlackjackNotificationCanvasElement(this.scene);
     }
 
@@ -151,7 +126,10 @@ export class SceneManager {
         // this._helper.dispose();
     }
 
-    private async boot(): Promise<void> {}
+    private async boot(): Promise<void> {
+        // const assetManager = new AssetsManager(this.scene);
+        // assetManager.addTextureTask("load-chip-1", actionButtons[Action]);
+    }
 
     private addInitialHand(handID: string): void {
         this.playerSeat.addHand(handID);

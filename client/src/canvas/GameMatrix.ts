@@ -1,91 +1,89 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Cell } from "../types/canvas.types";
 
-import { CanvasElement, Cell } from "../types/canvas.types";
+export interface CanvasElement {
+    update: (data: GameMatrix) => void;
+}
 
 export class GameMatrix {
-    private width: number;
-    private height: number;
-    private matrixSize = 7;
-    private cellWidth: number;
-    private cellHeight: number;
-    private readonly subscribers: Array<CanvasElement>;
-    private readonly matrix: Cell[] = [
-        "0", "0", "dealer-points", "0", "0", "0", "0",
-        "chips", "0", "0", "dealer-seat", "0", "0", "0",
+    private _width: number;
+    private _height: number;
+    private _colNum = 7;
+    private _rowNum = 8;
+    private _cellWidth: number;
+    private _cellHeight: number;
+    private readonly _subscribers: Array<CanvasElement>;
+    private readonly _matrix: Cell[] = [
+        "0", "0", "0", "dealer-seat", "0", "0", "0",
+        "chips", "0", "0", "0", "0", "0", "0",
+        "0", "0", "0", "0", "0", "0", "0",
+        "0", "0", "0", "0", "0", "0", "0",
         "0", "0", "0", "0", "0", "0", "0",
         "0", "0", "0", "player-seat", "0", "0", "0",
-        "0", "0", "0", "0", "0", "0", "0",
-        "0", "0", "0", "0", "0", "0", "0",
         "0", "0", "0", "0", "0", "0", "0",
         "0", "0", "0", "0", "0", "0", "0",
     ];
 
     public constructor(width: number, height: number) {
-        this.width = 2;
-        this.height = 2;
+        this._width = 2;
+        this._height = 2;
         if (height < width) {
             const ratio = width / height;
-            this.width = 2 * ratio;
+            this._width = 2 * ratio;
         } else if (width < height) {
             const ratio = height / width;
-            this.height = 2 * ratio;
+            this._height = 2 * ratio;
         }
-        this.cellWidth = this.width / this.matrixSize;
-        this.cellHeight = this.height / this.matrixSize;
-        // this.cellWidth = Math.trunc((this.width / this.matrixSize) * 100) / 100;
-        // this.cellHeight = Math.trunc((this.height / this.matrixSize) * 100) / 100;
-        this.subscribers = [];
+        this._cellWidth = this._width / this._colNum;
+        this._cellHeight = this._height / this._rowNum;
+        this._subscribers = [];
     }
 
     public addSubscriber(subscribers: Array<CanvasElement>): void {
-        subscribers.forEach((subscriber) => this.subscribers.push(subscriber));
+        subscribers.forEach((subscriber) => this._subscribers.push(subscriber));
     }
 
     public update(width: number, height: number): void {
         if (height < width) {
             const ratio = width / height;
-            this.width = 2 * ratio;
+            this._width = 2 * ratio;
         } else if (width < height) {
             const ratio = height / width;
-            this.height = 2 * ratio;
+            this._height = 2 * ratio;
         }
-        this.cellWidth = this.width / this.matrixSize;
-        this.cellHeight = this.height / this.matrixSize;
+        this._cellWidth = this._width / this._colNum;
+        this._cellHeight = this._height / this._rowNum;
         this.notify();
     }
 
-    public getMatrix(): Cell[] {
-        return this.matrix;
+    public get matrix(): Cell[] {
+        return this._matrix;
     }
 
-    public getCellWidth(): number {
-        return this.cellWidth;
+    public get cellWidth(): number {
+        return this._cellWidth;
     }
 
-    public getCellHeight(): number {
-        return this.cellHeight;
+    public get cellHeight(): number {
+        return this._cellHeight;
     }
 
-    public getMatrixSize(): number {
-        return this.matrixSize;
+    public get matrixWidth(): number {
+        return this._width;
     }
 
-    public getMatrixWidth(): number {
-        return this.width;
+    public get matrixHeight(): number {
+        return this._height;
     }
 
-    public getMatrixHeight(): number {
-        return this.height;
+    public get colNum(): number {
+        return this._colNum;
+    }
+
+    public get rowNum(): number {
+        return this._rowNum;
     }
 
     private notify(): void {
-        this.subscribers.forEach((subscriber) => subscriber.update({
-            width: this.width,
-            height: this.height,
-            cellHeight: this.cellHeight,
-            cellWidth: this.cellWidth,
-            map: this.matrix,
-            size: this.matrixSize,
-        }));
+        this._subscribers.forEach((subscriber) => subscriber.update(this));
     }
 }

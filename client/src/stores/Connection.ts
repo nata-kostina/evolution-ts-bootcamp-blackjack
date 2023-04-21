@@ -140,6 +140,10 @@ export class Connection {
         return this._status === "waiting";
     }
 
+    public get status(): SocketStatus {
+        return this._status;
+    }
+
     public sendRequest<Event extends keyof ClientToServerEvents>(
         request: RequestParameters<Event>,
     ): void {

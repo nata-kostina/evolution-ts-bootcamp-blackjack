@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { TransformNode, Vector3, Scene } from "@babylonjs/core";
-import { GameMatrix } from "../GameMatrix";
+import { CanvasElement, GameMatrix } from "../GameMatrix";
 import { CardCanvasElement } from "./Card.canvas.element";
 import { DealDealerCard } from "../../types/game.types";
 import { CardAnimation, UnholeCardPayload } from "../../types/canvas.types";
 import { isNormalCard } from "../../utils/gameUtils/isHoleCard";
 import { PointsCanvasElement } from "./Points.canvas.element";
 import { cardSize } from "../../constants/canvas.constants";
+import { getPositionFromMatrix } from "../utils/getPositionFromMatrix";
 
-export class DealerSeatCanvasElement extends TransformNode {
+export class DealerSeatCanvasElement extends TransformNode implements CanvasElement {
     protected readonly scene: Scene;
     protected readonly matrix: GameMatrix;
     private _cards: Array<CardCanvasElement> = [];
@@ -18,22 +19,22 @@ export class DealerSeatCanvasElement extends TransformNode {
         super("dealer-seat", scene);
         this.scene = scene;
         this.matrix = matrix;
+        this.position = getPositionFromMatrix(matrix, "dealer-seat");
+        // const mtx = matrix.getMatrix();
+        // const mtxSize = matrix.getMatrixSize();
+        // const cellWidth = matrix.getCellWidth();
+        // const cellHeight = matrix.getCellHeight();
+        // const matrixWidth = matrix.getMatrixWidth();
+        // const matrixHeight = matrix.getMatrixHeight();
+        // const index = mtx.indexOf("dealer-seat");
 
-        const mtx = matrix.getMatrix();
-        const mtxSize = matrix.getMatrixSize();
-        const cellWidth = matrix.getCellWidth();
-        const cellHeight = matrix.getCellHeight();
-        const matrixWidth = matrix.getMatrixWidth();
-        const matrixHeight = matrix.getMatrixHeight();
-        const index = mtx.indexOf("dealer-seat");
-
-        const row = Math.floor(index / mtxSize);
-        const column = index % mtxSize;
-        this.position = new Vector3(
-            -matrixWidth * 0.5 + cellWidth * 0.5 + cellWidth * column,
-            -cardSize.height * 0.5 + matrixHeight * 0.5 - cellHeight * 0.5 - cellHeight * row,
-            0,
-        );
+        // const row = Math.floor(index / mtxSize);
+        // const column = index % mtxSize;
+        // this.position = new Vector3(
+        //     -matrixWidth * 0.5 + cellWidth * 0.5 + cellWidth * column,
+        //     -cardSize.height * 0.5 + matrixHeight * 0.5 - cellHeight * 0.5 - cellHeight * row,
+        //     0,
+        // );
 
         this._pointsElement = new PointsCanvasElement(
             this.scene,
@@ -103,5 +104,9 @@ export class DealerSeatCanvasElement extends TransformNode {
         this._cards.forEach((card) => card.animate(CardAnimation.Remove, () => card.dispose()));
         this._cards = [];
         this._pointsElement.skin.isVisible = false;
+    }
+
+    public update(matrix: GameMatrix): void {
+        this.position = getPositionFromMatrix(matrix, "dealer-seat");
     }
 }

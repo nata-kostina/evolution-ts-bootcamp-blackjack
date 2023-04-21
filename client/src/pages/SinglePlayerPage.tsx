@@ -1,17 +1,17 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
-import { RequireConnection } from "../../hoc/RequireConnection";
-import { ControlPanel } from "../../components/ControlPanel/ControlPanel";
-import { useModal } from "../../hooks/useModal";
-import { NotificationModal } from "../../components/Modal/NotificationModal";
-import { Rules } from "../../components/Rules/Rules";
+import { RequireConnection } from "../hoc/RequireConnection";
+import { GameCanvas } from "../components/Canvas/GameCanvas";
+// import { ControlPanel } from "../components/ControlPanel/ControlPanel";
+import { NotificationModal } from "../components/Modal/NotificationModal";
+import { useModal } from "../hooks/useModal";
 
 const SinglePlayerPage = observer(() => {
     const { isOpen, closeModal, notification } = useModal();
     return (
         <>
-            <ControlPanel />
-            <Rules />
+            <GameCanvas />
+            {/* <ControlPanel /> */}
             <NotificationModal
                 closeModal={closeModal}
                 isOpen={isOpen}

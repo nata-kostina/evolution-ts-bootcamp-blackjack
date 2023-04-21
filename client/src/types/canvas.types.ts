@@ -9,17 +9,13 @@ export type MatrixProps = {
     cellHeight: number;
 };
 
-export interface CanvasElement {
-    update: (data: MatrixProps) => void;
-}
-
 export interface IBetCanvasElement {
     addChip: (value: Bet) => void;
     removeChip: () => void;
     updateBet: (bet: Bet) => void;
 }
 
-export type Cell = "0" | "chips" | "player-seat" | "dealer-seat" | "dealer-points" | "player-points" | "bet";
+export type Cell = "0" | "chips" | "player-seat" | "dealer-seat";
 
 export enum CardAnimation {
     Deal = "Deal",

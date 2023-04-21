@@ -12,31 +12,37 @@ import { ChipItem } from "../types/game.types";
 export const chipSet: ChipItem[] = [
     {
         id: uuid(),
+        name: "chip-1",
         value: 1,
         img: Chip1,
     },
     {
         id: uuid(),
+        name: "chip-5",
         value: 5,
         img: Chip5,
     },
     {
         id: uuid(),
+        name: "chip-10",
         value: 10,
         img: Chip10,
     },
     {
         id: uuid(),
+        name: "chip-15",
         value: 15,
         img: Chip15,
     },
     {
         id: uuid(),
+        name: "chip-50",
         value: 50,
         img: Chip50,
     },
     {
         id: uuid(),
+        name: "chip-100",
         value: 100,
         img: Chip100,
     },

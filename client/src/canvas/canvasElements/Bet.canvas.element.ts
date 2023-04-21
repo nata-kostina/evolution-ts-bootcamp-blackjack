@@ -66,7 +66,7 @@ export class BetCanvasElement extends TransformNode implements IBetCanvasElement
             const setChip = this.scene.getMeshByName(`chip-${chipConstant.id}`) as Mesh;
             if (setChip) {
                 const chip = new BetChipCanvasElement(this.scene,
-                    { id: uuid(), img: getChipImg(value), value },
+                    { id: uuid(), img: getChipImg(value), value, name: `chip-${value}` },
                 );
                 chip.setParent(this);
 
@@ -76,8 +76,8 @@ export class BetCanvasElement extends TransformNode implements IBetCanvasElement
                 );
                 this._chipsStack.push(chip);
                 chip.finalPosition = new Vector3(
-                    this.position.x + (Math.random() * 0.08 - 0.05),
-                    -betTextblockSize.height * 0.4 - chipRadius + (Math.random() * 0.08 - 0.05),
+                    this.position.x + (Math.random() * 0.08 - 0.05) - betTextblockSize.width,
+                    (Math.random() * 0.08 - 0.05),
                     this.position.z - this._chipsStack.length * chipSize.height * 1.1);
 
                 await chip.animate(ChipAnimation.Add);

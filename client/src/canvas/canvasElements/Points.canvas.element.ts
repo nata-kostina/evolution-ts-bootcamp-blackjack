@@ -33,7 +33,7 @@ export class PointsCanvasElement extends GroundMesh {
         this.rotation.x = -Math.PI * 0.5;
 
         const texture = AdvancedDynamicTexture.CreateForMesh(this._skin);
-        texture.background = "#17515E";
+        texture.background = "#113C45";
         this.textBlock = new TextBlock(`text-points-${this._handID}`, "0");
         this.textBlock.color = "white";
         this.textBlock.fontSize = 350;

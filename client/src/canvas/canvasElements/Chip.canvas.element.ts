@@ -39,7 +39,9 @@ export class ChipCanvasElement extends Mesh {
         );
 
         const chipMaterial = new StandardMaterial("material", this.scene);
-        chipMaterial.diffuseTexture = new Texture(this.chip.img, this.scene, { invertY: true });
+        const chipTexture = this.scene.getTextureByName(this.chip.img) as Texture;
+
+        chipMaterial.diffuseTexture = chipTexture;
 
         const faceUV = [];
         faceUV[0] = new Vector4(0, 0, 0.25, 1);

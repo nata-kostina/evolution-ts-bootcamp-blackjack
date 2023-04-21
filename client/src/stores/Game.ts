@@ -30,14 +30,13 @@ import {
 
 export class Game {
     private readonly _ui: UIStore;
-    private readonly _scene: SceneManager;
+    private _scene: SceneManager | null = null;
 
     private _session: GameSession | null = null;
     private _playerID: PlayerID | null = null;
     private _roomID: RoomID | null = null;
 
-    public constructor(ui: UIStore, scene: SceneManager) {
-        this._scene = scene;
+    public constructor(ui: UIStore) {
         this._ui = ui;
         makeAutoObservable(this);
     }
@@ -62,8 +61,12 @@ export class Game {
         return this._roomID;
     }
 
-    public get scene(): SceneManager {
+    public get scene(): SceneManager | null {
         return this._scene;
+    }
+
+    public set scene(scene: SceneManager | null) {
+        this._scene = scene;
     }
 
     public async handleInitGame(
@@ -92,7 +95,7 @@ export class Game {
                     this._roomID = session.roomID;
                     this._ui.player = validatedPlayer;
                     this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
-                    this._scene.init(validatedActiveHand.handID);
+                    this._scene?.init(validatedActiveHand.handID);
                 }
             } else {
             }
@@ -150,7 +153,7 @@ export class Game {
                     this._ui.toggleVisibleActionBtnsDisabled(true);
                     // this._ui.togglePlaceBetBtnDisabled(true);
                     // this._ui.toggleBetEditBtnsDisabled(true);
-                    this._scene.toggleChipAction(false);
+                    this._scene?.toggleChipAction(false);
                 }
             } else {
             }
@@ -167,7 +170,7 @@ export class Game {
                 );
                 switch (notification.variant) {
                     case NotificationVariant.Blackjack:
-                        this._scene.addBlackjackNotification();
+                        this._scene?.addBlackjackNotification();
                         break;
                     case NotificationVariant.StandOrTakeMoney:
                         this._ui.addModal(notification);
@@ -195,7 +198,7 @@ export class Game {
                     this._ui.resetBetHistory();
                     this._ui.player = validatedPlayer;
                     this._ui.toggleVisibleActionBtnsDisabled(false);
-                    this._scene.resetScene();
+                    this._scene?.resetScene();
                 }
             } else {
             }
@@ -213,7 +216,7 @@ export class Game {
     ): Promise<void> {
         try {
             if (response.ok && response.payload) {
-                await this._scene.dealDealerCard(response.payload);
+                await this._scene?.dealDealerCard(response.payload);
             } else {
             }
         } catch (error) {}
@@ -224,7 +227,7 @@ export class Game {
     ): Promise<void> {
         try {
             if (response.ok && response.payload) {
-                await this._scene.dealPlayerCard(response.payload);
+                await this._scene?.dealPlayerCard(response.payload);
             } else {
             }
         } catch (error) {}
@@ -236,7 +239,7 @@ export class Game {
         try {
             if (response.ok && response.payload) {
                 const unholedCard = await unholedCardSchema.validate(response.payload);
-                await this._scene.unholeCard(unholedCard);
+                await this._scene?.unholeCard(unholedCard);
             }
         } catch (error) { }
     }
@@ -269,7 +272,7 @@ export class Game {
                     this._ui.player = validatedPlayer;
                     this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
                     this._ui.toggleVisibleActionBtnsDisabled(true);
-                    await this._scene.split({
+                    await this._scene?.split({
                         oldHandID: validatedActiveHand.handID,
                         newHandID: newHand.handID,
                         bet: validatedActiveHand.bet,
@@ -299,7 +302,7 @@ export class Game {
                     response.payload.result,
                 );
                 this._ui.togglePlayerActionsBtnsDisabled(true);
-                await this._scene.removeHand(validatedHandID, validatedGameResult);
+                await this._scene?.removeHand(validatedHandID, validatedGameResult);
             } else {
             }
         } catch (error) {
@@ -316,7 +319,7 @@ export class Game {
             console.log("handleReassignActiveHand: ", response.payload);
             if (response.ok && response.payload) {
                 const validatedId = await handIDSchema.validate(response.payload.handID);
-                this._scene.updateHelper({ handId: validatedId });
+                this._scene?.updateHelper({ handId: validatedId });
             } else {
             }
         } catch (error) {

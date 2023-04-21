@@ -22,7 +22,7 @@ export enum Suit {
 export type Card = { value: CardValue; suit: Suit; id: string; };
 export type Deck = Card[];
 
-export type ChipItem = { id: string; value: number; img: string; };
+export type ChipItem = { id: string; name: string; value: number; img: string; };
 
 export type Bet = number;
 

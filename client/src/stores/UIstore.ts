@@ -141,7 +141,6 @@ export class UIStore {
     }
 
     public toggleActionBtnsVisible(enabled: AvailableActions): void {
-        console.log("enabled: ", enabled);
         Object.keys(this._actionBtnsState).forEach((btn) => {
             if (btn === Action.BET) {
                 this._actionBtnsState.bet.isVisible = enabled.includes(Action.BET);
@@ -154,16 +153,12 @@ export class UIStore {
                 );
             }
         });
-        console.log("this._actionBtnsState: ", toJS(this._actionBtnsState));
     }
 
     public toggleVisibleActionBtnsDisabled(value: boolean): void {
-        console.log("toggleVisibleActionBtnsDisabled");
-        console.log("this._actionBtnsState: ", toJS(this._actionBtnsState));
         Object.values(this._actionBtnsState).forEach((btn) => {
             if (btn.isVisible) {
                 btn.isDisabled = value;
-                console.log("btn: ", toJS(btn));
             }
         });
     }

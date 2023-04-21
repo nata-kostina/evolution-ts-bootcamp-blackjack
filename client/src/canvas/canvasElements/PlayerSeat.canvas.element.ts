@@ -1,18 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Scene, GroundMesh, MeshBuilder, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
-import { CanvasBase } from "../CanvasBase";
-import { GameMatrix } from "../GameMatrix";
+import { CanvasElement, GameMatrix } from "../GameMatrix";
 import { HandCanvasElement } from "./Hand.canvas.element";
-import { Bet, DealPlayerCard, GameResult } from "../../types/game.types";
-import { CardCanvasElement } from "./Card.canvas.element";
-import { PointsCanvasElement } from "./Points.canvas.element";
-import { CardAnimation, HandAnimation, SplitParams } from "../../types/canvas.types";
-import SeatSVG from "../../assets/img/seat/seat.svg";
+import { DealPlayerCard, GameResult } from "../../types/game.types";
+import { HandAnimation, SplitParams } from "../../types/canvas.types";
 import { seatSize } from "../../constants/canvas.constants";
+import { assetsSrc } from "../../constants/assets.constants";
+import { getPositionFromMatrix } from "../utils/getPositionFromMatrix";
 
-export class PlayerSeatCanvasElement extends GroundMesh {
+export class PlayerSeatCanvasElement extends GroundMesh implements CanvasElement {
     protected readonly scene: Scene;
-    protected matrix: GameMatrix;
     private hands: Array<HandCanvasElement> = [];
     private _activeHand: HandCanvasElement | null = null;
     private readonly _seat: GroundMesh;
@@ -20,24 +16,6 @@ export class PlayerSeatCanvasElement extends GroundMesh {
     public constructor(scene: Scene, matrix: GameMatrix) {
         super(`player-seat`, scene);
         this.scene = scene;
-        this.matrix = matrix;
-
-        const mtx = matrix.getMatrix();
-        const mtxSize = matrix.getMatrixSize();
-        const cellWidth = matrix.getCellWidth();
-        const cellHeight = matrix.getCellHeight();
-        const matrixWidth = matrix.getMatrixWidth();
-        const matrixHeight = matrix.getMatrixHeight();
-        const index = mtx.indexOf("player-seat");
-
-        const row = Math.floor(index / mtxSize);
-        const column = index % mtxSize;
-        const position = new Vector3(
-            -matrixWidth * 0.5 + cellWidth * 0.5 + cellWidth * column,
-            matrixHeight * 0.5 - cellHeight * 0.5 - cellHeight * row,
-            0,
-        );
-
         this._seat = MeshBuilder.CreateGround(
             `player-seat`,
             {
@@ -47,22 +25,28 @@ export class PlayerSeatCanvasElement extends GroundMesh {
             this.scene,
         );
         this._seat.setParent(this);
-        this.position = position;
+        this.position = getPositionFromMatrix(matrix, "player-seat");
+        console.log("constructor: ", this.position);
         this.rotation.x = -Math.PI * 0.5;
+    }
+
+    public addContent(): void {
         const groundMaterial = new StandardMaterial(
             `material-player-seat`,
             this.scene,
         );
-        groundMaterial.diffuseTexture = new Texture(SeatSVG, this.scene);
+        const seatTexture = this.scene.getTextureByName(assetsSrc.seat) as Texture;
+        groundMaterial.diffuseTexture = seatTexture;
         groundMaterial.diffuseTexture.hasAlpha = true;
         this._seat.material = groundMaterial;
     }
 
     public addHand(handID: string): void {
+        console.log("seat positon: ", this.position);
         const hand = new HandCanvasElement(
             this.scene,
             handID,
-            new Vector3().copyFrom(this._seat.position),
+            new Vector3().copyFrom(this.position),
         );
         this.hands.push(hand);
     }
@@ -92,6 +76,7 @@ export class PlayerSeatCanvasElement extends GroundMesh {
                 new Vector3().copyFrom(hand.position),
             );
 
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const [firstCard, secondCard] = hand.cards;
             hand.removeCard(secondCard);
             newHand.addCard(secondCard);
@@ -132,5 +117,10 @@ export class PlayerSeatCanvasElement extends GroundMesh {
             hand.reset();
             hand.dispose();
         });
+    }
+
+    public update(matrix: GameMatrix): void {
+        this.position = getPositionFromMatrix(matrix, "player-seat");
+        this.hands.forEach((hand) => hand.update(this.position));
     }
 }

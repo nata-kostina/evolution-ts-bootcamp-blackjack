@@ -1,32 +1,58 @@
 :root {
-    --controlPanel: #2B2B2D;
-    --controlPanelBorder: 2px;
-    --controlItemBg: radial-gradient(circle, rgba(253,253,179,1) 0%, rgba(211,195,155,1) 59%, rgba(229,214,180,1) 63%, rgba(229,214,180,1) 67%, rgba(107,92,66,1) 70%, rgba(107,92,66,1) 100%);
-    --controlItemWidth: 80px;
-    --controlItemImgBorder: 6px;
-    --controlItemImgInnerWidth: calc((var(--controlItemWidth) - 2*var(--controlItemImgBorder)) / 1.4);
-    --controlItemTextHeight: 30px;
+  --controlPanel: #2b2b2d;
+  --controlPanelBorder: 2px;
+  --controlItemBg: radial-gradient(
+    circle,
+    rgba(253, 253, 179, 1) 0%,
+    rgba(211, 195, 155, 1) 59%,
+    rgba(229, 214, 180, 1) 63%,
+    rgba(229, 214, 180, 1) 67%,
+    rgba(107, 92, 66, 1) 70%,
+    rgba(107, 92, 66, 1) 100%
+  );
+  --controlItemWidth: 80px;
+  --controlItemImgBorder: 6px;
+  --controlItemImgInnerWidth: calc(
+    (var(--controlItemWidth) - 2 * var(--controlItemImgBorder)) / 1.4
+  );
+  --controlItemTextHeight: 30px;
 
-    --goldBorder:  linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-    --silverBorder: linear-gradient(315deg, #b8c6db 0%, #f5f7fa 74%);
-    --balanceContainerWidth: 200px;
-    --balanceContainerHeight: 50px;
+  --goldBorder: linear-gradient(
+    to right,
+    #bf953f,
+    #fcf6ba,
+    #b38728,
+    #fbf5b7,
+    #aa771c
+  );
+  --silverBorder: linear-gradient(315deg, #b8c6db 0%, #f5f7fa 74%);
+  --balanceContainerWidth: 200px;
+  --balanceContainerHeight: 50px;
 
-    --betActionWidth: 50px;
-    --betActionBorder: 2px;
-    --betActionImgInnerWidth: calc((var(--betActionWidth) - 2*var(--betActionBorder)) / 1.4);
+  --betActionWidth: 50px;
+  --betActionBorder: 2px;
+  --betActionImgInnerWidth: calc(
+    (var(--betActionWidth) - 2 * var(--betActionBorder)) / 1.4
+  );
 
-    --helperSize: 50px;
-  }
+  --helperSize: 50px;
+}
+
+@font-face {
+    font-family: 'OldStandard';
+    src: url('./assets/fonts/OldStandardTT-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
 
 * {
-    box-sizing: border-box; 
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -34,26 +60,15 @@ body {
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    outline: none;
-}
-canvas {
-    width: 100%;
-    height: 100%;
-    /* max-width: 1000px;
-    max-height: 800px; */
-    outline: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
 }
 
-/* #canvas {
-    position: "absolute";
-    top: 0;
-    left: 0;
-    width: 500px;
-    height: 500px;
-    background-image: url('./assets/img/background.jpg'),
-} */
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}

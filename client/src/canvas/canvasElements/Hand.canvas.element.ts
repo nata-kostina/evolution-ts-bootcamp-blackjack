@@ -1,4 +1,5 @@
 import {
+    AxesViewer,
     Scene,
     TransformNode,
     Vector3,
@@ -30,12 +31,8 @@ export class HandCanvasElement extends TransformNode {
         super(`hand-${id}`, scene);
         this.scene = scene;
         this._handID = id;
-        this.position = new Vector3(position.x, position.y, position.z);
-        // const localAxes = new AxesViewer(this.scene, 1);
-        // localAxes.xAxis.parent = this;
-        // localAxes.yAxis.parent = this;
-        // localAxes.zAxis.parent = this;
-
+        this.position = new Vector3().copyFrom(position);
+        console.log("hand position: ", this.position);
         this._betElement = new BetCanvasElement(
             scene,
             this.position,
@@ -50,6 +47,11 @@ export class HandCanvasElement extends TransformNode {
         );
         this._pointsElement.setParent(this);
         this._pointsElement.skin.isVisible = false;
+
+        const localAxes = new AxesViewer(this.scene, 1);
+        localAxes.xAxis.parent = this;
+        localAxes.yAxis.parent = this;
+        localAxes.zAxis.parent = this;
     }
 
     public get handID(): string {
@@ -68,6 +70,8 @@ export class HandCanvasElement extends TransformNode {
             newCard.card,
         );
         cardElement.setParent(this);
+        console.log("cardElement position: ", cardElement.position);
+
         this._cards.push(cardElement);
         await cardElement.addContent();
         await cardElement.animate(CardAnimation.Deal, () => {
@@ -149,5 +153,9 @@ export class HandCanvasElement extends TransformNode {
         this._cards = [];
         this._pointsElement.dispose();
         this._betElement.dispose();
+    }
+
+    public update(position: Vector3): void {
+        this.position = position;
     }
 }

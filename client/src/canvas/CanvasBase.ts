@@ -10,8 +10,8 @@ export class CanvasBase {
     public readonly camera: ArcRotateCamera;
     public readonly gameMatrix: GameMatrix;
 
-    public constructor() {
-        this.canvas = this.createCanvas();
+    public constructor(canvasElement: HTMLCanvasElement) {
+        this.canvas = canvasElement;
         this.engine = this.createEngine(this.canvas);
         this.scene = this.createScene(this.engine);
         this.scene.clearColor = new Color4(0, 0, 0, 0.0000000000000001);
@@ -32,15 +32,16 @@ export class CanvasBase {
         return this.gameMatrix;
     }
 
-    protected createCanvas(): HTMLCanvasElement {
-        const canvas = document.createElement("canvas");
-        canvas.style.backgroundImage = `url(${Background})`;
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundSize = "cover";
-        canvas.style.backgroundPosition = "center";
-        document.body.appendChild(canvas);
-        return canvas;
-    }
+    // protected createCanvas(): HTMLCanvasElement {
+    //     const canvas = document.createElement("canvas");
+    //     canvas.style.backgroundColor = "#1D5669";
+    //     canvas.style.backgroundImage = `url(${Background})`;
+    //     canvas.style.backgroundRepeat = "no-repeat";
+    //     canvas.style.backgroundSize = "cover";
+    //     canvas.style.backgroundPosition = "center";
+    //     document.body.appendChild(canvas);
+    //     return canvas;
+    // }
 
     protected createEngine(canvas: HTMLCanvasElement): Engine {
         return new Engine(canvas, true, {}, true);
@@ -51,7 +52,7 @@ export class CanvasBase {
     }
 
     protected createCamera(scene: Scene): ArcRotateCamera {
-        const camera = new ArcRotateCamera("Camera", -Math.PI * 0.5, Math.PI * 0.5, 3, Vector3.Zero(), scene);
+        const camera = new ArcRotateCamera("Camera", -Math.PI * 0.5, Math.PI * 0.5, 2.8, Vector3.Zero(), scene);
         this.scene.setActiveCameraByName("Camera");
         camera.attachControl(true);
         // camera.setTarget(BABYLON.Vector3.Zero());
