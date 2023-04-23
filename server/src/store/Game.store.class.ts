@@ -1,5 +1,3 @@
-/* eslint-disable no-empty */
-/* eslint-disable @typescript-eslint/no-empty-function */
 import randomstring from 'randomstring';
 import {
   DealerInstance,
@@ -20,7 +18,6 @@ import {
 import { initializeGameState } from '../utils/initializers.js';
 import { CardsHandler } from '../utils/CardsHandler.js';
 import { initializeHand } from './../utils/initializers.js';
-import ld from 'lodash';
 
 class Store implements IStore {
   private store: State;
@@ -38,7 +35,7 @@ class Store implements IStore {
         throw new Error('No such game');
       }
     } catch (error) {
-      console.log('Failed to join player to a game');
+      throw new Error('Failed to update the deck');
     }
   }
 
@@ -51,7 +48,7 @@ class Store implements IStore {
         throw new Error('No such game');
       }
     } catch (error) {
-      console.log('Failed to join player to a game');
+      throw new Error('Failed to join player to a game');
     }
   }
 
@@ -64,7 +61,6 @@ class Store implements IStore {
         throw new Error('There is no such room');
       }
     } catch (error) {
-      console.log('Failed to get a game');
       throw new Error('Failed to get a game');
     }
   }
@@ -79,8 +75,7 @@ class Store implements IStore {
         throw new Error('There is no such player');
       }
     } catch (error) {
-      console.log('Failed to get a player');
-      throw new Error('Failed to get a player');
+      throw new Error(`Player ${playerID}: Failed to get a player`);
     }
   }
 
@@ -100,7 +95,7 @@ class Store implements IStore {
         throw new Error('Player not found');
       }
     } catch (error) {
-      throw new Error('Failed to remove player');
+      throw new Error(`Player ${playerID}: Failed to remove player`);
     }
   }
 
@@ -128,7 +123,7 @@ class Store implements IStore {
       const game = this.getGame(roomID);
       return [...game.deck];
     } catch (error) {
-      throw new Error('Failed to prepare response for client');
+      throw new Error('Failed to get game');
     }
   }
 
@@ -147,8 +142,7 @@ class Store implements IStore {
         throw new Error('There is no such player');
       }
     } catch (error) {
-      console.log('Failed to get a player');
-      throw new Error('Failed to get a player');
+      throw new Error(`Player ${playerID}: Failed to get an active hand`);
     }
   }
 
@@ -156,7 +150,6 @@ class Store implements IStore {
     try {
       const game = this.getGame(roomID);
       const player = this.getPlayer({ playerID, roomID });
-      //   const updatedHands = payload.hands ? [...player.hands, ...payload.hands] : [...player.hands];
       const updatedPlayer: PlayerInstance = {
         ...player,
         ...payload,
@@ -164,7 +157,7 @@ class Store implements IStore {
 
       game.players[player.playerID] = updatedPlayer;
     } catch (e: unknown) {
-      throw new Error('Player updation failed');
+      throw new Error(`Player ${playerID}: Failed to update player`);
     }
   }
 
@@ -189,7 +182,7 @@ class Store implements IStore {
 
       this.updatePlayer({ roomID, playerID, payload: { hands: updatedHands } });
     } catch (e: unknown) {
-      throw new Error('Player updation failed');
+      throw new Error(`Player ${playerID}: Failed to update hand`);
     }
   }
 
@@ -198,7 +191,7 @@ class Store implements IStore {
       const hand = this.getHand({ playerID, roomID, handID });
       return hand.points;
     } catch (e: unknown) {
-      throw new Error('Player updation failed');
+      throw new Error(`Player ${playerID}: Failed to get score`);
     }
   }
 
@@ -227,8 +220,7 @@ class Store implements IStore {
     if (dealer) {
       return dealer;
     } else {
-      console.log('There is no such dealer');
-      throw new Error('There is no such dealer');
+      throw new Error('Failed to get the dealer');
     }
   }
 
@@ -241,7 +233,7 @@ class Store implements IStore {
       const updatedDealer = { ...dealer, ...payload, cards: updatedCards, points: updatedPoints };
       game.dealer = updatedDealer;
     } catch (e: unknown) {
-      throw new Error('Player updation failed');
+      throw new Error('Failed to update dealer');
     }
   }
 
@@ -281,7 +273,7 @@ class Store implements IStore {
 
       game.players[player.playerID] = updatedPlayer;
     } catch (e: unknown) {
-      throw new Error('Failed to reset player');
+      throw new Error(`Player ${playerID}: Failed to reset player`);
     }
   }
 
@@ -306,7 +298,7 @@ class Store implements IStore {
       this.resetDealer(roomID);
       this.resetPlayer({ playerID, roomID });
     } catch (e) {
-      throw new Error('Failed to reset session');
+      throw new Error(`Player ${playerID}: Failed to reset session`);
     }
   }
 
@@ -336,7 +328,7 @@ class Store implements IStore {
       };
       return session;
     } catch (e) {
-      throw new Error('Failed to get reset session');
+      throw new Error(`Player ${playerID}: Failed to get reset session`);
     }
   }
 
@@ -361,13 +353,10 @@ class Store implements IStore {
   public removeHand({ roomID, playerID, handID }: SpecificID & { handID: string }): void {
     try {
         const { hands } = this.getPlayer({ roomID, playerID });
-        console.log("removeHand handID: ", handID);
-        console.log("removeHand hands: ", hands);
         const updatedHands = hands.filter((hand) => hand.handID !== handID);
-        console.log("removeHand updatedHands: ", updatedHands);
       this.updatePlayer({ roomID, playerID, payload: { hands: updatedHands } });
     } catch (error) {
-      throw new Error(`Player ${playerID}: Failed to get reassign active hand`);
+      throw new Error(`Player ${playerID}: Failed to remove hand`);
     }
   }
 

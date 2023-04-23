@@ -55,38 +55,7 @@ export class ResponseManager implements IResponseManager {
         } catch (error) {
           console.log('Error respond with delay');
         }
-      }, delay ? delay : 800);
+      }, delay || 800);
     });
   }
 }
-// export const sendImmediately = () => {
-//   const respond: RespondFn = async ({ event, response, roomID }) => {
-//     io.timeout(20000)
-//       .to(roomID)
-//       .emit(event, ...response);
-//   };
-//   return respond;
-// };
-
-// export const sendInSequence = (delay = 800) => {
-//   let abortSequence = false;
-//   const respond: RespondFn = async ({ event, response, roomID }) => {
-//     // console.log(`Send in sequence, delay: `, delay);
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         try {
-//           if (!abortSequence) {
-//               io.timeout(20000)
-//                 .to(roomID)
-//                 .emit(event, ...response);
-//             // console.log('emit ', event);
-//             return resolve();
-//           }
-//         } catch (error) {
-//           abortSequence = true;
-//         }
-//       }, delay);
-//     });
-//   };
-//   return respond;
-// };

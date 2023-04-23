@@ -38,6 +38,7 @@ export type SuccessResponse<T> = {
   statusText: string;
   payload: T;
 };
+
 export type FailedResponse = {
   ok: false;
   statusText: string;
@@ -67,6 +68,7 @@ export type DealPlayerCard = {
   points: Array<number>;
   handID: string;
 };
+
 export type UnholeCardPayload = {
   target: 'dealer';
   card: Card;
@@ -79,6 +81,7 @@ export type FinishRoundForHand = {
     handID: string;
     result: GameResult;
 }
+
 export type ReassignActiveHand = {
     roomID: RoomID,
     playerID: PlayerID,

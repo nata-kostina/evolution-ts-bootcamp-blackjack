@@ -3,6 +3,8 @@ import { OkCloseNotificationModal } from "../modalTypes/OkModal";
 import { Connection } from "../../../stores/Connection";
 import { useConnection } from "../../../context/ConnectionContext";
 import { GameMode } from "../../../types/game.types";
+import { useGame } from "../../../context/GameContext";
+import { Game } from "../../../stores/Game";
 
 interface Props {
     isOpen: boolean;
@@ -11,13 +13,12 @@ interface Props {
 
 export const GameErrorNotification = ({ isOpen, closeModal }: Props) => {
     const connection = useConnection() as Connection;
+    const game = useGame() as Game;
 
     const handleOkClick = () => {
-        const playerID: string | null = localStorage.getItem("player_id");
-
         connection.sendRequest<"initGame">({
             event: "initGame",
-            payload: [{ playerID, mode: GameMode.Single }],
+            payload: [{ playerID: game.playerID, mode: GameMode.Single }],
         });
     };
     return (

@@ -6,7 +6,7 @@ import { Action } from "../../../types/game.types";
 
 interface UiMock {
     UI: {
-        getPlayerActionBtnstate: (() => ({
+        getPlayerActionBtnState: (() => ({
             isDisabled: boolean;
             isVisible: boolean;
         }) | null);
@@ -14,7 +14,7 @@ interface UiMock {
 }
 const mock: UiMock = {
     UI: {
-        getPlayerActionBtnstate: () => null,
+        getPlayerActionBtnState: () => null,
     },
 };
 
@@ -23,7 +23,7 @@ jest.mock("../../../context/GameContext", () => ({
 }));
 
 const mockActionButton: ActionBtn = {
-    action: Action.BET,
+    action: Action.Bet,
     svgPath: "",
 };
 
@@ -37,7 +37,7 @@ jest.mock("../../../hooks/useAction", () => ({
 describe("Player's actions panel tests", () => {
     afterEach(() => jest.resetAllMocks());
     it("should render PlayerActions component", () => {
-        mock.UI.getPlayerActionBtnstate = () => ({
+        mock.UI.getPlayerActionBtnState = () => ({
             isDisabled: true,
             isVisible: true,
         });
@@ -49,12 +49,12 @@ describe("Player's actions panel tests", () => {
         const actionIconElement = getByTestId("actionIcon");
         expect(actionIconElement).toBeInTheDocument();
 
-        const actionBtnText = getByText(Action.BET);
+        const actionBtnText = getByText(Action.Bet);
         expect(actionBtnText).toBeInTheDocument();
     });
 
     it("should not render invisible button", () => {
-        mock.UI.getPlayerActionBtnstate = () => ({
+        mock.UI.getPlayerActionBtnState = () => ({
             isDisabled: true,
             isVisible: false,
         });
@@ -65,7 +65,7 @@ describe("Player's actions panel tests", () => {
     });
 
     it("should render enabled button", () => {
-        mock.UI.getPlayerActionBtnstate = () => ({
+        mock.UI.getPlayerActionBtnState = () => ({
             isDisabled: false,
             isVisible: true,
         });
@@ -76,7 +76,7 @@ describe("Player's actions panel tests", () => {
     });
 
     it("should render disabled button", () => {
-        mock.UI.getPlayerActionBtnstate = () => ({
+        mock.UI.getPlayerActionBtnState = () => ({
             isDisabled: true,
             isVisible: true,
         });
@@ -87,7 +87,7 @@ describe("Player's actions panel tests", () => {
     });
 
     it("should call handleClick after button has been clicked", async () => {
-        mock.UI.getPlayerActionBtnstate = () => ({
+        mock.UI.getPlayerActionBtnState = () => ({
             isDisabled: false,
             isVisible: true,
         });

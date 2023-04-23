@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { TransformNode, Vector3, Scene } from "@babylonjs/core";
 import { CanvasElement, GameMatrix } from "../GameMatrix";
 import { CardCanvasElement } from "./Card.canvas.element";
@@ -35,7 +34,7 @@ export class DealerSeatCanvasElement extends TransformNode implements CanvasElem
             const unholedCard = new CardCanvasElement(this.scene, holeCard.position, card);
             unholedCard.setParent(this);
 
-            this.cards.pop();
+            this._cards.pop();
             this.addCard(unholedCard);
             holeCard.dispose();
 
@@ -50,14 +49,14 @@ export class DealerSeatCanvasElement extends TransformNode implements CanvasElem
         const cardElement = new CardCanvasElement(
             this.scene,
             new Vector3(
-                this.cards.length * 0.13,
+                this._cards.length * 0.13,
                 0,
-                this.position.z - this.cards.length * cardSize.depth - 0.04,
+                this.position.z - this._cards.length * cardSize.depth - 0.04,
             ),
             newCard.card,
         );
         cardElement.setParent(this);
-        this.cards.push(cardElement);
+        this._cards.push(cardElement);
         await cardElement.addContent();
         await cardElement.animate(CardAnimation.Deal, () => {
             if (isNormalCard(newCard.card)) {
@@ -72,17 +71,13 @@ export class DealerSeatCanvasElement extends TransformNode implements CanvasElem
     }
 
     public removeCards(): void {
-        this.cards.forEach((card) => card.animate(CardAnimation.Remove));
+        this._cards.forEach((card) => card.animate(CardAnimation.Remove));
         this._cards = [];
         this._pointsElement.dispose();
     }
 
-    public get cards(): Array<CardCanvasElement> {
-        return this._cards;
-    }
-
     public addCard(card: CardCanvasElement): void {
-        this.cards.push(card);
+        this._cards.push(card);
     }
 
     public reset(): void {

@@ -60,13 +60,13 @@ export type Card = { value: CardValue; suit: Suit; id: string };
 export type Deck = Card[];
 
 export enum Action {
-  HIT = 'hit',
-  STAND = 'stand',
-  DOUBLE = 'double',
-  SURENDER = 'surender',
-  Insurance = 'insurance',
-  Split = 'split',
-  Bet = 'bet'
+  Hit = 'Hit',
+  Stand = 'Stand',
+  Double = 'Double',
+  Surender = 'Surender',
+  Insurance = 'Insurance',
+  Split = 'Split',
+  Bet = 'Bet'
 }
 
 export const WinCoefficient = {
@@ -81,8 +81,6 @@ export enum GameMode {
   Single = 'single',
   Multi = 'multi',
 }
-
-export type AvailableActions = Action[];
 
 export type HoleCard = { id: string };
 

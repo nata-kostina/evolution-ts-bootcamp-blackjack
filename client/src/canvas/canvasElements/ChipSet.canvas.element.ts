@@ -1,27 +1,18 @@
-/* eslint-disable import/no-cycle */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-floating-promises */
-/* eslint-disable @typescript-eslint/no-empty-function */
-import {
-    Vector3,
-    Scene,
-} from "@babylonjs/core";
-import { CanvasBase } from "../CanvasBase";
+import { Vector3, Scene } from "@babylonjs/core";
 import { chipRadius } from "../../constants/canvas.constants";
 import { CanvasElement, GameMatrix } from "../GameMatrix";
 import { chipSet } from "../../constants/game.constants";
 import { ChipCanvasElement } from "./Chip.canvas.element";
-import { Controller } from "../Controller";
-import { MatrixProps } from "../../types/canvas.types";
+import { CanvasController } from "../CanvasController";
 import { getPositionFromMatrix } from "../utils/getPositionFromMatrix";
 
 export class ChipSetCanvasElement implements CanvasElement {
     private readonly scene: Scene;
-    private readonly controller: Controller;
+    private readonly controller: CanvasController;
     private chipSet: Array<ChipCanvasElement> = [];
     private _position: Vector3;
 
-    public constructor(scene: Scene, matrix: GameMatrix, controller: Controller) {
+    public constructor(scene: Scene, matrix: GameMatrix, controller: CanvasController) {
         this.scene = scene;
         this.controller = controller;
         this._position = getPositionFromMatrix(matrix, "chips");

@@ -1,6 +1,6 @@
 import React from "react";
 import { ReactSVG } from "react-svg";
-import LogoSVG from "../../assets/img/logo2.svg";
+import LogoSVG from "../../assets/img/logo.svg";
 import styles from "./styles.module.css";
 
 export const LoaderScreen = () => {

@@ -13,7 +13,7 @@ import { CardCanvasElement } from "./Card.canvas.element";
 import { getSplitHandAnimation } from "../utils/animation/hand.animation";
 import { PointsCanvasElement } from "./Points.canvas.element";
 import { BetCanvasElement } from "./Bet.canvas.element";
-import { cardSize } from "../../constants/canvas.constants";
+import { animationSpeed, cardSize } from "../../constants/canvas.constants";
 
 export class HandCanvasElement extends TransformNode {
     private readonly scene: Scene;
@@ -45,11 +45,6 @@ export class HandCanvasElement extends TransformNode {
         );
         this._pointsElement.setParent(this);
         this._pointsElement.skin.isVisible = false;
-
-        // const localAxes = new AxesViewer(this.scene, 1);
-        // localAxes.xAxis.parent = this;
-        // localAxes.yAxis.parent = this;
-        // localAxes.zAxis.parent = this;
     }
 
     public get handID(): string {
@@ -126,7 +121,7 @@ export class HandCanvasElement extends TransformNode {
                 0,
                 frameRate,
                 false,
-                2,
+                this.scene.getAnimationRatio() * animationSpeed,
                 () => {
                     if (onFinish) {
                         onFinish();

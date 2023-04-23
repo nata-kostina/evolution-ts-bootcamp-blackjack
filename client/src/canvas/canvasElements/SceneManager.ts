@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-empty-function */
-import { BackgroundMaterial, CreateGround, CreateSphere, Scene, Texture, Vector3 } from "@babylonjs/core";
+import { BackgroundMaterial, CreateGround, Scene, Texture, Vector3 } from "@babylonjs/core";
 import { PlayerSeatCanvasElement } from "./PlayerSeat.canvas.element";
 import { DealerSeatCanvasElement } from "./DealerSeat.canvas.element copy";
 import { GameMatrix } from "../GameMatrix";
 import { ChipSetCanvasElement } from "./ChipSet.canvas.element";
-import { Controller } from "../Controller";
+import { CanvasController } from "../CanvasController";
 import { BlackjackNotificationCanvasElement } from "./BlackjackNotification.canvas.element";
 import { SplitParams, UnholeCardPayload } from "../../types/canvas.types";
 import {
@@ -24,13 +22,13 @@ export class SceneManager {
     public chipSet: ChipSetCanvasElement;
     private readonly scene: Scene;
     private readonly gameMatrix: GameMatrix;
-    private readonly controller: Controller;
+    private readonly controller: CanvasController;
     private _helper: HelperCanvasElement;
 
     public constructor(
         scene: Scene,
         matrix: GameMatrix,
-        controller: Controller,
+        controller: CanvasController,
     ) {
         this.scene = scene;
         this.gameMatrix = matrix;
@@ -119,8 +117,6 @@ export class SceneManager {
         this.toggleChipAction(false);
         this._helper.skin.isVisible = false;
         this.playerSeat.reset();
-        // this.dealerSeat.dispose(false, true);
-        // this._helper.dispose();
     }
 
     private addInitialHand(handID: string): void {

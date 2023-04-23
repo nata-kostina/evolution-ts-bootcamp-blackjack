@@ -12,7 +12,7 @@ export const useAction = () => {
         const playerID = game.playerID;
         const roomID = connection.roomID;
 
-        if (action === Action.BET) {
+        if (action === Action.Bet) {
             if (playerID && roomID) {
                 const bet = game.UI.bet;
                 if (bet) {
@@ -28,7 +28,7 @@ export const useAction = () => {
             }
         }
 
-        if (isPlayerAction(action) && action !== Action.BET) {
+        if (isPlayerAction(action) && action !== Action.Bet) {
             if (playerID && roomID) {
                 connection.sendRequest<"makeDecision">({
                     event: "makeDecision",
@@ -39,7 +39,7 @@ export const useAction = () => {
                     }],
                 });
             }
-            if (action === Action.DOUBLE && game.UI.bet) {
+            if (action === Action.Double && game.UI.bet) {
                 game.UI.addBet({ value: game.UI.bet });
             }
             game.UI.toggleVisibleActionBtnsDisabled(true);

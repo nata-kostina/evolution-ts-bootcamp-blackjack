@@ -1,7 +1,4 @@
-import {
-    Animation,
-    Vector3,
-} from "@babylonjs/core";
+import { Animation, Vector3 } from "@babylonjs/core";
 
 export const getDealCardAnimation = (finalPosition: Vector3): { frameRate: number; animationArray: Array<Animation>; } => {
     const frameRate = 8;
@@ -42,12 +39,12 @@ export const getDealCardAnimation = (finalPosition: Vector3): { frameRate: numbe
 
     const keyFramesYR = [];
 
+    // keyFramesYR.push({
+    //     frame: 0,
+    //     value: Math.PI,
+    // });
     keyFramesYR.push({
-        frame: 0,
-        value: Math.PI,
-    });
-    keyFramesYR.push({
-        frame: 7,
+        frame: frameRate / 2,
         value: Math.PI,
     });
 

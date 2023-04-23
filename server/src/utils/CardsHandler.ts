@@ -21,7 +21,6 @@ export const CardsHandler: Handler = {
 
   isBlackjack: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => {
     try {
-      const player = store.getPlayer({ playerID, roomID });
       const activeHand = store.getActiveHand({ roomID, playerID });
       if (activeHand.cards.length === 2) {
         const [first, second] = activeHand.cards;
@@ -34,7 +33,7 @@ export const CardsHandler: Handler = {
       }
       return false;
     } catch (error) {
-      throw new Error('Failed to check for blackjack');
+      throw new Error(`Player ${playerID}: Failed to check for blackjack`);
     }
   },
   canDouble: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => {
@@ -51,7 +50,7 @@ export const CardsHandler: Handler = {
       }
       return false;
     } catch (error: unknown) {
-      throw new Error('Failed to check for double');
+      throw new Error(`Player ${playerID}: Failed to check for double`);
     }
   },
   canSplit: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => {
@@ -66,7 +65,7 @@ export const CardsHandler: Handler = {
       }
       return false;
     } catch (error) {
-      throw new Error('Failed to check for double');
+      throw new Error(`Player ${playerID}: Failed to check for split`);
     }
   },
 
@@ -82,7 +81,7 @@ export const CardsHandler: Handler = {
       }
       return false;
     } catch (error) {
-      throw new Error('Failed to check for place insurance');
+      throw new Error(`Failed to check for place insurance`);
     }
   },
 
@@ -97,7 +96,7 @@ export const CardsHandler: Handler = {
         }
       }
     const aces = cards.filter((card) => card.value === CardValue.ACE);
-    if (aces.length) {
+    if (aces.length > 0) {
       const acesSums = [aces.length, PointsMap[CardValue.ACE] + aces.length - 1];
 
       const nonAces = cards.filter((card) => card.value !== CardValue.ACE);
@@ -108,8 +107,6 @@ export const CardsHandler: Handler = {
 
       const minorSum = nonAcesSum + acesSums[0];
       const majorSum = nonAcesSum + acesSums[1];
-      console.log("minorSum: ", minorSum);
-      console.log("majorSum: ", majorSum);
 
       if (majorSum > TWENTY_ONE) {
         return [minorSum];

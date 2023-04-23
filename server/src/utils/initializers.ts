@@ -6,11 +6,9 @@ export function initializeGameState({ roomID, playerID }: SpecificID): GameState
   return {
     roomID,
     organizer: playerID,
-    hasStarted: false,
     deck: initialDeck,
     players: {},
     dealer: { cards: [], hasHoleCard: false, points: 0 },
-    dealNum: 0,
   };
 }
 

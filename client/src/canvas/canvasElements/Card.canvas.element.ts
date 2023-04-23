@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-/* eslint-disable @typescript-eslint/no-empty-function */
 import {
     MeshBuilder,
     Texture,
@@ -20,7 +18,7 @@ import { assertUnreachable } from "../../utils/general/assertUnreachable";
 import { isHoleCard } from "../../utils/gameUtils/isHoleCard";
 import { CardAnimation } from "../../types/canvas.types";
 import { Card, HoleCard } from "../../types/game.types";
-import { cardSize } from "../../constants/canvas.constants";
+import { animationSpeed, cardSize } from "../../constants/canvas.constants";
 
 export class CardCanvasElement {
     private readonly scene: Scene;
@@ -101,7 +99,7 @@ export class CardCanvasElement {
                     0,
                     frameRate,
                     false,
-                    3,
+                    this.scene.getAnimationRatio() * animationSpeed,
                 );
                 await dealAnim.waitAsync();
                 if (!this.isHoleCard) {
@@ -119,7 +117,7 @@ export class CardCanvasElement {
                     0,
                     removeFR,
                     false,
-                    3,
+                    this.scene.getAnimationRatio() * animationSpeed,
                     () => this.skin.dispose(),
                 );
                 await removeAnim.waitAsync();
@@ -133,7 +131,7 @@ export class CardCanvasElement {
                     0,
                     FRUnhole,
                     false,
-                    5,
+                    this.scene.getAnimationRatio() * animationSpeed,
                     () => {
                         if (onFinish) {
                             onFinish();

@@ -16,3 +16,4 @@ export const cardSize = {
 };
 export const helperSize = { height: 0.03, diameter: 0.2 };
 export const pointsTextblockSize = { width: 0.5, height: 0.25 };
+export const animationSpeed = 3;

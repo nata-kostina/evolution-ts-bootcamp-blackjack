@@ -14,11 +14,11 @@ export const getBlackjackAnimation = (): { frameRate: number; animationArray: Ar
 
     keyFrames.push({
         frame: 4,
-        value: new Vector3(1.3, 1.3, 1.3),
+        value: new Vector3(1.1, 1.1, 1.1),
     });
 
     keyFrames.push({
-        frame: 8,
+        frame: 6,
         value: new Vector3(1, 1, 1),
     });
     keyFrames.push({

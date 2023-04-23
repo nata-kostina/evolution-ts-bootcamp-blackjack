@@ -1,7 +1,3 @@
-/* eslint-disable import/no-cycle */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-floating-promises */
-/* eslint-disable @typescript-eslint/no-empty-function */
 import {
     ActionManager,
     ExecuteCodeAction,
@@ -13,7 +9,7 @@ import {
     Vector3,
     Vector4,
 } from "@babylonjs/core";
-import { Controller } from "../Controller";
+import { CanvasController } from "../CanvasController";
 import { ChipItem } from "../../types/game.types";
 import { chipSize } from "../../constants/canvas.constants";
 
@@ -24,7 +20,7 @@ export class ChipCanvasElement extends Mesh {
     private readonly chip: ChipItem;
     private action: ExecuteCodeAction;
 
-    public constructor(scene: Scene, position: Vector3, chip: ChipItem, controller: Controller) {
+    public constructor(scene: Scene, position: Vector3, chip: ChipItem, controller: CanvasController) {
         super(`chip-${chip.id}`, scene);
         this.scene = scene;
         this._id = chip.id;

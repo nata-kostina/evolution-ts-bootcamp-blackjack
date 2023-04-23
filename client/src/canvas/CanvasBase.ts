@@ -1,88 +1,84 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { HemisphericLight, ArcRotateCamera, Engine, Scene, Vector3, Color4, Camera } from "@babylonjs/core";
-import Background from "../assets/img/background5.jpg";
+import {
+    ArcRotateCamera,
+    Engine,
+    Scene,
+    Vector3,
+    Color4,
+    Camera,
+    HemisphericLight,
+} from "@babylonjs/core";
 import { GameMatrix } from "./GameMatrix";
 
 export class CanvasBase {
-    public readonly engine: Engine;
-    public readonly canvas: HTMLCanvasElement;
-    public readonly scene: Scene;
-    public readonly camera: ArcRotateCamera;
-    public readonly gameMatrix: GameMatrix;
+    private readonly _scene: Scene;
+    private readonly _engine: Engine;
+    private readonly _canvas: HTMLCanvasElement;
+    private readonly _camera: ArcRotateCamera;
+    private readonly _gameMatrix: GameMatrix;
 
     public constructor(canvasElement: HTMLCanvasElement) {
-        this.canvas = canvasElement;
-        this.engine = this.createEngine(this.canvas);
-        this.scene = this.createScene(this.engine);
-        this.scene.clearColor = new Color4(0, 0, 0, 0.0000000000000001);
-        this.camera = this.createCamera(this.scene);
-        this.createLight(this.scene);
-        const scalingLevel = this.engine.getHardwareScalingLevel();
-        this.gameMatrix = new GameMatrix(this.engine.getRenderWidth(true) * scalingLevel,
-            this.engine.getRenderHeight(true) * scalingLevel);
+        this._canvas = canvasElement;
+        this._engine = this.createEngine(this._canvas);
+        this._scene = this.createScene(this._engine);
+        this._scene.clearColor = new Color4(0, 0, 0, 0.0000000000000001);
+        this._camera = this.createCamera();
+        this.createLight();
+
+        const scalingLevel = this._engine.getHardwareScalingLevel();
+        this._gameMatrix = new GameMatrix(this._engine.getRenderWidth(true) * scalingLevel,
+            this._engine.getRenderHeight(true) * scalingLevel);
+
         window.addEventListener("resize", this.onResize);
-        this.engine.runRenderLoop(this.onRender);
+        this._engine.runRenderLoop(this.onRender);
     }
 
-    public start(): void {
-        this.onResize();
+    public get scene(): Scene {
+        return this._scene;
     }
 
     public getGameMatrix(): GameMatrix {
-        return this.gameMatrix;
+        return this._gameMatrix;
     }
 
-    // protected createCanvas(): HTMLCanvasElement {
-    //     const canvas = document.createElement("canvas");
-    //     canvas.style.backgroundColor = "#1D5669";
-    //     canvas.style.backgroundImage = `url(${Background})`;
-    //     canvas.style.backgroundRepeat = "no-repeat";
-    //     canvas.style.backgroundSize = "cover";
-    //     canvas.style.backgroundPosition = "center";
-    //     document.body.appendChild(canvas);
-    //     return canvas;
-    // }
-
-    protected createEngine(canvas: HTMLCanvasElement): Engine {
+    private createEngine(canvas: HTMLCanvasElement): Engine {
         return new Engine(canvas, true, {}, true);
     }
 
-    protected createScene(engine: Engine): Scene {
-        return new Scene(engine, {});
+    private createScene(_engine: Engine): Scene {
+        return new Scene(_engine, {});
     }
 
-    protected createCamera(scene: Scene): ArcRotateCamera {
-        const camera = new ArcRotateCamera("Camera", -Math.PI * 0.5, Math.PI * 0.5, 2.8, Vector3.Zero(), scene);
-        this.scene.setActiveCameraByName("Camera");
-        camera.attachControl(true);
-        // camera.setTarget(BABYLON.Vector3.Zero());
+    private createCamera(): ArcRotateCamera {
+        const camera = new ArcRotateCamera("Camera", -Math.PI * 0.5, Math.PI * 0.54, 2.8, Vector3.Zero(), this._scene);
+        this._scene.setActiveCameraByName("Camera");
         return camera;
     }
 
-    protected createLight(scene: Scene): void {
-        const light = new HemisphericLight("light", new Vector3(0, -2, -3), scene);
+    private createLight(): void {
+        const light = new HemisphericLight("light", new Vector3(0, -1, -1), this._scene);
+        light.intensity = 1.5;
     }
 
     private onRender = () => {
-        this.scene.render();
+        this._scene.render();
     };
 
     private onResize = () => {
-        this.engine.resize();
+        this._engine.resize();
 
-        if (this.scene.activeCamera) {
+        if (this._scene.activeCamera) {
             if (
-                this.scene.getEngine().getRenderHeight() > this.scene.getEngine().getRenderWidth()
+                this._scene.getEngine().getRenderHeight() > this._scene.getEngine().getRenderWidth()
             ) {
-                this.scene.activeCamera.fovMode = Camera.FOVMODE_HORIZONTAL_FIXED;
+                this._scene.activeCamera.fovMode = Camera.FOVMODE_HORIZONTAL_FIXED;
             } else {
-                this.scene.activeCamera.fovMode = Camera.FOVMODE_VERTICAL_FIXED;
+                this._scene.activeCamera.fovMode = Camera.FOVMODE_VERTICAL_FIXED;
             }
         }
 
-        const scalingLevel = this.engine.getHardwareScalingLevel();
-        const screenWidth = this.engine.getRenderWidth(true) * scalingLevel;
-        const screenHeight = this.engine.getRenderHeight(true) * scalingLevel;
-        this.gameMatrix.update(screenWidth, screenHeight);
+        const scalingLevel = this._engine.getHardwareScalingLevel();
+        const screenWidth = this._engine.getRenderWidth(true) * scalingLevel;
+        const screenHeight = this._engine.getRenderHeight(true) * scalingLevel;
+        this._gameMatrix.update(screenWidth, screenHeight);
     };
 }

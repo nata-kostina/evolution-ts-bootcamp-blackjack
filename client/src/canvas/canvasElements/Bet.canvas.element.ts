@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import uuid from "react-uuid";
 import {
     MeshBuilder,
@@ -6,18 +5,14 @@ import {
     GroundMesh,
     Mesh,
     TransformNode,
-    StandardMaterial,
-    Color3,
-    AxesViewer,
     Scene,
 } from "@babylonjs/core";
 import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
 import { ChipAnimation, IBetCanvasElement } from "../../types/canvas.types";
-import { CanvasBase } from "../CanvasBase";
 import { chipSet } from "../../constants/game.constants";
 import { BetChipCanvasElement } from "./BetChip.canvas.elemenr";
 import { getChipImg } from "../utils/getChipImg";
-import { chipSize, handSize, betGroundSize, betTextblockSize, chipRadius } from "../../constants/canvas.constants";
+import { chipSize, handSize, betTextblockSize } from "../../constants/canvas.constants";
 
 export class BetCanvasElement extends TransformNode implements IBetCanvasElement {
     private readonly scene: Scene;
@@ -40,10 +35,7 @@ export class BetCanvasElement extends TransformNode implements IBetCanvasElement
             handPosition.x,
             handPosition.y - handSize.height * 0.5 - betTextblockSize.height * 0.5,
             handPosition.z);
-        // const localAxes = new AxesViewer(this.scene, 1);
-        // localAxes.xAxis.parent = this;
-        // localAxes.yAxis.parent = this;
-        // localAxes.zAxis.parent = this;
+
         this._textGround.rotation.x = -Math.PI * 0.5;
         this._textGround.setParent(this);
 

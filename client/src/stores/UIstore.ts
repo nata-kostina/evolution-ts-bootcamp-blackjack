@@ -15,31 +15,31 @@ export class UIStore {
     Action | BetAction,
     { isVisible: boolean; isDisabled: boolean; }
   > = {
-            hit: {
+            [Action.Hit]: {
                 isVisible: false,
                 isDisabled: true,
             },
-            stand: {
+            [Action.Stand]: {
                 isVisible: false,
                 isDisabled: true,
             },
-            double: {
+            [Action.Double]: {
                 isVisible: false,
                 isDisabled: true,
             },
-            surender: {
+            [Action.Surender]: {
                 isVisible: false,
                 isDisabled: true,
             },
-            insurance: {
+            [Action.Insurance]: {
                 isVisible: false,
                 isDisabled: true,
             },
-            bet: {
+            [Action.Bet]: {
                 isVisible: true,
                 isDisabled: true,
             },
-            split: {
+            [Action.Split]: {
                 isVisible: false,
                 isDisabled: true,
             },
@@ -54,7 +54,6 @@ export class UIStore {
         };
 
     private _betHistory: Array<number> = [];
-    private _helperTarget: Array<Action> = [];
     private _currentModal: Notification | null = null;
     private _modalQueue: Array<Notification> = [];
     private _isModalShown = false;
@@ -83,10 +82,6 @@ export class UIStore {
         return this._modalQueue;
     }
 
-    public get helper(): Array<Action> {
-        return this._helperTarget;
-    }
-
     public get currentModal(): Notification | null {
         return this._currentModal;
     }
@@ -99,24 +94,11 @@ export class UIStore {
         this._betElement = element;
     }
 
-    public isPlayerActionBtnDisabled(btn: Action): boolean {
-        return this._actionBtnsState[btn].isDisabled;
-    }
-
-    public getPlayerActionBtnstate(btn: Action | BetAction): {
+    public getPlayerActionBtnState(btn: Action | BetAction): {
         isDisabled: boolean;
         isVisible: boolean;
     } {
         return this._actionBtnsState[btn];
-    }
-
-    public togglePlaceBetBtnDisabled(value: boolean): void {
-        this._actionBtnsState.bet.isDisabled = value;
-    }
-
-    public toggleBetEditBtnsDisabled(value: boolean): void {
-        this._actionBtnsState.undo.isDisabled = value;
-        this._actionBtnsState.reset.isDisabled = value;
     }
 
     public togglePlayerActionsBtnsDisabled(value: boolean): void {
@@ -125,19 +107,13 @@ export class UIStore {
         });
     }
 
-    public togglePlayerActionsBtnsVisible(value: boolean): void {
-        Object.values(this._actionBtnsState).forEach((btn) => {
-            btn.isVisible = value;
-        });
-    }
-
     public toggleActionBtnsVisible(enabled: AvailableActions): void {
         Object.keys(this._actionBtnsState).forEach((btn) => {
-            if (btn === Action.BET) {
-                this._actionBtnsState.bet.isVisible = enabled.includes(Action.BET);
+            if (btn === Action.Bet) {
+                this._actionBtnsState.Bet.isVisible = enabled.includes(Action.Bet);
             } else if (btn === BetAction.Reset || btn === BetAction.Undo) {
-                this._actionBtnsState.undo.isVisible = enabled.includes(Action.BET);
-                this._actionBtnsState.reset.isVisible = enabled.includes(Action.BET);
+                this._actionBtnsState.undo.isVisible = enabled.includes(Action.Bet);
+                this._actionBtnsState.reset.isVisible = enabled.includes(Action.Bet);
             } else {
                 this._actionBtnsState[btn as Action].isVisible = enabled.includes(
                     btn as Action,
@@ -204,14 +180,6 @@ export class UIStore {
         this._betHistory = [];
     }
 
-    public addHelper(action: Action): void {
-        this._helperTarget.push(action);
-    }
-
-    public resetHelperTarget(): void {
-        this._helperTarget = [];
-    }
-
     public addModal(notification: Notification): void {
         this._modalQueue = [...this._modalQueue, notification];
     }
@@ -231,5 +199,14 @@ export class UIStore {
         this._isModalShown = false;
         this._currentModal = null;
         this._modalQueue = this._modalQueue.slice(1);
+    }
+
+    private togglePlaceBetBtnDisabled(value: boolean): void {
+        this._actionBtnsState.Bet.isDisabled = value;
+    }
+
+    private toggleBetEditBtnsDisabled(value: boolean): void {
+        this._actionBtnsState.undo.isDisabled = value;
+        this._actionBtnsState.reset.isDisabled = value;
     }
 }

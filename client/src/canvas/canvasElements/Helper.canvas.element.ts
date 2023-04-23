@@ -8,7 +8,7 @@ import {
 } from "@babylonjs/core";
 import { HelperAnimation } from "../../types/canvas.types";
 import { getHelperAnimation } from "../utils/animation/helper.animation";
-import { handSize, helperSize } from "../../constants/canvas.constants";
+import { animationSpeed, handSize, helperSize } from "../../constants/canvas.constants";
 
 export class HelperCanvasElement extends Mesh {
     private readonly scene: Scene;
@@ -59,7 +59,7 @@ export class HelperCanvasElement extends Mesh {
                     0,
                     frameRate * 2,
                     true,
-                    2.5,
+                    this.scene.getAnimationRatio() * animationSpeed * 0.7,
                     () => {
                         if (onFinish) {
                             onFinish();

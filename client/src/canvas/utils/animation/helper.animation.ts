@@ -1,7 +1,4 @@
-import {
-    Animation,
-    Vector3,
-} from "@babylonjs/core";
+import { Animation, Vector3 } from "@babylonjs/core";
 
 export const getHelperAnimation = (
     position: Vector3,

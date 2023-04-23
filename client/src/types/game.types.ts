@@ -59,14 +59,15 @@ export interface GameSession {
     players: Record<PlayerID, PlayerInstance>;
     dealer: DealerInstance;
 }
+
 export enum Action {
-    HIT = "hit",
-    STAND = "stand",
-    DOUBLE = "double",
-    SURENDER = "surender",
-    INSURANCE = "insurance",
-    BET = "bet",
-    SPLIT = "split",
+    Hit = "Hit",
+    Stand = "Stand",
+    Double = "Double",
+    Surender = "Surender",
+    Insurance = "Insurance",
+    Split = "Split",
+    Bet = "Bet",
 }
 
 export enum BetAction {

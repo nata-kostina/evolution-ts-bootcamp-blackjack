@@ -4,7 +4,6 @@ import { Action, Bet, PlayerID, SpecificID, YesNoAcknowledgement } from './index
 export interface Controller {
   handleInitGame({ playerID, socket }: { playerID: PlayerID | null; socket: Socket }): Promise<void>;
   handleDecision({ roomID, playerID, action }: SpecificID & { action: Action }): Promise<void>;
-  finishGame({ playerID, roomID }: SpecificID): Promise<void>;
   handlePlaceBet({ playerID, roomID, bet }: SpecificID & { bet: Bet }): Promise<void>;
   handleTakeMoneyDecision({
     playerID,

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Vector2, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { Path2, Curve3 } from "@babylonjs/core/Maths/math.path";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
@@ -42,8 +41,14 @@ export class BlackjackNotificationCanvasElement {
         textMesh.rotation.x = -Math.PI / 2;
 
         const { frameRate, animationArray } = getBlackjackAnimation();
-        this.scene.beginDirectAnimation(textMesh, animationArray, 0, frameRate, false, 1, () => {
-            textMesh.dispose();
-        });
+        this.scene.beginDirectAnimation(textMesh,
+            animationArray,
+            0,
+            frameRate,
+            false,
+            this.scene.getAnimationRatio(),
+() => {
+    textMesh.dispose();
+});
     }
 }

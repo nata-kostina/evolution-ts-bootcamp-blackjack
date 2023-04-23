@@ -15,7 +15,7 @@ interface Props {
 export const PlayerActionButton = observer(({ item }: Props) => {
     const { handleClick } = useAction();
     const game = useGame() as Game;
-    const btnState = game.UI.getPlayerActionBtnstate(item.action);
+    const btnState = game.UI.getPlayerActionBtnState(item.action);
     return (
         <>{btnState.isVisible && (
             <button

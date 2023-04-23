@@ -23,13 +23,13 @@ export const handSchema = object().shape({
 export const playerSchema = object().shape({
     playerID: string().required(),
     roomID: string().required(),
-    bet: number().required().min(0),
+    bet: number().required(),
     balance: number().required(),
-    insurance: number().required().min(0),
-    hands: array().of(handSchema).required(),
+    insurance: number().required(),
+    hands: array().of(handSchema).defined(),
     activeHandID: string().defined().test(
-        "my test",
-        "error: name is not a string",
+        "active hand test",
+        "error: active hand is not a string",
         (text) => {
             if (typeof text === "string") {
                 return true;
@@ -41,7 +41,7 @@ export const playerSchema = object().shape({
 
 const dealerSchema = object().shape({
     cards: array().of(cardSchema).required(),
-    points: number().required().min(0),
+    points: number().required(),
     hasHoleCard: boolean().required(),
 });
 
@@ -63,14 +63,14 @@ export const newCardSchema = object().shape({
         suit: string<Suit>(),
         id: string().required(),
     }),
-    points: number().required().min(0),
+    points: number().required(),
     handID: string(),
 });
 
 export const unholedCardSchema = object().shape({
     target: string<"dealer">().required(),
     card: cardSchema,
-    points: number().required().min(0),
+    points: number().required(),
 });
 
 export const handIDSchema = string().required();

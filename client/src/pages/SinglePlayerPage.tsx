@@ -19,6 +19,3 @@ export const SinglePlayerPage = observer(() => {
         </>
     );
 });
-
-// export const SinglePlayerPageWithConnectionRequired =
-//   RequireConnection(SinglePlayerPage);

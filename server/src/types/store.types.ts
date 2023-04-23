@@ -3,12 +3,10 @@ import { SpecificID } from './socket.types.js';
 
 export interface GameState {
   roomID: RoomID;
-  hasStarted: boolean;
   organizer: PlayerID;
   deck: Deck;
   players: Record<PlayerID, PlayerInstance>;
   dealer: DealerInstance;
-  dealNum: number;
 }
 
 export type State = Record<RoomID, GameState>;

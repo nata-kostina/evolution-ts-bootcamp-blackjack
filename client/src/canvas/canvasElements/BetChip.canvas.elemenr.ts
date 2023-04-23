@@ -1,26 +1,16 @@
-/* eslint-disable import/no-cycle */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-floating-promises */
-/* eslint-disable @typescript-eslint/no-empty-function */
 import {
-    ActionManager,
-    ExecuteCodeAction,
     Mesh,
     MeshBuilder,
     StandardMaterial,
     Texture,
-    TransformNode,
     Vector3,
     Vector4,
     Scene,
-    AxesViewer,
 } from "@babylonjs/core";
-import { CanvasBase } from "../CanvasBase";
-import { chipRadius } from "../../constants/canvas.constants";
+import { animationSpeed, chipRadius } from "../../constants/canvas.constants";
 import { ChipItem } from "../../types/game.types";
 import { ChipAnimation } from "../../types/canvas.types";
 import { getChipAnimation } from "../utils/animation/chip.animation";
-import { assertUnreachable } from "../../utils/general/assertUnreachable";
 
 export class BetChipCanvasElement extends Mesh {
     private readonly scene: Scene;
@@ -78,7 +68,7 @@ export class BetChipCanvasElement extends Mesh {
             0,
             frameRate,
             false,
-            2.5,
+            this.scene.getAnimationRatio() * animationSpeed,
             () => {
                 if (onFinish) {
                     onFinish();

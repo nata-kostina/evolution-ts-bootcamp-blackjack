@@ -137,10 +137,6 @@ export class Connection {
         makeAutoObservable(this);
     }
 
-    public get connectionID(): string | null {
-        return this._connectionID;
-    }
-
     public get roomID(): string | null {
         return this._roomID;
     }

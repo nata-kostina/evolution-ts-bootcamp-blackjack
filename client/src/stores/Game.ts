@@ -76,6 +76,7 @@ export class Game {
                 playerID: id,
                 players: session.players,
             });
+
             if (player) {
                 const validatedPlayer = await playerSchema.validate(player);
                 const validatedActiveHand = await handSchema.validate(
@@ -102,11 +103,13 @@ export class Game {
             if (!this._playerID) {
                 throw new Error("No player found");
             }
+
             const session = await gameSessionSchema.validate(response.payload);
             const player = pickPlayerInstance({
                 playerID: this._playerID,
                 players: session.players,
             });
+
             if (player) {
                 const validatedPlayer = await playerSchema.validate(player);
                 this._session = session;
@@ -123,12 +126,13 @@ export class Game {
             if (!this._playerID) {
                 throw new Error("No player found");
             }
-            const session = await gameSessionSchema.validate(response.payload);
 
+            const session = await gameSessionSchema.validate(response.payload);
             const player = pickPlayerInstance({
                 playerID: this._playerID,
                 players: session.players,
             });
+
             if (player) {
                 const validatedPlayer = await playerSchema.validate(player);
                 this._session = session;
@@ -219,11 +223,13 @@ export class Game {
             if (!this._playerID) {
                 throw new Error("No player found");
             }
+
             const session = await gameSessionSchema.validate(response.payload);
             const player = pickPlayerInstance({
                 playerID: this._playerID,
                 players: session.players,
             });
+
             if (player) {
                 const validatedPlayer = await playerSchema.validate(player);
                 const validatedActiveHand = await handSchema.validate(
@@ -259,12 +265,14 @@ export class Game {
             if (!this._playerID) {
                 throw new Error("No player found");
             }
+
             const validatedHandID = await handIDSchema.validate(
                 response.payload.handID,
             );
             const validatedGameResult = await gameResultSchema.validate(
                 response.payload.result,
             );
+
             this._ui.togglePlayerActionsBtnsDisabled(true);
             await this._scene?.removeHand(validatedHandID, validatedGameResult);
         });
@@ -304,6 +312,7 @@ export class Game {
                 throw new Error("Invalid server response");
             }
         } catch (error) {
+            console.log(error);
             await this.handleNotificate({
                 ok: true,
                 payload: {

@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { CanvasBase } from "../../canvas/CanvasBase";
 import { SceneManager } from "../../canvas/canvasElements/SceneManager";
 import { useGame } from "../../context/GameContext";
-import { Controller } from "../../canvas/Controller";
+import { CanvasController } from "../../canvas/CanvasController";
 import styles from "./styles.module.css";
 import { AssetsLoader } from "../../canvas/utils/assetsManager";
 import { useConnection } from "../../context/ConnectionContext";
@@ -26,7 +26,7 @@ export const GameCanvas = observer(() => {
 
         const canvasBase = new CanvasBase(canvas);
         const matrix = canvasBase.getGameMatrix();
-        const controller = new Controller(game.UI);
+        const controller = new CanvasController(game.UI);
         const sceneManager = new SceneManager(canvasBase.scene, matrix, controller);
         game.scene = sceneManager;
 
