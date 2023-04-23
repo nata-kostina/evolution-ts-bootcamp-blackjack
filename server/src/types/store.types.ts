@@ -45,7 +45,7 @@ export interface IStore {
   updateDealer({ roomID, payload }: UpdateDealerParams): void;
   getActiveHand({roomID, playerID}: SpecificID): Hand;
   updateHand({ playerID, roomID, handID, payload }: UpdateHandParams): void;
-  getScore({ roomID, playerID, handID}: SpecificID & {handID: string}): number;
+  getScore({ roomID, playerID, handID}: SpecificID & {handID: string}): Array<number>;
   unholeCard(roomID: RoomID): void;
   resetPlayer({ playerID, roomID }: SpecificID): void;
   resetDealer(roomID: RoomID): void;

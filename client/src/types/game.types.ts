@@ -34,7 +34,7 @@ export type Hand = {
     parentID: string;
     cards: Card[];
     bet: number;
-    points: number;
+    points: Array<number>;
 };
 
 export type PlayerInstance = {
@@ -91,7 +91,7 @@ export type DealDealerCard = {
 export type DealPlayerCard = {
     target: "player";
     card: Card;
-    points: number;
+    points: Array<number>;
     handID: string;
 };
 

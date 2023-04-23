@@ -1,8 +1,8 @@
-import { useConnection } from "../../context/ConnectionContext";
-import { useGame } from "../../context/GameContext";
-import { Connection } from "../../stores/Connection";
-import { Game } from "../../stores/Game";
-import { Action, BetAction } from "../../types/game.types";
+import { useConnection } from "../context/ConnectionContext";
+import { useGame } from "../context/GameContext";
+import { Connection } from "../stores/Connection";
+import { Game } from "../stores/Game";
+import { Action, BetAction } from "../types/game.types";
 
 export const useAction = () => {
     const connection = useConnection() as Connection;

@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./normalize.css";
 import "./index.css";
 import Modal from "react-modal";
-import { SinglePlayerPageWithConnectionRequired } from "./pages/SinglePlayerPage";
+import { SinglePlayerPage } from "./pages/SinglePlayerPage";
 import { ConnectionProvider } from "./context/ConnectionContext";
 import { GameProvider } from "./context/GameContext";
 import { init } from "./init";
@@ -19,7 +19,7 @@ const root = ReactDOM.createRoot(
 root.render(
     <ConnectionProvider connection={connection}>
         <GameProvider game={game}>
-            <SinglePlayerPageWithConnectionRequired />
+            <SinglePlayerPage />
         </GameProvider>
     </ConnectionProvider>,
 );

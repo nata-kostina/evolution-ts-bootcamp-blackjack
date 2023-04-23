@@ -25,7 +25,7 @@ export type Hand = {
   parentID: string;
   cards: Card[];
   bet: number;
-  points: number;
+  points: Array<number>;
   isStanding: boolean;
 };
 

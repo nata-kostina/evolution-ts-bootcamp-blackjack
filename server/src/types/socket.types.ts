@@ -64,7 +64,7 @@ export type DealDealerCard = {
 export type DealPlayerCard = {
   target: 'player';
   card: Card;
-  points: number;
+  points: Array<number>;
   handID: string;
 };
 export type UnholeCardPayload = {

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { observer } from "mobx-react-lite";
 import { CanvasBase } from "../../canvas/CanvasBase";
 import { SceneManager } from "../../canvas/canvasElements/SceneManager";
 import { useGame } from "../../context/GameContext";
@@ -9,7 +10,7 @@ import { useConnection } from "../../context/ConnectionContext";
 import { LoaderScreen } from "../LoaderScreen/LoaderScreen";
 import { GameMode } from "../../types/game.types";
 
-export const GameCanvas = () => {
+export const GameCanvas = observer(() => {
     const reactCanvas = useRef<HTMLCanvasElement>(null);
     const game = useGame();
     const connection = useConnection();
@@ -45,11 +46,12 @@ export const GameCanvas = () => {
             })
             .catch((error) => console.log(error));
     }, [reactCanvas, game, connection]);
+    const isGameLoading = isLoading || !connection?.isInitialized;
 
     return (
         <>
-            {(isLoading || connection?.isWaiting) && <LoaderScreen />}
-            <canvas ref={reactCanvas} id={styles.canvas} />;
+            {isGameLoading && <LoaderScreen />}
+            <canvas ref={reactCanvas} id={styles.canvas} data-testid="canvas" />;
         </>
     );
-};
+});

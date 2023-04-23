@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-empty */
 import { makeAutoObservable } from "mobx";
-import { ValidationError } from "yup";
 import { UIStore } from "./UIstore";
 import { pickPlayerInstance } from "../utils/storeUtils/pickPlayerInsrance";
 import { SceneManager } from "../canvas/canvasElements/SceneManager";
@@ -10,7 +7,6 @@ import {
     GameSession,
     PlayerID,
     RoomID,
-    Action,
     DealDealerCard,
     DealPlayerCard,
 } from "../types/game.types";
@@ -21,7 +17,6 @@ import {
     gameSessionSchema,
     handIDSchema,
     handSchema,
-    newCardSchema,
     notificationSchema,
     playerIDSchema,
     playerSchema,
@@ -72,287 +67,251 @@ export class Game {
     public async handleInitGame(
         response: SocketResponse<{ game: GameSession; playerID: PlayerID; }>,
     ): Promise<void> {
-        try {
-            if (response.ok && response.payload) {
-                const session = await gameSessionSchema.validate(response.payload.game);
-                const id = await playerIDSchema.validate(response.payload.playerID);
-                this.playerID = id;
+        await this.handleResponse(response, async () => {
+            const session = await gameSessionSchema.validate(response.payload.game);
+            const id = await playerIDSchema.validate(response.payload.playerID);
+            this.playerID = id;
 
-                const player = pickPlayerInstance({
-                    playerID: id,
-                    players: session.players,
-                });
-                if (player) {
-                    const validatedPlayer = await playerSchema.validate(player);
-                    const validatedActiveHand = await handSchema.validate(
-                        validatedPlayer.hands.find(
+            const player = pickPlayerInstance({
+                playerID: id,
+                players: session.players,
+            });
+            if (player) {
+                const validatedPlayer = await playerSchema.validate(player);
+                const validatedActiveHand = await handSchema.validate(
+                    validatedPlayer.hands.find(
                             (hand) => hand.handID === player.activeHandID,
-                        ),
-                    );
-                    localStorage.setItem("player_id", validatedPlayer.playerID);
+                    ),
+                );
 
-                    this._session = session;
-                    this._roomID = session.roomID;
-                    this._ui.player = validatedPlayer;
-                    this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
-                    this._scene?.init(validatedActiveHand.handID);
-                }
-            } else {
+                localStorage.setItem("player_id", validatedPlayer.playerID);
+
+                this._session = session;
+                this._roomID = session.roomID;
+                this._ui.player = validatedPlayer;
+                this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
+                this._scene?.init(validatedActiveHand.handID);
             }
-        } catch (error) {
-            if (error instanceof ValidationError) {
-                console.log("The response data is invalid");
-                return;
-            }
-            console.log("Uncaught error occured");
-        }
+        });
     }
 
     public async handleUpdateGameSession(
         response: SocketResponse<GameSession>,
     ): Promise<void> {
-        try {
-            if (response.ok && response.payload && this._playerID) {
-                const session = await gameSessionSchema.validate(response.payload);
-                const player = pickPlayerInstance({
-                    playerID: this._playerID,
-                    players: session.players,
-                });
-                if (player) {
-                    const validatedPlayer = await playerSchema.validate(player);
-                    this._session = session;
-                    this._ui.player = validatedPlayer;
-                    this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
-                }
-            } else {
+        await this.handleResponse(response, async () => {
+            if (!this._playerID) {
+                throw new Error("No player found");
             }
-        } catch (error) {}
+            const session = await gameSessionSchema.validate(response.payload);
+            const player = pickPlayerInstance({
+                playerID: this._playerID,
+                players: session.players,
+            });
+            if (player) {
+                const validatedPlayer = await playerSchema.validate(player);
+                this._session = session;
+                this._ui.player = validatedPlayer;
+                this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
+            }
+        });
     }
 
     public async handlePlaceBet(
         response: SocketResponse<GameSession>,
     ): Promise<void> {
-        try {
-            if (response.ok && response.payload && this._playerID) {
-                const session = await gameSessionSchema.validate(response.payload);
-
-                const player = pickPlayerInstance({
-                    playerID: this._playerID,
-                    players: session.players,
-                });
-                if (player) {
-                    const validatedPlayer = await playerSchema.validate(player);
-                    const validatedActiveHand = await handSchema.validate(
-                        validatedPlayer.hands.find(
-                            (hand) => hand.handID === player.activeHandID,
-                        ),
-                    );
-                    this._session = session;
-                    this._ui.player = validatedPlayer;
-                    this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
-                    this._ui.toggleVisibleActionBtnsDisabled(true);
-                    // this._ui.togglePlaceBetBtnDisabled(true);
-                    // this._ui.toggleBetEditBtnsDisabled(true);
-                    this._scene?.toggleChipAction(false);
-                }
-            } else {
+        await this.handleResponse(response, async () => {
+            if (!this._playerID) {
+                throw new Error("No player found");
             }
-        } catch (error) {}
+            const session = await gameSessionSchema.validate(response.payload);
+
+            const player = pickPlayerInstance({
+                playerID: this._playerID,
+                players: session.players,
+            });
+            if (player) {
+                const validatedPlayer = await playerSchema.validate(player);
+                this._session = session;
+                this._ui.player = validatedPlayer;
+                this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
+                this._ui.toggleVisibleActionBtnsDisabled(true);
+                this._scene?.toggleChipAction(false);
+            }
+        });
     }
 
     public async handleNotificate(
         response: SocketResponse<Notification>,
     ): Promise<void> {
-        try {
-            if (response.ok && response.payload) {
-                const notification = await notificationSchema.validate(
-                    response.payload,
-                );
-                switch (notification.variant) {
-                    case NotificationVariant.Blackjack:
-                        this._scene?.addBlackjackNotification();
-                        break;
-                    case NotificationVariant.StandOrTakeMoney:
-                        this._ui.addModal(notification);
-                        break;
-                    default:
-                        break;
-                }
-            } else {
+        await this.handleResponse(response, async () => {
+            const notification = await notificationSchema.validate(
+                response.payload,
+            );
+            switch (notification.variant) {
+                case NotificationVariant.Blackjack:
+                    this._scene?.addBlackjackNotification();
+                    break;
+                case NotificationVariant.StandOrTakeMoney:
+                    this._ui.addModal(notification);
+                    break;
+                case NotificationVariant.Disconnection:
+                    this._ui.addModal(notification);
+                    break;
+                case NotificationVariant.GameError:
+                    this._ui.addModal(notification);
+                    break;
+                default:
+                    break;
             }
-        } catch (error) {}
+        });
     }
 
     public async handleFinishRound(
         response: SocketResponse<GameSession>,
     ): Promise<void> {
-        try {
-            if (response.ok && response.payload && this._playerID) {
-                const session = await gameSessionSchema.validate(response.payload);
-                const player = pickPlayerInstance({ playerID: this._playerID, players: session.players });
-                if (player) {
-                    const validatedPlayer = await playerSchema.validate(player, {
-                        stripUnknown: true,
-                    });
-                    this._session = session;
-                    this._ui.resetBetHistory();
-                    this._ui.player = validatedPlayer;
-                    this._ui.toggleVisibleActionBtnsDisabled(false);
-                    this._scene?.resetScene();
-                }
-            } else {
+        await this.handleResponse(response, async () => {
+            if (!this._playerID) {
+                throw new Error("No player found");
             }
-        } catch (error) {
-            if (error instanceof ValidationError) {
-                console.log("The response data is invalid", error);
-                return;
+            const session = await gameSessionSchema.validate(response.payload);
+            const player = pickPlayerInstance({ playerID: this._playerID, players: session.players });
+            if (player) {
+                const validatedPlayer = await playerSchema.validate(player, {
+                    stripUnknown: true,
+                });
+                this._session = session;
+                this._ui.resetBetHistory();
+                this._ui.player = validatedPlayer;
+                this._scene?.resetScene();
             }
-            console.log("Uncaught error occured");
-        }
+        });
     }
 
     public async handleDealDealerCard(
         response: SocketResponse<DealDealerCard>,
     ): Promise<void> {
-        try {
-            if (response.ok && response.payload) {
-                await this._scene?.dealDealerCard(response.payload);
-            } else {
-            }
-        } catch (error) {}
+        await this.handleResponse(response, async () => {
+            await this._scene?.dealDealerCard(response.payload);
+        });
     }
 
     public async handleDealPlayerCard(
         response: SocketResponse<DealPlayerCard>,
     ): Promise<void> {
-        try {
-            if (response.ok && response.payload) {
-                await this._scene?.dealPlayerCard(response.payload);
-            } else {
-            }
-        } catch (error) {}
+        await this.handleResponse(response, async () => {
+            await this._scene?.dealPlayerCard(response.payload);
+        });
     }
 
     public async handleUnholeCard(
         response: SocketResponse<UnholeCardPayload>,
     ): Promise<void> {
-        try {
-            if (response.ok && response.payload) {
-                const unholedCard = await unholedCardSchema.validate(response.payload);
-                await this._scene?.unholeCard(unholedCard);
-            }
-        } catch (error) { }
+        await this.handleResponse(response, async () => {
+            const unholedCard = await unholedCardSchema.validate(response.payload);
+            await this._scene?.unholeCard(unholedCard);
+        });
     }
 
     public async handleSplit(
         response: SocketResponse<GameSession>,
     ): Promise<void> {
-        try {
-            if (response.ok && response.payload && this._playerID) {
-                const session = await gameSessionSchema.validate(response.payload);
-                const player = pickPlayerInstance({
-                    playerID: this._playerID,
-                    players: session.players,
-                });
-                if (player) {
-                    const validatedPlayer = await playerSchema.validate(player);
-                    const validatedActiveHand = await handSchema.validate(
-                        validatedPlayer.hands.find(
+        await this.handleResponse(response, async () => {
+            if (!this._playerID) {
+                throw new Error("No player found");
+            }
+            const session = await gameSessionSchema.validate(response.payload);
+            const player = pickPlayerInstance({
+                playerID: this._playerID,
+                players: session.players,
+            });
+            if (player) {
+                const validatedPlayer = await playerSchema.validate(player);
+                const validatedActiveHand = await handSchema.validate(
+                    validatedPlayer.hands.find(
                             (hand) => hand.handID === player.activeHandID,
-                        ),
-                    );
-                    const newHand = validatedPlayer.hands.find(
+                    ),
+                );
+                const newHand = validatedPlayer.hands.find(
                         (hand) =>
                             hand.parentID === validatedActiveHand.handID,
-                    );
-                    if (!newHand) {
-                        return;
-                    }
-                    this._session = session;
-                    this._ui.player = validatedPlayer;
-                    this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
-                    this._ui.toggleVisibleActionBtnsDisabled(true);
-                    await this._scene?.split({
-                        oldHandID: validatedActiveHand.handID,
-                        newHandID: newHand.handID,
-                        bet: validatedActiveHand.bet,
-                        points: validatedActiveHand.points,
-                    });
+                );
+                if (!newHand) {
+                    return;
                 }
-            } else {
+                this._session = session;
+                this._ui.player = validatedPlayer;
+                this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
+                this._ui.toggleVisibleActionBtnsDisabled(true);
+                await this._scene?.split({
+                    oldHandID: validatedActiveHand.handID,
+                    newHandID: newHand.handID,
+                    bet: validatedActiveHand.bet,
+                    points: validatedActiveHand.points,
+                });
             }
-        } catch (error) {
-            if (error instanceof ValidationError) {
-                console.log("The response data is invalid");
-                return;
-            }
-            console.log("Uncaught error occured");
-        }
+        });
     }
 
     public async handleFinishRoundForHand(
         response: SocketResponse<FinishRoundForHand>,
     ): Promise<void> {
-        try {
-            if (response.ok && response.payload && this._playerID) {
-                const validatedHandID = await handIDSchema.validate(
-                    response.payload.handID,
-                );
-                const validatedGameResult = await gameResultSchema.validate(
-                    response.payload.result,
-                );
-                this._ui.togglePlayerActionsBtnsDisabled(true);
-                await this._scene?.removeHand(validatedHandID, validatedGameResult);
-            } else {
+        await this.handleResponse(response, async () => {
+            if (!this._playerID) {
+                throw new Error("No player found");
             }
-        } catch (error) {
-            if (error instanceof ValidationError) {
-                console.log("The response data is invalid");
-                return;
-            }
-            console.log("Uncaught error occured");
-        }
+            const validatedHandID = await handIDSchema.validate(
+                response.payload.handID,
+            );
+            const validatedGameResult = await gameResultSchema.validate(
+                response.payload.result,
+            );
+            this._ui.togglePlayerActionsBtnsDisabled(true);
+            await this._scene?.removeHand(validatedHandID, validatedGameResult);
+        });
     }
 
     public async handleReassignActiveHand(response: SocketResponse<ReassignActiveHand>): Promise<void> {
-        try {
-            console.log("handleReassignActiveHand: ", response.payload);
-            if (response.ok && response.payload) {
-                const validatedId = await handIDSchema.validate(response.payload.handID);
-                this._scene?.updateHelper({ handId: validatedId });
-            } else {
-            }
-        } catch (error) {
-            if (error instanceof ValidationError) {
-                console.log("The response data is invalid");
-                return;
-            }
-            console.log("Uncaught error occured");
-        }
+        await this.handleResponse(response, async () => {
+            const validatedId = await handIDSchema.validate(response.payload.handID);
+            this._scene?.updateHelper({ handId: validatedId });
+        });
     }
 
     public async handleMakeDecision(response: SocketResponse<GameSession>): Promise<void> {
+        await this.handleResponse(response, async () => {
+            if (!this._playerID) {
+                throw new Error("No player found");
+            }
+            const session = await gameSessionSchema.validate(response.payload);
+            const player = pickPlayerInstance({
+                playerID: this._playerID,
+                players: session.players,
+            });
+            if (player) {
+                const validatedPlayer = await playerSchema.validate(player);
+                this._session = session;
+                this._ui.player = validatedPlayer;
+                this._ui.toggleVisibleActionBtnsDisabled(false);
+            }
+        });
+    }
+
+    private async handleResponse<T>(response: SocketResponse<T>, handler: () => Promise<void>): Promise<void> {
         try {
-            if (response.ok && response.payload && this._playerID) {
-                const session = await gameSessionSchema.validate(response.payload);
-                const player = pickPlayerInstance({
-                    playerID: this._playerID,
-                    players: session.players,
-                });
-                if (player) {
-                    const validatedPlayer = await playerSchema.validate(player);
-                    this._session = session;
-                    this._ui.player = validatedPlayer;
-                    this._ui.toggleVisibleActionBtnsDisabled(false);
-                }
+            if (response.ok && response.payload) {
+                await handler();
             } else {
+                throw new Error("Invalid server response");
             }
         } catch (error) {
-            if (error instanceof ValidationError) {
-                console.log("The response data is invalid");
-                return;
-            }
-            console.log("Uncaught error occured");
+            await this.handleNotificate({
+                ok: true,
+                payload: {
+                    variant: NotificationVariant.GameError,
+                    text: "Ooops! Something is wrong.",
+                },
+                statusText: "ok",
+            });
         }
     }
 }

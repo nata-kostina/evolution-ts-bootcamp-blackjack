@@ -26,7 +26,7 @@ export class HelperCanvasElement extends Mesh {
         this._skin.setParent(this);
 
         const helperMaterial = new StandardMaterial("material", this._scene);
-        helperMaterial.diffuseColor = new Color3(1, 0, 1);
+        helperMaterial.diffuseColor = Color3.FromHexString("#F2EEAD");
         this._skin.material = helperMaterial;
 
         this.position = new Vector3(position.x,

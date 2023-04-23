@@ -4,7 +4,7 @@
   top: 40%;
 
   height: 200px;
-  width: 300px;
+  width: 420px;
 
   padding: 0px;
 
@@ -19,6 +19,8 @@
   background-image: linear-gradient(#2c1b05, #2c1b05), var(--goldBorder);
   background-origin: border-box;
   background-clip: padding-box, border-box;
+
+  z-index: 1000;
 }
 
 .inner {
@@ -26,6 +28,8 @@
 
   width: 100%;
   height: 100%;
+
+  padding: 20px;
 
   display: flex;
   flex-direction: column;
@@ -48,8 +52,10 @@
 .text {
   margin: 10px 0px;
 
-  font-size: 18px;
+  font-size: 20px;
+  line-height: 1.8em;
   color: #ffffff;
+  text-align: center;
 }
 
 .controls {
@@ -77,10 +83,10 @@
   background-origin: border-box;
   background-clip: padding-box, border-box;
 
-  transition: transform .2s ease-in;
+  transition: transform 0.2s ease-in;
 }
 
 .btnAnswer:hover {
-    cursor: pointer;
-    transform: translateY(-4px);
+  cursor: pointer;
+  transform: translateY(-4px);
 }

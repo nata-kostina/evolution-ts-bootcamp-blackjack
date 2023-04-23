@@ -7,7 +7,8 @@ type Handler = {
   canDouble: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => boolean;
   canSplit: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => boolean;
   canPlaceInsurance: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => boolean;
-  getPointsSum: (cards: Card[]) => number;
+  getPointsSum: (cards: Card[]) => Array<number>;
+  getDealerPoints: (cards: Card[]) => number;
 };
 
 export const CardsHandler: Handler = {
@@ -45,7 +46,8 @@ export const CardsHandler: Handler = {
       }
       const activeHand = hands[0];
       if (activeHand.cards.length === 2) {
-        return activeHand.points === NINE || activeHand.points === TEN || activeHand.points === ELEVEN;
+        const available = activeHand.points.filter((points) => points === NINE || points === TEN || points === ELEVEN);
+        return available.length > 0;
       }
       return false;
     } catch (error: unknown) {
@@ -84,14 +86,65 @@ export const CardsHandler: Handler = {
     }
   },
 
-  getPointsSum(cards: Card[]): number {
-    return cards.reduce((sum, card) => {
-      const point = PointsMap[card.value];
-      sum += point;
-      // special check for Ace
-      if (card.value === CardValue.ACE && sum > TWENTY_ONE) {
-        sum = sum - point + 1;
+  getPointsSum(cards: Card[]): Array<number> {
+      if (cards.length === 2) {
+        const [first, second] = cards;
+        if (
+          (first.value === CardValue.ACE && TenSet.has(second.value)) ||
+          (second.value === CardValue.ACE && TenSet.has(first.value))
+        ) {
+          return [TWENTY_ONE];
+        }
       }
+    const aces = cards.filter((card) => card.value === CardValue.ACE);
+    if (aces.length) {
+      const acesSums = [aces.length, PointsMap[CardValue.ACE] + aces.length - 1];
+
+      const nonAces = cards.filter((card) => card.value !== CardValue.ACE);
+      const nonAcesSum = nonAces.reduce((sum, card) => {
+        sum += PointsMap[card.value];
+        return sum;
+      }, 0);
+
+      const minorSum = nonAcesSum + acesSums[0];
+      const majorSum = nonAcesSum + acesSums[1];
+      console.log("minorSum: ", minorSum);
+      console.log("majorSum: ", majorSum);
+
+      if (majorSum > TWENTY_ONE) {
+        return [minorSum];
+      } else {
+        return [minorSum, majorSum];
+      }
+    } else {
+      const pointsSum = cards.reduce((sum, card) => {
+        sum += PointsMap[card.value];
+        return sum;
+      }, 0);
+      return [pointsSum];
+    }
+  },
+
+  getDealerPoints(cards: Card[]): number {
+    const aces = cards.filter((card) => card.value === CardValue.ACE);
+    if (aces.length > 0) {
+      const acesSum = aces.reduce((sum, card, index) => {
+        if (index === 0) {
+          sum += 11;
+        } else {
+          sum += 1;
+        }
+        return sum;
+      }, 0);
+      const nonAces = cards.filter((card) => card.value !== CardValue.ACE);
+      const nonAcesSum = nonAces.reduce((sum, card) => {
+        sum += PointsMap[card.value];
+        return sum;
+      }, 0);
+      return nonAcesSum + acesSum;
+    }
+    return cards.reduce((sum, card) => {
+      sum += PointsMap[card.value];
       return sum;
     }, 0);
   },

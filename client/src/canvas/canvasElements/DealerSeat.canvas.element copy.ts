@@ -20,21 +20,6 @@ export class DealerSeatCanvasElement extends TransformNode implements CanvasElem
         this.scene = scene;
         this.matrix = matrix;
         this.position = getPositionFromMatrix(matrix, "dealer-seat");
-        // const mtx = matrix.getMatrix();
-        // const mtxSize = matrix.getMatrixSize();
-        // const cellWidth = matrix.getCellWidth();
-        // const cellHeight = matrix.getCellHeight();
-        // const matrixWidth = matrix.getMatrixWidth();
-        // const matrixHeight = matrix.getMatrixHeight();
-        // const index = mtx.indexOf("dealer-seat");
-
-        // const row = Math.floor(index / mtxSize);
-        // const column = index % mtxSize;
-        // this.position = new Vector3(
-        //     -matrixWidth * 0.5 + cellWidth * 0.5 + cellWidth * column,
-        //     -cardSize.height * 0.5 + matrixHeight * 0.5 - cellHeight * 0.5 - cellHeight * row,
-        //     0,
-        // );
 
         this._pointsElement = new PointsCanvasElement(
             this.scene,
@@ -66,7 +51,7 @@ export class DealerSeatCanvasElement extends TransformNode implements CanvasElem
             this.scene,
             new Vector3(
                 this.cards.length * 0.13,
-                this.position.y,
+                0,
                 this.position.z - this.cards.length * cardSize.depth - 0.04,
             ),
             newCard.card,
@@ -83,7 +68,7 @@ export class DealerSeatCanvasElement extends TransformNode implements CanvasElem
     }
 
     public updatePoints(points: number): void {
-        this._pointsElement.update(points);
+        this._pointsElement.update([points]);
     }
 
     public removeCards(): void {

@@ -81,8 +81,6 @@ export class CanvasBase {
         }
 
         const scalingLevel = this.engine.getHardwareScalingLevel();
-        this.gameMatrix.update(this.engine.getRenderWidth(true) * scalingLevel,
-            this.engine.getRenderHeight(true) * scalingLevel);
         const screenWidth = this.engine.getRenderWidth(true) * scalingLevel;
         const screenHeight = this.engine.getRenderHeight(true) * scalingLevel;
         this.gameMatrix.update(screenWidth, screenHeight);

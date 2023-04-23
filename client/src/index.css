@@ -10,7 +10,7 @@
     rgba(107, 92, 66, 1) 70%,
     rgba(107, 92, 66, 1) 100%
   );
-  --controlItemWidth: 80px;
+  --controlItemWidth: 90px;
   --controlItemImgBorder: 6px;
   --controlItemImgInnerWidth: calc(
     (var(--controlItemWidth) - 2 * var(--controlItemImgBorder)) / 1.4
@@ -36,6 +36,7 @@
   );
 
   --helperSize: 50px;
+  --reducingCoeffisient: 0.9;
 }
 
 @font-face {

@@ -193,7 +193,7 @@ class Store implements IStore {
     }
   }
 
-  public getScore({ roomID, playerID, handID }: SpecificID & { handID: string }): number {
+  public getScore({ roomID, playerID, handID }: SpecificID & { handID: string }): Array<number> {
     try {
       const hand = this.getHand({ playerID, roomID, handID });
       return hand.points;
@@ -237,7 +237,7 @@ class Store implements IStore {
       const game = this.getGame(roomID);
       const dealer = this.getDealer(roomID);
       const updatedCards = payload.cards ? [...dealer.cards, ...payload.cards] : dealer.cards;
-      const updatedPoints = CardsHandler.getPointsSum(updatedCards);
+      const updatedPoints = CardsHandler.getDealerPoints(updatedCards);
       const updatedDealer = { ...dealer, ...payload, cards: updatedCards, points: updatedPoints };
       game.dealer = updatedDealer;
     } catch (e: unknown) {

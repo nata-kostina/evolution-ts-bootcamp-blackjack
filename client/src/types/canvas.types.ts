@@ -46,4 +46,4 @@ export type UnholeCardPayload = {
     points: number;
 };
 
-export type SplitParams = { oldHandID: string; newHandID: string; bet: Bet; points: number; };
+export type SplitParams = { oldHandID: string; newHandID: string; bet: Bet; points: Array<number>; };

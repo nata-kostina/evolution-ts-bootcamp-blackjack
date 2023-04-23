@@ -45,10 +45,6 @@ export class SceneManager {
     }
 
     public addContent(): void {
-        console.log("scene manager add content");
-        // const sphere = CreateSphere("sphere", { diameter: 0.4 }, this.scene);
-        // console.log({ matrix: this.gameMatrix.matrixHeight, width: this.gameMatrix.matrixWidth });
-        // sphere.position = new Vector3(1, 0, 0);
         const ground = CreateGround("ground1", { width: 2.1, height: 0.6 }, this.scene);
         ground.position.y = 0.8;
         ground.position.z = 0.3;
@@ -65,6 +61,7 @@ export class SceneManager {
     }
 
     public init(activeHand: string): void {
+        this.resetScene();
         this.toggleChipAction(true);
         this.addInitialHand(activeHand);
     }
@@ -102,6 +99,7 @@ export class SceneManager {
 
     public async unholeCard(payload: UnholeCardPayload): Promise<void> {
         await this.dealerSeat.unholeCard(payload);
+        this._helper.skin.isVisible = false;
     }
 
     public async removeHand(handID: string, result: GameResult): Promise<void> {
@@ -117,18 +115,12 @@ export class SceneManager {
     }
 
     public async resetScene(): Promise<void> {
-        console.log("resetScene");
         this.dealerSeat.reset();
         this.toggleChipAction(false);
         this._helper.skin.isVisible = false;
-        // this.playerSeat.dispose();
+        this.playerSeat.reset();
         // this.dealerSeat.dispose(false, true);
         // this._helper.dispose();
-    }
-
-    private async boot(): Promise<void> {
-        // const assetManager = new AssetsManager(this.scene);
-        // assetManager.addTextureTask("load-chip-1", actionButtons[Action]);
     }
 
     private addInitialHand(handID: string): void {

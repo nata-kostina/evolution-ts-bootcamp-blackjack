@@ -25,11 +25,10 @@ export class PointsCanvasElement extends GroundMesh {
         this._skin.setParent(this);
 
         this.position = new Vector3(
-            handPosition.x - handSize.width * 1.3,
+            handPosition.x - handSize.width * 1.1,
             handPosition.y + handSize.width * 0.45,
             handPosition.z,
         );
-
         this.rotation.x = -Math.PI * 0.5;
 
         const texture = AdvancedDynamicTexture.CreateForMesh(this._skin);
@@ -45,7 +44,7 @@ export class PointsCanvasElement extends GroundMesh {
         return this._skin;
     }
 
-    public update(points: number): void {
-        this.textBlock.text = points.toString();
+    public update(points: Array<number>): void {
+        this.textBlock.text = points.join("/");
     }
 }

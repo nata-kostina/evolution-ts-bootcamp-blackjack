@@ -26,7 +26,6 @@ export class PlayerSeatCanvasElement extends GroundMesh implements CanvasElement
         );
         this._seat.setParent(this);
         this.position = getPositionFromMatrix(matrix, "player-seat");
-        console.log("constructor: ", this.position);
         this.rotation.x = -Math.PI * 0.5;
     }
 
@@ -42,7 +41,6 @@ export class PlayerSeatCanvasElement extends GroundMesh implements CanvasElement
     }
 
     public addHand(handID: string): void {
-        console.log("seat positon: ", this.position);
         const hand = new HandCanvasElement(
             this.scene,
             handID,
@@ -75,7 +73,7 @@ export class PlayerSeatCanvasElement extends GroundMesh implements CanvasElement
                 newHandID,
                 new Vector3().copyFrom(hand.position),
             );
-
+            newHand.pointsElement.skin.isVisible = true;
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const [firstCard, secondCard] = hand.cards;
             hand.removeCard(secondCard);
@@ -121,6 +119,5 @@ export class PlayerSeatCanvasElement extends GroundMesh implements CanvasElement
 
     public update(matrix: GameMatrix): void {
         this.position = getPositionFromMatrix(matrix, "player-seat");
-        this.hands.forEach((hand) => hand.update(this.position));
     }
 }

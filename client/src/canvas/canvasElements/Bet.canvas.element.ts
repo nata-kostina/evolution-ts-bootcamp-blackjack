@@ -77,7 +77,7 @@ export class BetCanvasElement extends TransformNode implements IBetCanvasElement
                 this._chipsStack.push(chip);
                 chip.finalPosition = new Vector3(
                     this.position.x + (Math.random() * 0.08 - 0.05) - betTextblockSize.width,
-                    (Math.random() * 0.08 - 0.05),
+                    (Math.random() * 0.08 - 0.05) + 0.06,
                     this.position.z - this._chipsStack.length * chipSize.height * 1.1);
 
                 await chip.animate(ChipAnimation.Add);

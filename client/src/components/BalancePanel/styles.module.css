@@ -1,15 +1,10 @@
 .balanceContainer {
-  /* width: var(--balanceContainerWidth); */
   height: 100%;
 
   position: relative;
 
   display: flex;
   align-items: center;
-
-  /* background-color: #18181A; */
-
-  /* border-radius: 5px; */
 
   color: #ffffff;
 }
@@ -21,7 +16,6 @@
   padding: 0px 15px;
 
   display: flex;
-  /* flex-direction: column; */
   justify-content: space-around;
 }
 
@@ -34,8 +28,11 @@
   margin-right: 15px;
 }
 
+.amount:last-child {
+  margin-right: 0px;
+}
+
 .amountKey {
-  /* width: 50%; */
   flex: 0 0 50%;
 }
 
@@ -67,4 +64,28 @@
   display: flex;
 
   border: 3px solid red;
+}
+
+@media screen and (max-width: 768px),
+screen and (max-height: 580px) {
+  .balanceContainer {
+    width: 100%;
+  }
+  .amount {
+    flex-direction: row;
+    align-items: center;
+
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .amount {
+    font-size: 12px;
+    margin-right: 2px;
+  }
+
+  .inner {
+    padding: 0px 2px;
+  }
 }

@@ -1,15 +1,21 @@
 import React from "react";
 import { WithModalProps, withModal } from "../hoc/withModal";
+import styles from "../styles.module.css";
 
 interface OkCloseNotificationProps extends WithModalProps {
     text: string;
+    handleOkClick: () => void;
 }
-const OkCloseNotification = ({ onClose, text }: OkCloseNotificationProps) => {
+const OkCloseNotification = ({ onClose, text, handleOkClick }: OkCloseNotificationProps) => {
+    const handleClick = () => {
+        handleOkClick();
+        onClose();
+    };
     return (
-        <div>
-            <div>{text}</div>
-            <button onClick={onClose}>Ok</button>
-        </div>
+        <>
+            <div className={styles.text}>{text}</div>
+            <button className={styles.btnAnswer} onClick={handleClick}>Ok</button>
+        </>
     );
 };
 

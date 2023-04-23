@@ -5,6 +5,7 @@
   left: 50%;
   transform: translateX(-50%);
   width: 55%;
+  min-width: 460px;
   height: 60px;
   border: solid var(--controlPanelBorder) transparent;
   border-top-left-radius: 45px;
@@ -125,15 +126,15 @@
 }
 
 .imgContainerInner svg {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 .textContainer {
   position: absolute;
   bottom: -18px;
 
-  width: var(--controlItemWidth);
+  width: 100%;
   height: var(--controlItemTextHeight);
 
   display: flex;
@@ -165,13 +166,71 @@
   background-origin: border-box;
   background-clip: padding-box, border-box;
 
+  font-size: 16px;
   color: #ffffff;
   text-transform: uppercase;
 }
 
-@media screen and (max-width: 1024px) {
+@media screen and (max-width: 1024px), screen and (max-height: 820px) {
+  .actionsPanel {
+    top: -45px;
+    height: 45px;
+  }
   .controlItem {
-    width: var(--controlItemWidth) / 1.5;
-    height: var(--controlItemWidth) / 1.5;
+    width: 75px;
+    height: 75px;
+  }
+
+  .imgContainer {
+    width: 75px;
+    height: 75px;
+  }
+
+  .imgContainerInner {
+    width: calc((75px - 2 * var(--controlItemImgBorder)) / 1.4);
+    height: calc((75px - 2 * var(--controlItemImgBorder)) / 1.4);
+  }
+
+  .textContainer {
+    font-size: 12px;
+    width: 100%;
+  }
+}
+
+@media screen and (max-height: 580px) {
+  /* .actionsPanel {
+        top: -55px;
+        height: 55px;
+    } */
+}
+@media screen and (max-width: 480px), screen and (max-height: 580px) {
+  .actionsPanel {
+    width: 100%;
+    top: -30px;
+    height: 30px;
+    min-width: 320px;
+  }
+
+  .inner {
+    top: -18px;
+  }
+  .textContainer {
+    display: none;
+  }
+
+  .controlItem {
+    width: 55px;
+    height: 55px;
+    margin: 0px 2px;
+  }
+
+  .imgContainer {
+    width: 55px;
+    height: 55px;
+  }
+
+  .imgContainerInner {
+    width: calc((55px - 2 * var(--controlItemImgBorder)) / 1.4);
+    height: calc((55px - 2 * var(--controlItemImgBorder)) / 1.4);
   }
 }

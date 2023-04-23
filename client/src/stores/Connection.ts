@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { makeAutoObservable } from "mobx";
 import { io, Socket } from "socket.io-client";
 import { Game } from "./Game";
@@ -12,14 +10,15 @@ import {
 } from "../types/socket.types";
 import { RoomID } from "../types/game.types";
 import { ResponseQueue } from "./ResponseHandlerQueue";
+import { NotificationVariant } from "../types/notification.types";
 
 export class Connection {
-    private _socket: Socket<ServerToClientEvents, ClientToServerEvents>;
     private _status: SocketStatus = SocketStatus.Waiting;
     private _connectionErrorCounter = 0;
-    private _game: Game;
     private _connectionID: string | null = null;
     private _roomID: RoomID | null = null;
+    private readonly _socket: Socket<ServerToClientEvents, ClientToServerEvents>;
+    private readonly _game: Game;
     private readonly _responseHandlerQueue: ResponseQueue;
 
     public constructor(serverURL: string, game: Game) {
@@ -34,25 +33,39 @@ export class Connection {
 
         this._socket.on("connect", () => {
             this._connectionErrorCounter = 0;
-            this._status = SocketStatus.Connected;
+            this.status = SocketStatus.Connected;
             this._connectionID = this._socket.id;
             this._game.playerID = this._socket.id;
         });
 
         this._socket.on("disconnect", () => {
-            this._status = SocketStatus.Disconnected;
+            this.status = SocketStatus.Disconnected;
+            this._game.handleNotificate({
+                ok: true,
+                payload: { variant: NotificationVariant.Disconnection, text: "Ooops! Server was disconnected" },
+                statusText: "ok",
+            });
         });
 
         this._socket.on("connect_error", () => {
             this._connectionErrorCounter++;
             if (this._connectionErrorCounter > errorConncetionNumLimit) {
-                this._status = SocketStatus.WithError;
+                this.status = SocketStatus.WithError;
+                this._socket.disconnect();
+                this._game.handleNotificate({
+                    ok: true,
+                    payload: { variant: NotificationVariant.Disconnection, text: "Ooops! Can't reach server" },
+                    statusText: "ok",
+                });
             }
         });
 
         this._socket.on("initGame", (response) => {
-            this._roomID = response.payload.game.roomID;
-            this._game.roomID = this._roomID;
+            if (response.ok) {
+                this.status = SocketStatus.Initialized;
+                this._roomID = response.payload.game.roomID;
+                this._game.roomID = this._roomID;
+            }
             this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleInitGame(response);
             });
@@ -132,16 +145,16 @@ export class Connection {
         return this._roomID;
     }
 
-    public get isFailed(): boolean {
-        return this._status === "error" || this._status === "disconnected";
-    }
-
-    public get isWaiting(): boolean {
-        return this._status === "waiting";
+    public get isInitialized(): boolean {
+        return this._status === SocketStatus.Initialized;
     }
 
     public get status(): SocketStatus {
         return this._status;
+    }
+
+    public set status(value: SocketStatus) {
+        this._status = value;
     }
 
     public sendRequest<Event extends keyof ClientToServerEvents>(

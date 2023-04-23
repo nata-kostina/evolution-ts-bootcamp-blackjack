@@ -9,7 +9,7 @@ interface YesNoNotificationProps extends WithModalProps {
     onClose: () => void;
 }
 
-export const YesNoNotification = ({ text, handleAnswer, onClose }: YesNoNotificationProps) => {
+const YesNoNotification = ({ text, handleAnswer, onClose }: YesNoNotificationProps) => {
     const handleClick = (response: YesNoAcknowledgement) => {
         handleAnswer(response);
         onClose();

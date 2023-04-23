@@ -16,7 +16,7 @@ import {
     getRemoveCardAnimation,
     getUnholeCardAnimation,
 } from "../utils/animation/card.animation";
-import { assertUnreachable } from "../../utils/assertUnreachable";
+import { assertUnreachable } from "../../utils/general/assertUnreachable";
 import { isHoleCard } from "../../utils/gameUtils/isHoleCard";
 import { CardAnimation } from "../../types/canvas.types";
 import { Card, HoleCard } from "../../types/game.types";
@@ -162,6 +162,4 @@ export class CardCanvasElement {
     public setParent(parent: TransformNode): void {
         this.skin.parent = parent;
     }
-
-    private async boot(): Promise<void> {}
 }

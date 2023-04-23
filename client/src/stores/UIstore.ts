@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { makeAutoObservable, toJS } from "mobx";
+import { makeAutoObservable } from "mobx";
 import {
     Action,
     AvailableActions,
@@ -54,15 +53,11 @@ export class UIStore {
             },
         };
 
-    // private _betEditBtnsState = { isVisible: true, isDisabled: true };
     private _betHistory: Array<number> = [];
-
     private _helperTarget: Array<Action> = [];
-
     private _currentModal: Notification | null = null;
     private _modalQueue: Array<Notification> = [];
     private _isModalShown = false;
-
     private _betElement: IBetCanvasElement | null = null;
 
     public constructor() {
@@ -114,10 +109,6 @@ export class UIStore {
     } {
         return this._actionBtnsState[btn];
     }
-
-    // public isBetEditBtnDisabled(): boolean {
-    //     return this._betEditBtnsState.isDisabled;
-    // }
 
     public togglePlaceBetBtnDisabled(value: boolean): void {
         this._actionBtnsState.bet.isDisabled = value;

@@ -13,9 +13,14 @@ export function withModal<P extends WithModalProps = WithModalProps>(Component: 
             <Modal
                 isOpen={isOpen}
                 shouldCloseOnOverlayClick={false}
-                contentLabel="Example Modal"
                 shouldCloseOnEsc={false}
                 className={styles.modal}
+                data-testid="modal"
+                style={{
+                    overlay: {
+                        zIndex: "1000",
+                    },
+                }}
             >
                 <div className={styles.inner}>
                     <Component {...props as P} />

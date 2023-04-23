@@ -17,7 +17,7 @@ export const handSchema = object().shape({
     parentID: string().required(),
     cards: array().of(cardSchema).required(),
     bet: number().required(),
-    points: number().required(),
+    points: array().of(number().required()).required(),
 });
 
 export const playerSchema = object().shape({

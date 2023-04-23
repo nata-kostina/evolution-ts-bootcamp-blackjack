@@ -5,7 +5,7 @@ import { PlayerActionsPanel } from "../PlayerActionsPanel/PlayerActionsPanel";
 
 export const ControlPanel = () => {
     return (
-        <div className={styles.controlPanel}>
+        <div className={styles.controlPanel} data-testid="controlPanel">
             <div className={styles.inner}>
                 <BalancePanel />
                 <PlayerActionsPanel />

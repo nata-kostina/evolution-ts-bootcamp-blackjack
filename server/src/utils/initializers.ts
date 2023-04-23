@@ -38,7 +38,7 @@ export function initializeHand(parentID: string): Hand {
     cards: [],
     handID: v4(),
     parentID,
-    points: 0,
+    points: [0],
     isStanding: false,
   };
 }

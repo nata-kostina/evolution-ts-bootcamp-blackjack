@@ -20,7 +20,7 @@ import { chipRadius } from "../../constants/canvas.constants";
 import { ChipItem } from "../../types/game.types";
 import { ChipAnimation } from "../../types/canvas.types";
 import { getChipAnimation } from "../utils/animation/chip.animation";
-import { assertUnreachable } from "../../utils/assertUnreachable";
+import { assertUnreachable } from "../../utils/general/assertUnreachable";
 
 export class BetChipCanvasElement extends Mesh {
     private readonly scene: Scene;
@@ -48,15 +48,6 @@ export class BetChipCanvasElement extends Mesh {
         this._skin.material = chipMaterial;
 
         this._skin.rotation.x = -Math.PI * 0.5;
-
-        // this.position = parentChipPosition;
-        // console.log("parentChipPosition: ", parentChipPosition);
-        // this.position = new Vector3(parentChipPosition.x, parentChipPosition.y + 0.01, parentChipPosition.z);
-
-        // const localAxes = new AxesViewer(this.scene, 1);
-        // localAxes.xAxis.parent = this;
-        // localAxes.yAxis.parent = this;
-        // localAxes.zAxis.parent = this;
     }
 
     public get chipValue(): number {

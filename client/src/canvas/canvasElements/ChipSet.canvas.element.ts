@@ -34,9 +34,8 @@ export class ChipSetCanvasElement implements CanvasElement {
     public update(matrix: GameMatrix): void {
         this._position = getPositionFromMatrix(matrix, "chips");
         this.chipSet.forEach((chip, idx) => {
-            const x = this._position.x;
             chip.update(new Vector3(
-                this._position.x,
+                this._position.x - chipRadius * 2,
                 this._position.y - idx * chipRadius * 2 * 1.1,
                 0,
             ));
@@ -45,7 +44,7 @@ export class ChipSetCanvasElement implements CanvasElement {
 
     public addContent(): void {
         for (let j = 0; j < chipSet.length; j++) {
-            const x = this._position.x;
+            const x = this._position.x - chipRadius * 2;
             const y = this._position.y - j * chipRadius * 2 * 1.1;
             const z = this._position.z;
             const chip = new ChipCanvasElement(this.scene, new Vector3(x, y, z), chipSet[j], this.controller);
