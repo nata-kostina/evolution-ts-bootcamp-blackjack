@@ -288,7 +288,7 @@ export class SinglePlayerController implements Controller {
       });
 
       const deck2 = this._gameStore.getDeck(roomID);
-      const { card: card2, updatedDeck: updatedDeck2 } = CardsHandler.takeCardFromDeck(deck);
+      const { card: card2, updatedDeck: updatedDeck2 } = CardsHandler.takeCardFromDeck(deck2);
       this._gameStore.updateDeck({ roomID, deck: updatedDeck2 });
       //   const mockCard2 = { id: 'sjfajo;', suit: Suit.Clubs, value: CardValue.FOUR };
       const hand2 = this._gameStore.getHand({ roomID, playerID, handID: newHand.handID });
@@ -447,11 +447,11 @@ export class SinglePlayerController implements Controller {
 
   private async dealCards({ playerID, roomID }: SpecificID): Promise<void> {
     try {
-      await this.dealPlayerCard({ roomID, playerID });
-      await this.dealDealerCard(roomID);
-      await this.dealPlayerCard({ roomID, playerID });
-      await this.dealDealerHoleCard(roomID);
-      // await this.dealMockCards({ playerID, roomID });
+    //   await this.dealPlayerCard({ roomID, playerID });
+    //   await this.dealDealerCard(roomID);
+    //   await this.dealPlayerCard({ roomID, playerID });
+    //   await this.dealDealerHoleCard(roomID);
+      await this.dealMockCards({ playerID, roomID });
     } catch (error: unknown) {
       throw new Error(isError(error) ? error.message : `${playerID}: Failed to deal cards`);
     }
@@ -772,8 +772,8 @@ export class SinglePlayerController implements Controller {
         const deck = this._gameStore.getDeck(roomID);
         const { card, updatedDeck } = CardsHandler.takeCardFromDeck(deck);
         this._gameStore.updateDeck({ roomID, deck: updatedDeck });
-        // const mockCard = { id: 'sodjh', suit: Suit.Hearts, value: CardValue.FIVE };
-        this._gameStore.updateDealer({ roomID, payload: { cards: [card] } });
+        const mockCard = { id: 'sodjh', suit: Suit.Hearts, value: CardValue.ACE };
+        this._gameStore.updateDealer({ roomID, payload: { cards: [mockCard] } });
         dealerPoints = this._gameStore.getDealer(roomID).points;
         await this._respondManager.respondWithDelay({
           roomID,
@@ -781,7 +781,7 @@ export class SinglePlayerController implements Controller {
           response: [
             successResponse<DealDealerCard>({
               target: 'dealer',
-              card,
+              card: mockCard,
               points: dealerPoints,
             }),
           ],
@@ -1051,7 +1051,7 @@ export class SinglePlayerController implements Controller {
       ],
     });
 
-    const card2 = { id: '1faf', suit: Suit.Clubs, value: CardValue.TEN };
+    const card2 = { id: '1faf', suit: Suit.Clubs, value: CardValue.ACE };
     this._gameStore.updateDealer({
       roomID,
       payload: {
@@ -1094,7 +1094,7 @@ export class SinglePlayerController implements Controller {
       ],
     });
 
-    const card4 = { id: 'wegtq', suit: Suit.Clubs, value: CardValue.SEVEN };
+    const card4 = { id: 'wegtq', suit: Suit.Clubs, value: CardValue.FIVE };
     this._gameStore.updateDealer({
       roomID,
       payload: {

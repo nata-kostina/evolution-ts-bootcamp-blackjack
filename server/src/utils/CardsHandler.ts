@@ -7,7 +7,7 @@ type Handler = {
   canDouble: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => boolean;
   canSplit: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => boolean;
   canPlaceInsurance: ({ playerID, roomID, store }: SpecificID & { store: IStore }) => boolean;
-  getPointsSum: (cards: Card[]) => Array<number>;
+  getPlayerPoints: (cards: Card[]) => Array<number>;
   getDealerPoints: (cards: Card[]) => number;
 };
 
@@ -85,7 +85,7 @@ export const CardsHandler: Handler = {
     }
   },
 
-  getPointsSum(cards: Card[]): Array<number> {
+  getPlayerPoints(cards: Card[]): Array<number> {
       if (cards.length === 2) {
         const [first, second] = cards;
         if (
@@ -125,20 +125,21 @@ export const CardsHandler: Handler = {
   getDealerPoints(cards: Card[]): number {
     const aces = cards.filter((card) => card.value === CardValue.ACE);
     if (aces.length > 0) {
-      const acesSum = aces.reduce((sum, card, index) => {
-        if (index === 0) {
-          sum += 11;
-        } else {
-          sum += 1;
-        }
-        return sum;
-      }, 0);
+        const acesSums = [aces.length, PointsMap[CardValue.ACE] + aces.length - 1];
       const nonAces = cards.filter((card) => card.value !== CardValue.ACE);
       const nonAcesSum = nonAces.reduce((sum, card) => {
         sum += PointsMap[card.value];
         return sum;
       }, 0);
-      return nonAcesSum + acesSum;
+
+      const minorSum = nonAcesSum + acesSums[0];
+      const majorSum = nonAcesSum + acesSums[1];
+
+      if (majorSum > TWENTY_ONE) {
+        return minorSum;
+      } else {
+        return majorSum;
+      }
     }
     return cards.reduce((sum, card) => {
       sum += PointsMap[card.value];

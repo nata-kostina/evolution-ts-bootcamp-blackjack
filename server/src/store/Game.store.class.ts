@@ -165,7 +165,7 @@ class Store implements IStore {
     try {
       const hand = this.getHand({ playerID, roomID, handID });
       const player = this.getPlayer({ playerID, roomID });
-      const updatedPoints = payload.cards ? CardsHandler.getPointsSum(payload.cards) : hand.points;
+      const updatedPoints = payload.cards ? CardsHandler.getPlayerPoints(payload.cards) : hand.points;
       const updatedHand: Hand = {
         ...hand,
         ...payload,

@@ -20,14 +20,6 @@ export class AssetsLoader {
         Object.keys(assetsSrc).forEach((key) => {
             this.assetsManager.addTextureTask(key, assetsSrc[key as keyof typeof assetsSrc]);
         });
-        // chipSet.forEach((obj) => {
-        //     const img = this.assetsManager.addTextureTask(obj.name, obj.img);
-        //     img.onSuccess = (t) => {
-        //         this._textures[t.name] = t.texture;
-        //     };
-        // });
-        // this.assetsManager.addTextureTask(obj.name, Rules);
-
         return this.assetsManager.loadAsync();
     }
 }

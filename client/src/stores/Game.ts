@@ -155,16 +155,8 @@ export class Game {
                 case NotificationVariant.Blackjack:
                     this._scene?.addBlackjackNotification();
                     break;
-                case NotificationVariant.StandOrTakeMoney:
-                    this._ui.addModal(notification);
-                    break;
-                case NotificationVariant.Disconnection:
-                    this._ui.addModal(notification);
-                    break;
-                case NotificationVariant.GameError:
-                    this._ui.addModal(notification);
-                    break;
                 default:
+                    this._ui.addModal(notification);
                     break;
             }
         });
