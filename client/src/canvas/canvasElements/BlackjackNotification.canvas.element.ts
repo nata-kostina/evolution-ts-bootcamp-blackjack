@@ -46,7 +46,7 @@ export class BlackjackNotificationCanvasElement {
             0,
             frameRate,
             false,
-            this.scene.getAnimationRatio(),
+            1,
 () => {
     textMesh.dispose();
 });

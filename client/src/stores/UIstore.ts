@@ -90,6 +90,10 @@ export class UIStore {
         return this._isModalShown;
     }
 
+    public set isModalShown(value: boolean) {
+        this._isModalShown = value;
+    }
+
     public set betElement(element: IBetCanvasElement) {
         this._betElement = element;
     }

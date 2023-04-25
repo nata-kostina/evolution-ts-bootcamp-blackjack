@@ -68,7 +68,7 @@ export class BetChipCanvasElement extends Mesh {
             0,
             frameRate,
             false,
-            this.scene.getAnimationRatio() * animationSpeed,
+            animationSpeed,
             () => {
                 if (onFinish) {
                     onFinish();

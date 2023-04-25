@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { WithModalProps, withModal } from "../hoc/withModal";
+import styles from "../styles.module.css";
 
 interface DisappearingNotificationProps extends WithModalProps {
     text: string;
@@ -16,7 +17,7 @@ const DisappearingNotification = ({ onClose, text, timer = 1000 }: DisappearingN
     }, []);
     return (
         <div>
-            <div>{text}</div>
+            <div className={styles.text}>{text}</div>
         </div>
     );
 };

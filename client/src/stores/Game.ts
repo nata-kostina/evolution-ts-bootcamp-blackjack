@@ -71,7 +71,7 @@ export class Game {
             const session = await gameSessionSchema.validate(response.payload.game);
             const id = await playerIDSchema.validate(response.payload.playerID);
             this.playerID = id;
-
+            console.log(session.players);
             const player = pickPlayerInstance({
                 playerID: id,
                 players: session.players,
@@ -79,6 +79,7 @@ export class Game {
 
             if (player) {
                 const validatedPlayer = await playerSchema.validate(player);
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const validatedActiveHand = await handSchema.validate(
                     validatedPlayer.hands.find(
                             (hand) => hand.handID === player.activeHandID,
@@ -91,7 +92,8 @@ export class Game {
                 this._roomID = session.roomID;
                 this._ui.player = validatedPlayer;
                 this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
-                this._scene?.init(validatedActiveHand.handID);
+                this._scene?.init(validatedPlayer.playerID, session.players);
+                // this._scene?.init(validatedActiveHand.handID);
             }
         });
     }
@@ -113,8 +115,10 @@ export class Game {
             if (player) {
                 const validatedPlayer = await playerSchema.validate(player);
                 this._session = session;
+                console.log("handleUpdateGameSession session: ", session);
                 this._ui.player = validatedPlayer;
                 this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
+                this._scene?.updateSession(session.players);
             }
         });
     }
@@ -136,10 +140,12 @@ export class Game {
             if (player) {
                 const validatedPlayer = await playerSchema.validate(player);
                 this._session = session;
+                console.log("handlePlaceBet session: ", session);
                 this._ui.player = validatedPlayer;
                 this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
                 this._ui.toggleVisibleActionBtnsDisabled(true);
                 this._scene?.toggleChipAction(false);
+                // this._scene?.updateSession(session.players);
             }
         });
     }
@@ -154,6 +160,14 @@ export class Game {
             switch (notification.variant) {
                 case NotificationVariant.Blackjack:
                     this._scene?.addBlackjackNotification();
+                    break;
+                case NotificationVariant.PlaceBet:
+                    if (this._ui.isModalShown) {
+                        console.log("this._ui.isModalShown = false;");
+                        this._ui.isModalShown = false;
+                        this._ui.modalQueue.pop();
+                    }
+                    this._ui.addModal(notification);
                     break;
                 default:
                     this._ui.addModal(notification);

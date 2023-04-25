@@ -99,7 +99,7 @@ export class CardCanvasElement {
                     0,
                     frameRate,
                     false,
-                    this.scene.getAnimationRatio() * animationSpeed,
+                    animationSpeed,
                 );
                 await dealAnim.waitAsync();
                 if (!this.isHoleCard) {
@@ -117,7 +117,7 @@ export class CardCanvasElement {
                     0,
                     removeFR,
                     false,
-                    this.scene.getAnimationRatio() * animationSpeed,
+                    animationSpeed,
                     () => this.skin.dispose(),
                 );
                 await removeAnim.waitAsync();
@@ -131,7 +131,7 @@ export class CardCanvasElement {
                     0,
                     FRUnhole,
                     false,
-                    this.scene.getAnimationRatio() * animationSpeed,
+                    animationSpeed,
                     () => {
                         if (onFinish) {
                             onFinish();

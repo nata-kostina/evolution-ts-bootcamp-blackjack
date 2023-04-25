@@ -94,6 +94,7 @@ export type DealPlayerCard = {
     card: Card;
     points: Array<number>;
     handID: string;
+    playerID: PlayerID;
 };
 
 export enum GameResult {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BackgroundMaterial, CreateGround, Scene, Texture, Vector3 } from "@babylonjs/core";
 import { PlayerSeatCanvasElement } from "./PlayerSeat.canvas.element";
 import { DealerSeatCanvasElement } from "./DealerSeat.canvas.element copy";
@@ -10,6 +11,7 @@ import {
     DealDealerCard,
     DealPlayerCard,
     GameResult,
+    PlayerInstance,
 } from "../../types/game.types";
 // eslint-disable-next-line import/no-unassigned-import
 import "@babylonjs/loaders/glTF";
@@ -17,7 +19,8 @@ import { HelperCanvasElement } from "./Helper.canvas.element";
 import { assetsSrc } from "../../constants/assets.constants";
 
 export class SceneManager {
-    public playerSeat: PlayerSeatCanvasElement;
+    public playerSeats: Array<PlayerSeatCanvasElement> = [];
+    // public playerSeat: PlayerSeatCanvasElement;
     public dealerSeat: DealerSeatCanvasElement;
     public chipSet: ChipSetCanvasElement;
     private readonly scene: Scene;
@@ -33,13 +36,13 @@ export class SceneManager {
         this.scene = scene;
         this.gameMatrix = matrix;
         this.controller = controller;
-        this.playerSeat = new PlayerSeatCanvasElement(scene, matrix);
+        // this.playerSeat = new PlayerSeatCanvasElement(scene, matrix);
         this.dealerSeat = new DealerSeatCanvasElement(scene, matrix);
         this.chipSet = new ChipSetCanvasElement(scene, matrix, controller);
         this._helper = new HelperCanvasElement(scene, Vector3.Zero());
         this._helper.skin.isVisible = false;
 
-        this.gameMatrix.addSubscriber([this.chipSet, this.playerSeat, this.dealerSeat]);
+        this.gameMatrix.addSubscriber([this.chipSet, this.dealerSeat]);
     }
 
     public addContent(): void {
@@ -55,13 +58,38 @@ export class SceneManager {
         ground.rotation.x = -Math.PI * 0.5;
 
         this.chipSet.addContent();
-        this.playerSeat.addContent();
+        // this.playerSeat.addContent();
     }
 
-    public init(activeHand: string): void {
+    // public init(activeHand: string): void {
+    //     this.resetScene();
+    //     this.toggleChipAction(true);
+    //     this.addInitialHand(activeHand);
+    // }
+
+    public init(playerID: string, players: Record<string, PlayerInstance>): void {
         this.resetScene();
+        const playersIds = Object.keys(players);
+
+        playersIds.forEach((id, index) => {
+            const x = (index + 1) / (playersIds.length + 1) * this.gameMatrix.matrixWidth - this.gameMatrix.matrixWidth * 0.5;
+            const position = new Vector3(x, 0, 0);
+            const seat = new PlayerSeatCanvasElement(this.scene, position, id);
+            seat.addContent();
+            this.playerSeats.push(seat);
+
+            const player = players[id];
+            const initialHandElement = seat.addHand(player.activeHandID);
+            if (playerID === id) {
+                this.controller.setBetElement(initialHandElement.betElement);
+            }
+        });
         this.toggleChipAction(true);
-        this.addInitialHand(activeHand);
+    }
+
+    public updateSession(players: Record<string, PlayerInstance>): void {
+        const playersIds = Object.keys(players);
+        this.playerSeats.forEach((seat) => seat.updateSeat(players[seat.playerID]));
     }
 
     public toggleChipAction(register: boolean): void {
@@ -69,7 +97,12 @@ export class SceneManager {
     }
 
     public async dealPlayerCard(newCard: DealPlayerCard): Promise<void> {
-        await this.playerSeat.dealCard(newCard);
+        // await this.playerSeat.dealCard(newCard);
+        const seat = this.playerSeats.find((_seat) => _seat.playerID === newCard.playerID);
+        console.log({ playerID: newCard.playerID, seatPosition: seat?.position });
+        if (seat) {
+            await seat.dealCard(newCard);
+        }
     }
 
     public async dealDealerCard(newCard: DealDealerCard): Promise<void> {
@@ -82,12 +115,12 @@ export class SceneManager {
         bet,
         points,
     }: SplitParams): Promise<void> {
-        await this.playerSeat.split({ oldHandID, newHandID, bet, points });
-        const hand = this.playerSeat.getHand(oldHandID);
-        if (hand) {
-            this._helper.update(hand.position);
-            this._helper.skin.isVisible = true;
-        }
+        // await this.playerSeat.split({ oldHandID, newHandID, bet, points });
+        // const hand = this.playerSeat.getHand(oldHandID);
+        // if (hand) {
+        //     this._helper.update(hand.position);
+        //     this._helper.skin.isVisible = true;
+        // }
     }
 
     public addBlackjackNotification(): void {
@@ -101,29 +134,30 @@ export class SceneManager {
     }
 
     public async removeHand(handID: string, result: GameResult): Promise<void> {
-        await this.playerSeat.removeHand(handID, result);
+        // await this.playerSeat.removeHand(handID, result);
     }
 
     public updateHelper({ handId }: { handId: string; }): void {
-        const hand = this.playerSeat.getHand(handId);
-        if (hand) {
-            this._helper.update(hand.position);
-            this._helper.skin.isVisible = true;
-        }
+        // const hand = this.playerSeat.getHand(handId);
+        // if (hand) {
+        //     this._helper.update(hand.position);
+        //     this._helper.skin.isVisible = true;
+        // }
     }
 
     public async resetScene(): Promise<void> {
+        this.playerSeats.forEach((seat) => { seat.reset(); seat.dispose(); });
         this.dealerSeat.reset();
         this.toggleChipAction(false);
         this._helper.skin.isVisible = false;
-        this.playerSeat.reset();
+        // this.playerSeat.reset();
     }
 
     private addInitialHand(handID: string): void {
-        this.playerSeat.addHand(handID);
-        const initialHandElement = this.playerSeat.getHand(handID);
-        if (initialHandElement) {
-            this.controller.setBetElement(initialHandElement.betElement);
-        }
+        // this.playerSeat.addHand(handID);
+        // const initialHandElement = this.playerSeat.getHand(handID);
+        // if (initialHandElement) {
+        // this.controller.setBetElement(initialHandElement.betElement);
+        // }
     }
 }

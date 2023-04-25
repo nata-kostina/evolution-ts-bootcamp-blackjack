@@ -8,7 +8,7 @@ import {
     ChipAnimation,
     HandAnimation,
 } from "../../types/canvas.types";
-import { Bet, DealPlayerCard, GameResult } from "../../types/game.types";
+import { Bet, DealPlayerCard, GameResult, Hand } from "../../types/game.types";
 import { CardCanvasElement } from "./Card.canvas.element";
 import { getSplitHandAnimation } from "../utils/animation/hand.animation";
 import { PointsCanvasElement } from "./Points.canvas.element";
@@ -49,6 +49,10 @@ export class HandCanvasElement extends TransformNode {
 
     public get handID(): string {
         return this._handID;
+    }
+
+    public updateHand(hand: Hand): void {
+        this._betElement.updateBet(hand.bet);
     }
 
     public async dealCard(newCard: DealPlayerCard): Promise<void> {
@@ -121,7 +125,7 @@ export class HandCanvasElement extends TransformNode {
                 0,
                 frameRate,
                 false,
-                this.scene.getAnimationRatio() * animationSpeed,
+                animationSpeed,
                 () => {
                     if (onFinish) {
                         onFinish();

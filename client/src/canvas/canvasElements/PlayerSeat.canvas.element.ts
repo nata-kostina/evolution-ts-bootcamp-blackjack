@@ -1,38 +1,59 @@
-import { Scene, GroundMesh, MeshBuilder, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
+import {
+    Scene,
+    GroundMesh,
+    MeshBuilder,
+    StandardMaterial,
+    Texture,
+    Vector3,
+} from "@babylonjs/core";
 import { CanvasElement, GameMatrix } from "../GameMatrix";
 import { HandCanvasElement } from "./Hand.canvas.element";
-import { DealPlayerCard, GameResult } from "../../types/game.types";
+import {
+    DealPlayerCard,
+    GameResult,
+    PlayerID,
+    PlayerInstance,
+} from "../../types/game.types";
 import { HandAnimation, SplitParams } from "../../types/canvas.types";
 import { seatSize } from "../../constants/canvas.constants";
 import { assetsSrc } from "../../constants/assets.constants";
 import { getPositionFromMatrix } from "../utils/getPositionFromMatrix";
 
-export class PlayerSeatCanvasElement extends GroundMesh implements CanvasElement {
+export class PlayerSeatCanvasElement
+    extends GroundMesh
+    implements CanvasElement {
     protected readonly scene: Scene;
+    protected readonly _playerID: PlayerID;
     private hands: Array<HandCanvasElement> = [];
     private _activeHand: HandCanvasElement | null = null;
     private readonly _seat: GroundMesh;
 
-    public constructor(scene: Scene, matrix: GameMatrix) {
+    public constructor(scene: Scene, position: Vector3, playerID: PlayerID) {
         super(`player-seat`, scene);
         this.scene = scene;
+        this._playerID = playerID;
         this._seat = MeshBuilder.CreateGround(
-            `player-seat`,
-            {
-                width: seatSize.width,
-                height: seatSize.height,
-            },
-            this.scene,
+      `player-seat`,
+      {
+          width: seatSize.width,
+          height: seatSize.height,
+      },
+      this.scene,
         );
         this._seat.setParent(this);
-        this.position = getPositionFromMatrix(matrix, "player-seat");
+        // this.position = getPositionFromMatrix(matrix, "player-seat");
+        this.position = position;
         this.rotation.x = -Math.PI * 0.5;
+    }
+
+    public get playerID(): PlayerID {
+        return this._playerID;
     }
 
     public addContent(): void {
         const groundMaterial = new StandardMaterial(
-            `material-player-seat`,
-            this.scene,
+      `material-player-seat`,
+      this.scene,
         );
         const seatTexture = this.scene.getTextureByName(assetsSrc.seat) as Texture;
         groundMaterial.diffuseTexture = seatTexture;
@@ -40,30 +61,45 @@ export class PlayerSeatCanvasElement extends GroundMesh implements CanvasElement
         this._seat.material = groundMaterial;
     }
 
-    public addHand(handID: string): void {
+    public addHand(handID: string): HandCanvasElement {
         const hand = new HandCanvasElement(
             this.scene,
             handID,
             new Vector3().copyFrom(this.position),
         );
         this.hands.push(hand);
+        return hand;
+    }
+
+    public updateSeat(player: PlayerInstance): void {
+        this.hands.forEach((hand) => {
+            const updatedHand = player.hands.find((_h) => _h.handID === hand.handID);
+            if (updatedHand) {
+                hand.updateHand(updatedHand);
+            }
+        });
     }
 
     public set activeHand(handID: string) {
-        this._activeHand = this.hands.find((hand) => hand.handID === handID) || null;
+        this._activeHand =
+      this.hands.find((hand) => hand.handID === handID) || null;
     }
 
     public async dealCard(newCard: DealPlayerCard): Promise<void> {
-        const hand = this.getHand(newCard.handID) || new HandCanvasElement(
-            this.scene,
-            newCard.handID,
-            this._seat.position,
-        );
+        console.log({ playerID: this.playerID, hands: this.hands });
+        const hand =
+      this.getHand(newCard.handID) ||
+      new HandCanvasElement(this.scene, newCard.handID, this._seat.position);
         this.hands.push(hand);
         await hand.dealCard(newCard);
     }
 
-    public async split({ oldHandID, newHandID, bet, points }: SplitParams): Promise<void> {
+    public async split({
+        oldHandID,
+        newHandID,
+        bet,
+        points,
+    }: SplitParams): Promise<void> {
         const hand = this.getHand(oldHandID);
         if (hand) {
             this._activeHand = hand;
@@ -91,7 +127,9 @@ export class PlayerSeatCanvasElement extends GroundMesh implements CanvasElement
                 newHand.animate(HandAnimation.ToRight),
             ]);
 
-            await Promise.all(hand.chipsValue.map((chip) => newHand.betElement.addChip(chip)));
+            await Promise.all(
+                hand.chipsValue.map((chip) => newHand.betElement.addChip(chip)),
+            );
         }
     }
 
@@ -99,7 +137,10 @@ export class PlayerSeatCanvasElement extends GroundMesh implements CanvasElement
         return this.hands.find((element) => element.handID === handID);
     }
 
-    public async removeHand(handID: string, gameResult: GameResult): Promise<void> {
+    public async removeHand(
+        handID: string,
+        gameResult: GameResult,
+    ): Promise<void> {
         const hand = this.getHand(handID);
         if (hand) {
             await hand.remove(gameResult);
