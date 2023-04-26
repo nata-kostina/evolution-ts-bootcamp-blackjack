@@ -24,6 +24,8 @@ import {
   Card,
   GameResult,
   ReassignActiveHand,
+  ClientToServerEvents,
+  ServerToClientEvents,
 } from '../types/index.js';
 import { IResponseManager } from '../utils/responseManager.js';
 import {
@@ -37,7 +39,7 @@ import {
   TWENTY_ONE,
 } from '../constants/index.js';
 import { CardsHandler } from '../utils/CardsHandler.js';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { generatePlayerID } from '../utils/generatePlayerID.js';
 import { initializeHand } from './../utils/initializers.js';
 
@@ -52,12 +54,28 @@ export class SinglePlayerController implements Controller {
     this._respondManager = respondManager;
   }
 
-  public async handleInitGame({ playerID, socket }: { playerID: PlayerID; socket: Socket }): Promise<void> {
+  public async handleInitGame({
+    playerID,
+    socket,
+    io,
+  }: {
+    playerID: PlayerID;
+    socket: Socket;
+    io: Server<ClientToServerEvents, ServerToClientEvents>;
+  }): Promise<void> {
     try {
       const id = playerID || generatePlayerID();
-
+      // const id = `Player_id_${socket.id}`;
       const roomID = this._gameStore.createNewRoom(id);
+
+      const socketRooms = socket.rooms;
+      socketRooms.forEach((room) => {
+        if (room.startsWith('Room_id_')) {
+          socket.leave(room);
+        }
+      });
       socket.join(roomID);
+
 
       if (this._playersStore.isNewPlayer(id)) {
         this._playersStore.updatePlayerBalance({ playerID: id, balance: defaultBalance });
@@ -70,16 +88,14 @@ export class SinglePlayerController implements Controller {
       });
 
       this._gameStore.joinPlayerToGameState({ roomID, player });
+      this._gameStore.startGame(roomID);
 
-      return this._respondManager
-        .respondWithDelay({
-          roomID,
-          event: 'initGame',
-          response: [successResponse({ game: ld.cloneDeep(this._gameStore.getSession(roomID)), playerID: id })],
-        })
-        .catch((error: unknown) => {
-          throw new Error(isError(error) ? error.message : `Socket ${playerID}: Failed to handle game start`);
-        });
+      await this._respondManager.respondWithDelay({
+        roomID,
+        event: 'initGame',
+        response: [successResponse({ game: ld.cloneDeep(this._gameStore.getSession(roomID)), playerID: id })],
+      });
+
     } catch (error: unknown) {
       throw new Error(isError(error) ? error.message : `Socket ${playerID}: Failed to handle game start`);
     }
@@ -283,6 +299,7 @@ export class SinglePlayerController implements Controller {
             target: 'player',
             card,
             points: playerPoints1,
+            playerID,
           }),
         ],
       });
@@ -310,6 +327,7 @@ export class SinglePlayerController implements Controller {
             target: 'player',
             card: card2,
             points: playerPoints2,
+            playerID,
           }),
         ],
       });
@@ -447,10 +465,10 @@ export class SinglePlayerController implements Controller {
 
   private async dealCards({ playerID, roomID }: SpecificID): Promise<void> {
     try {
-    //   await this.dealPlayerCard({ roomID, playerID });
-    //   await this.dealDealerCard(roomID);
-    //   await this.dealPlayerCard({ roomID, playerID });
-    //   await this.dealDealerHoleCard(roomID);
+        // await this.dealPlayerCard({ roomID, playerID });
+        // await this.dealDealerCard(roomID);
+        // await this.dealPlayerCard({ roomID, playerID });
+        // await this.dealDealerHoleCard(roomID);
       await this.dealMockCards({ playerID, roomID });
     } catch (error: unknown) {
       throw new Error(isError(error) ? error.message : `${playerID}: Failed to deal cards`);
@@ -573,6 +591,7 @@ export class SinglePlayerController implements Controller {
             handID: player.activeHandID,
             card,
             points: updatedActiveHand.points,
+            playerID,
           }),
         ],
       });
@@ -597,9 +616,18 @@ export class SinglePlayerController implements Controller {
         playerID,
         payload: {
           balance: updatedBalance,
+          bet: 0,
         },
       });
-      await this.handleHandLose({ roomID, playerID, handID: player.activeHandID });
+      this._gameStore.updateHand({
+        roomID,
+        playerID,
+        handID: player.activeHandID,
+        payload: {
+          bet: 0,
+        },
+      });
+      await this.finishRoundForHand({ roomID, playerID, handID: player.activeHandID, result: GameResult.Win });
     } catch (error: unknown) {
       throw new Error(`Socket ${playerID}: Failed to handle surender`);
     }
@@ -610,7 +638,7 @@ export class SinglePlayerController implements Controller {
       const deck = this._gameStore.getDeck(roomID);
       const { card, updatedDeck } = CardsHandler.takeCardFromDeck(deck);
       this._gameStore.updateDeck({ roomID, deck: updatedDeck });
-    //   const mockCard: Card = { id: 'dofs', suit: Suit.Clubs, value: CardValue.EIGHT };
+        const mockCard: Card = { id: 'dofs', suit: Suit.Clubs, value: CardValue.THREE };
 
       const { handID, cards } = this._gameStore.getActiveHand({ roomID, playerID });
       this._gameStore.updateHand({
@@ -618,7 +646,7 @@ export class SinglePlayerController implements Controller {
         playerID,
         handID,
         payload: {
-          cards: ld.cloneDeep([...cards, card]),
+          cards: ld.cloneDeep([...cards, mockCard]),
         },
       });
 
@@ -631,8 +659,9 @@ export class SinglePlayerController implements Controller {
           successResponse<DealPlayerCard>({
             handID,
             target: 'player',
-            card: card,
+            card: mockCard,
             points: playerPoints,
+            playerID,
           }),
         ],
       });
@@ -649,7 +678,8 @@ export class SinglePlayerController implements Controller {
               isStanding: true,
             },
           });
-          if (otherHands.length > 0 && otherHands.every((hand) => hand.isStanding)) {
+
+          if ((otherHands.length === 0) || (otherHands.length > 0 && otherHands.every((hand) => hand.isStanding))) {
             await this.checkDealerCombination({ playerID, roomID });
           } else {
             await this.reassignActiveHand({ roomID, playerID });
@@ -918,13 +948,12 @@ export class SinglePlayerController implements Controller {
   }: SpecificID & { handID: string; result: GameResult }): Promise<void> {
     try {
       this._gameStore.removeHand({ handID, playerID, roomID });
-
+      
       await this._respondManager.respond({
         event: 'updateSession',
         roomID,
         response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
       });
-
       await this._respondManager.respondWithDelay({
         event: 'finishRoundForHand',
         roomID,
@@ -975,6 +1004,7 @@ export class SinglePlayerController implements Controller {
           card: card,
           handID: player.activeHandID,
           points: this._gameStore.getScore({ roomID, playerID, handID: player.activeHandID }),
+          playerID,
         }),
       ],
     });
@@ -1047,11 +1077,12 @@ export class SinglePlayerController implements Controller {
           card: card1,
           handID: player.activeHandID,
           points: this._gameStore.getScore({ roomID, playerID, handID: player.activeHandID }),
+          playerID,
         }),
       ],
     });
 
-    const card2 = { id: '1faf', suit: Suit.Clubs, value: CardValue.ACE };
+    const card2 = { id: '1faf', suit: Suit.Clubs, value: CardValue.SIX };
     this._gameStore.updateDealer({
       roomID,
       payload: {
@@ -1071,7 +1102,7 @@ export class SinglePlayerController implements Controller {
       ],
     });
 
-    const card3 = { id: 'ghjr', suit: Suit.Clubs, value: CardValue.SEVEN };
+    const card3 = { id: 'ghjr', suit: Suit.Clubs, value: CardValue.ACE };
     this._gameStore.updateHand({
       playerID: player.playerID,
       roomID,
@@ -1090,6 +1121,7 @@ export class SinglePlayerController implements Controller {
           card: card3,
           handID: player.activeHandID,
           points: this._gameStore.getScore({ roomID, playerID, handID: player.activeHandID }),
+          playerID,
         }),
       ],
     });

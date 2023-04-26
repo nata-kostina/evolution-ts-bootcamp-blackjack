@@ -1,63 +1,68 @@
 import { useConnection } from "../context/ConnectionContext";
 import { useGame } from "../context/GameContext";
-import { Connection } from "../stores/Connection";
-import { Game } from "../stores/Game";
 import { Action, BetAction } from "../types/game.types";
+import { ActionBtn } from "../types/ui.types";
 
 export const useAction = () => {
-    const connection = useConnection() as Connection;
-    const game = useGame() as Game;
+    const connection = useConnection();
+    const game = useGame();
 
-    const handleClick = (action: Action | BetAction) => {
-        const playerID = game.playerID;
-        const roomID = connection.roomID;
+    const handleClick = (actionBtn: ActionBtn) => {
+        const playerID = game?.playerID;
+        const roomID = connection?.roomID;
 
-        if (action === Action.Bet) {
+        if (isPlayerAction(actionBtn, actionBtn.action)) {
             if (playerID && roomID) {
-                const bet = game.UI.bet;
-                if (bet) {
-                    connection.sendRequest<"placeBet">({
-                        event: "placeBet",
+                if (actionBtn.action === Action.Bet) {
+                    const bet = game.UI.bet;
+                    if (bet) {
+                        connection.sendRequest<"placeBet">({
+                            event: "placeBet",
+                            payload: [{
+                                playerID,
+                                bet,
+                                roomID,
+                            }],
+                        });
+                    }
+                } else {
+                    connection.sendRequest<"makeDecision">({
+                        event: "makeDecision",
                         payload: [{
                             playerID,
-                            bet,
+                            action: actionBtn.action,
                             roomID,
                         }],
                     });
                 }
             }
-        }
-
-        if (isPlayerAction(action) && action !== Action.Bet) {
-            if (playerID && roomID) {
-                connection.sendRequest<"makeDecision">({
-                    event: "makeDecision",
-                    payload: [{
-                        playerID,
-                        action,
-                        roomID,
-                    }],
-                });
+            if (actionBtn.action === Action.Double && game?.UI.bet) {
+                game?.UI.addBet(game?.UI.bet);
             }
-            if (action === Action.Double && game.UI.bet) {
-                game.UI.addBet({ value: game.UI.bet });
+            game?.UI.toggleVisibleActionBtnsDisabled(true);
+        } else {
+            if (actionBtn.action === BetAction.Undo) {
+                game?.UI.undoBet();
             }
-            game.UI.toggleVisibleActionBtnsDisabled(true);
-        }
 
-        if (action === BetAction.Undo) {
-            game.UI.undoBet();
-        }
+            if (actionBtn.action === BetAction.Reset) {
+                game?.UI.resetBet();
+            }
 
-        if (action === BetAction.Reset) {
-            game.UI.resetBet();
+            if (actionBtn.action === BetAction.Rebet) {
+                game?.UI.rebet();
+            }
+            if (actionBtn.action === BetAction.AllIn) {
+                game?.UI.allIn();
+            }
         }
     };
     return { handleClick };
 };
 
 export function isPlayerAction(
+    btn: ActionBtn,
     action: Action | BetAction,
 ): action is Action {
-    return action !== BetAction.Undo && action !== BetAction.Reset;
+    return btn.type === "playerAction";
 }

@@ -38,21 +38,21 @@ export class Connection {
             this._game.playerID = this._socket.id;
         });
 
-        this._socket.on("disconnect", () => {
+        this._socket.on("disconnect", async () => {
             this.status = SocketStatus.Disconnected;
-            this._game.handleNotificate({
+            await this._game.handleNotificate({
                 ok: true,
                 payload: { variant: NotificationVariant.Disconnection, text: "Ooops! Server was disconnected" },
                 statusText: "ok",
             });
         });
 
-        this._socket.on("connect_error", () => {
+        this._socket.on("connect_error", async () => {
             this._connectionErrorCounter++;
             if (this._connectionErrorCounter > errorConncetionNumLimit) {
                 this.status = SocketStatus.WithError;
                 this._socket.disconnect();
-                this._game.handleNotificate({
+                await this._game.handleNotificate({
                     ok: true,
                     payload: { variant: NotificationVariant.Disconnection, text: "Ooops! Can't reach server" },
                     statusText: "ok",
@@ -60,76 +60,76 @@ export class Connection {
             }
         });
 
-        this._socket.on("initGame", (response) => {
+        this._socket.on("initGame", async (response) => {
             if (response.ok) {
                 this.status = SocketStatus.Initialized;
                 this._roomID = response.payload.game.roomID;
                 this._game.roomID = this._roomID;
             }
-            this._responseHandlerQueue.enqueue(async () => {
+            await this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleInitGame(response);
             });
         });
 
-        this._socket.on("placeBet", (reponse) => {
-            this._responseHandlerQueue.enqueue(async () => {
+        this._socket.on("placeBet", async (reponse) => {
+            await this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handlePlaceBet(reponse);
             });
         });
 
-        this._socket.on("updateSession", (response) => {
-            this._responseHandlerQueue.enqueue(async () => {
+        this._socket.on("updateSession", async (response) => {
+            await this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleUpdateGameSession(response);
             });
         });
 
-        this._socket.on("dealDealerCard", (reponse) => {
-            this._responseHandlerQueue.enqueue(async () => {
+        this._socket.on("dealDealerCard", async (reponse) => {
+            await this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleDealDealerCard(reponse);
             });
         });
 
-        this._socket.on("dealPlayerCard", (reponse) => {
-            this._responseHandlerQueue.enqueue(async () => {
+        this._socket.on("dealPlayerCard", async (reponse) => {
+            await this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleDealPlayerCard(reponse);
             });
         });
 
-        this._socket.on("notificate", (response) => {
-            this._responseHandlerQueue.enqueue(async () => {
+        this._socket.on("notificate", async (response) => {
+            await this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleNotificate(response);
             });
         });
 
-        this._socket.on("unholeCard", (response) => {
-            this._responseHandlerQueue.enqueue(async () => {
+        this._socket.on("unholeCard", async (response) => {
+            await this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleUnholeCard(response);
             });
         });
 
-        this._socket.on("finishRound", (response) => {
-            this._responseHandlerQueue.enqueue(async () => {
+        this._socket.on("finishRound", async (response) => {
+            await this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleFinishRound(response);
             });
         });
 
-        this._socket.on("split", (response) => {
-            this._responseHandlerQueue.enqueue(async () => {
+        this._socket.on("split", async (response) => {
+            await this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleSplit(response);
             });
         });
-        this._socket.on("finishRoundForHand", (response) => {
-            this._responseHandlerQueue.enqueue(async () => {
+        this._socket.on("finishRoundForHand", async (response) => {
+            await this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleFinishRoundForHand(response);
             });
         });
-        this._socket.on("reassignActiveHand", (response) => {
-            this._responseHandlerQueue.enqueue(async () => {
+        this._socket.on("reassignActiveHand", async (response) => {
+            await this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleReassignActiveHand(response);
             });
         });
-        this._socket.on("makeDecision", (response) => {
-            this._responseHandlerQueue.enqueue(async () => {
+        this._socket.on("makeDecision", async (response) => {
+            await this._responseHandlerQueue.enqueue(async () => {
                 await this._game.handleMakeDecision(response);
             });
         });

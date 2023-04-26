@@ -6,7 +6,6 @@ import styles from "./styles.module.css";
 import { useGame } from "../../context/GameContext";
 import { useAction } from "../../hooks/useAction";
 import { ActionBtn } from "../../types/ui.types";
-import { Game } from "../../stores/Game";
 
 interface Props {
     item: ActionBtn;
@@ -14,14 +13,15 @@ interface Props {
 
 export const PlayerActionButton = observer(({ item }: Props) => {
     const { handleClick } = useAction();
-    const game = useGame() as Game;
-    const btnState = game.UI.getPlayerActionBtnState(item.action);
+    const game = useGame();
+    const btnState = game?.UI.getPlayerActionBtnState(item.action);
+
     return (
-        <>{btnState.isVisible && (
+        <>{btnState?.isVisible && (
             <button
                 type="button"
                 className={styles.controlItem}
-                onClick={() => handleClick(item.action)}
+                onClick={() => handleClick(item)}
                 disabled={btnState.isDisabled}
             >
                 <div className={styles.imgContainer} data-testid="actionIcon">

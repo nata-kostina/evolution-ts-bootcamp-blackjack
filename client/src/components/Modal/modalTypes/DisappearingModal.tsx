@@ -2,11 +2,11 @@ import React, { useEffect } from "react";
 import { WithModalProps, withModal } from "../hoc/withModal";
 
 interface DisappearingNotificationProps extends WithModalProps {
-    text: string;
     timer?: number;
+    children?: JSX.Element;
 }
 
-const DisappearingNotification = ({ onClose, text, timer = 1000 }: DisappearingNotificationProps) => {
+const DisappearingNotification = ({ onClose, timer = 1000, children }: DisappearingNotificationProps) => {
     useEffect(() => {
         const timerID = setTimeout(() => onClose(), timer);
         return () => {
@@ -16,7 +16,7 @@ const DisappearingNotification = ({ onClose, text, timer = 1000 }: DisappearingN
     }, []);
     return (
         <div>
-            <div>{text}</div>
+            {children}
         </div>
     );
 };

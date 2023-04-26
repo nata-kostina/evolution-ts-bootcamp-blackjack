@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 import { makeAutoObservable } from "mobx";
 import { UIStore } from "./UIstore";
 import { pickPlayerInstance } from "../utils/storeUtils/pickPlayerInsrance";
@@ -9,6 +10,7 @@ import {
     RoomID,
     DealDealerCard,
     DealPlayerCard,
+    Action,
 } from "../types/game.types";
 import { Notification, NotificationVariant } from "../types/notification.types";
 import { FinishRoundForHand, ReassignActiveHand, SocketResponse } from "../types/socket.types";
@@ -90,7 +92,8 @@ export class Game {
                 this._session = session;
                 this._roomID = session.roomID;
                 this._ui.player = validatedPlayer;
-                this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
+
+                this._ui.toggleActionBtnsVisible([Action.Bet]);
                 this._scene?.init(validatedActiveHand.handID);
             }
         });
@@ -137,7 +140,6 @@ export class Game {
                 const validatedPlayer = await playerSchema.validate(player);
                 this._session = session;
                 this._ui.player = validatedPlayer;
-                this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
                 this._ui.toggleVisibleActionBtnsDisabled(true);
                 this._scene?.toggleChipAction(false);
             }
@@ -152,9 +154,9 @@ export class Game {
                 response.payload,
             );
             switch (notification.variant) {
-                case NotificationVariant.Blackjack:
-                    this._scene?.addBlackjackNotification();
-                    break;
+                // case NotificationVariant.Blackjack:
+                //     this._scene?.addBlackjackNotification();
+                //     break;
                 default:
                     this._ui.addModal(notification);
                     break;

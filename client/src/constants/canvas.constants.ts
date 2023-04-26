@@ -6,8 +6,8 @@ export const seatSize = {
     height: 0.65,
 };
 export const handSize = seatSize;
-export const betGroundSize = { width: 0.4, height: 0.15 };
-export const betTextblockSize = { width: 0.4, height: 0.25 };
+export const betGroundSize = { width: 0.6, height: 0.15 };
+export const betTextblockSize = { width: 0.4, height: 0.3 };
 export const chipSize = { height: 0.02, diameter: chipRadius * 2 };
 export const cardSize = {
     width: 0.3,

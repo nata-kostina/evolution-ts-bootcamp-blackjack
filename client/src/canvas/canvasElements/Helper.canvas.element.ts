@@ -59,7 +59,7 @@ export class HelperCanvasElement extends Mesh {
                     0,
                     frameRate * 2,
                     true,
-                    this.scene.getAnimationRatio() * animationSpeed * 0.7,
+                    animationSpeed * 0.7,
                     () => {
                         if (onFinish) {
                             onFinish();

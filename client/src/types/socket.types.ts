@@ -2,7 +2,6 @@ import { UnholeCardPayload } from "./canvas.types";
 import { Notification, YesNoAcknowledgement } from "./notification.types";
 import {
     Action,
-    Bet,
     DealPlayerCard,
     GameMode,
     GameSession,
@@ -29,9 +28,9 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-    initGame: ({ playerID, mode }: { playerID: PlayerID | null; mode: GameMode; }) => void;
+    initGame: ({ playerID, mode }: { playerID: PlayerID | null | undefined; mode: GameMode; }) => void;
     takeMoneyDecision: ({ roomID, playerID }: SpecificID & { response: YesNoAcknowledgement; }) => void;
-    placeBet: ({ roomID, playerID, bet }: SpecificID & { bet: Bet; }) => void;
+    placeBet: ({ roomID, playerID, bet }: SpecificID & { bet: number; }) => void;
     makeDecision: ({ roomID, playerID, action }: SpecificID & { action: Action; }) => void;
     startPlay: ({ roomID, playerID }: SpecificID) => void;
 }

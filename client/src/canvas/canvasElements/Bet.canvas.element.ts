@@ -43,7 +43,7 @@ export class BetCanvasElement extends TransformNode implements IBetCanvasElement
 
         this._textBlock = new TextBlock(`text-points-${this._handID}`, "0$");
         this._textBlock.color = "white";
-        this._textBlock.fontSize = 450;
+        this._textBlock.fontSize = 250;
 
         texture.addControl(this._textBlock);
     }

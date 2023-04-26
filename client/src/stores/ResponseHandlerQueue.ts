@@ -16,12 +16,12 @@ export class ResponseQueue {
         });
     }
 
-    public async dequeue(): Promise<boolean> {
-        if (this._pendingPromise) { return false; }
+    public async dequeue(): Promise<void> {
+        if (this._pendingPromise) { return; }
 
         const item = this._queue[0];
         this._queue = this._queue.slice(1);
-        if (!item) { return false; }
+        if (!item) { return; }
 
         try {
             this._pendingPromise = true;
@@ -35,6 +35,5 @@ export class ResponseQueue {
         } finally {
             this.dequeue();
         }
-        return true;
     }
 }

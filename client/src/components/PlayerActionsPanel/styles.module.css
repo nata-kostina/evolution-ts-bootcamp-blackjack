@@ -197,12 +197,6 @@
   }
 }
 
-@media screen and (max-height: 580px) {
-  /* .actionsPanel {
-        top: -55px;
-        height: 55px;
-    } */
-}
 @media screen and (max-width: 480px), screen and (max-height: 580px) {
   .actionsPanel {
     width: 100%;

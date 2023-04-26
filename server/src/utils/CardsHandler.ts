@@ -44,11 +44,7 @@ export const CardsHandler: Handler = {
         return false;
       }
       const activeHand = hands[0];
-      if (activeHand.cards.length === 2) {
-        const available = activeHand.points.filter((points) => points === NINE || points === TEN || points === ELEVEN);
-        return available.length > 0;
-      }
-      return false;
+      return activeHand.cards.length === 2;
     } catch (error: unknown) {
       throw new Error(`Player ${playerID}: Failed to check for double`);
     }

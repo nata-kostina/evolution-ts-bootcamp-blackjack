@@ -49,3 +49,5 @@ export const chipSet: ChipItem[] = [
 ];
 
 export const maxPlayersNum = 1;
+
+export const chipsValues = chipSet.map((chip) => chip.value);

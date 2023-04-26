@@ -27,7 +27,7 @@ export class PointsCanvasElement extends GroundMesh {
         this.position = new Vector3(
             handPosition.x - handSize.width * 1.1,
             handPosition.y + handSize.width * 0.45,
-            handPosition.z - 0.08,
+            handPosition.z - 0.01,
         );
         this.rotation.x = -Math.PI * 0.5;
 

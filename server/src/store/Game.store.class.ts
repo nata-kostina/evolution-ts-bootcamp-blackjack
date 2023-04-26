@@ -1,5 +1,6 @@
 import randomstring from 'randomstring';
 import {
+  ClientToServerEvents,
   DealerInstance,
   Deck,
   GameSession,
@@ -9,15 +10,19 @@ import {
   PlayerID,
   PlayerInstance,
   RoomID,
+  ServerToClientEvents,
   SpecificID,
   State,
   UpdateDealerParams,
+  UpdateGameParams,
   UpdateHandParams,
   UpdatePlayerParams,
 } from '../types/index.js';
 import { initializeGameState } from '../utils/initializers.js';
 import { CardsHandler } from '../utils/CardsHandler.js';
 import { initializeHand } from './../utils/initializers.js';
+import { Server } from 'socket.io';
+import { maxPlayersNum } from '../constants/game.constants.js';
 
 class Store implements IStore {
   private store: State;
@@ -39,12 +44,13 @@ class Store implements IStore {
     }
   }
 
-  public joinPlayerToGameState({ player, roomID }: { roomID: RoomID; player: PlayerInstance }): void {
+  public joinPlayerToGameState({ player, roomID }: { roomID: RoomID; player: PlayerInstance }): GameState {
     try {
       const game = this.store[roomID];
       if (game) {
-        game.players[player.playerID] = player;
-      } else {
+          game.players[player.playerID] = player;
+          return game;
+        } else {
         throw new Error('No such game');
       }
     } catch (error) {
@@ -146,6 +152,14 @@ class Store implements IStore {
     }
   }
 
+  public startGame(roomID: RoomID): void {
+    try {
+      const game = this.getGame(roomID);
+      game.hasStarted = true;
+    } catch (e: unknown) {
+      throw new Error(`Game ${roomID}: Failed to update game`);
+    }
+  }
   public updatePlayer({ playerID, roomID, payload }: UpdatePlayerParams): void {
     try {
       const game = this.getGame(roomID);
@@ -267,8 +281,8 @@ class Store implements IStore {
         hands: [],
         bet: 0,
         insurance: 0,
-        activeHandID: "",
-        availableActions: []
+        activeHandID: '',
+        availableActions: [],
       };
 
       game.players[player.playerID] = updatedPlayer;
@@ -352,8 +366,8 @@ class Store implements IStore {
 
   public removeHand({ roomID, playerID, handID }: SpecificID & { handID: string }): void {
     try {
-        const { hands } = this.getPlayer({ roomID, playerID });
-        const updatedHands = hands.filter((hand) => hand.handID !== handID);
+      const { hands } = this.getPlayer({ roomID, playerID });
+      const updatedHands = hands.filter((hand) => hand.handID !== handID);
       this.updatePlayer({ roomID, playerID, payload: { hands: updatedHands } });
     } catch (error) {
       throw new Error(`Player ${playerID}: Failed to remove hand`);
@@ -366,6 +380,20 @@ class Store implements IStore {
     gameState.organizer = playerID;
     this.store[roomID] = gameState;
     return roomID;
+  }
+
+  public getAvailableRoomID(io: Server<ClientToServerEvents, ServerToClientEvents>): RoomID | null {
+    const rooms = io.sockets.adapter.rooms;
+    for (const [id, participants] of rooms) {
+        // console.log("id, participants: ", {id, participants});
+      if (id.startsWith('Room_id_') && participants.size < maxPlayersNum) {
+        const game = this.getGame(id);
+        if (!game.hasStarted) {
+          return id;
+        }
+      }
+    }
+    return null;
   }
 }
 
