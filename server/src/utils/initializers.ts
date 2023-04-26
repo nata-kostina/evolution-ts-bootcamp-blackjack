@@ -1,11 +1,10 @@
 import { initialDeck } from '../constants/index.js';
-import { GameState, Hand, PlayerInstance, SpecificID, Action } from '../types/index.js';
+import { GameState, Hand, PlayerInstance, SpecificID, Action, RoomID } from '../types/index.js';
 import { v4 } from 'uuid';
 
-export function initializeGameState({ roomID, playerID }: SpecificID): GameState {
+export function initializeGameState(roomID: RoomID): GameState {
   return {
     roomID,
-    organizer: playerID,
     deck: initialDeck,
     players: {},
     dealer: { cards: [], hasHoleCard: false, points: 0 },

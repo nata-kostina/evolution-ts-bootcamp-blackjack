@@ -4,7 +4,6 @@ import { ClientToServerEvents, ServerToClientEvents, SpecificID } from './socket
 
 export interface GameState {
   roomID: RoomID;
-  organizer: PlayerID;
   deck: Deck;
   players: Record<PlayerID, PlayerInstance>;
   dealer: DealerInstance;
@@ -55,7 +54,7 @@ export interface IStore {
   resetDealer(roomID: RoomID): void;
   resetSession({ playerID, roomID }: SpecificID): void;
   getResetSession({ playerID, roomID }: SpecificID): GameSession;
-  createNewRoom(playerID: PlayerID): RoomID;
+  createNewRoom(): RoomID;
   reassignActiveHand({ roomID, playerID }: SpecificID): void;
   removeHand({ roomID, playerID, handID }: SpecificID & { handID: string }): void;
   getHand({ roomID, playerID, handID }: SpecificID & { handID: string }): Hand;

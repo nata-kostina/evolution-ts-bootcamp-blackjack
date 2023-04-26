@@ -46,8 +46,8 @@ class Store implements IStore {
 
   public joinPlayerToGameState({ player, roomID }: { roomID: RoomID; player: PlayerInstance }): GameState {
     try {
-      const game = this.store[roomID];
-      if (game) {
+        const game = this.store[roomID];
+        if (game) {
           game.players[player.playerID] = player;
           return game;
         } else {
@@ -107,7 +107,7 @@ class Store implements IStore {
 
   public getSession(roomID: RoomID): GameSession {
     try {
-      const game = this.getGame(roomID);
+        const game = this.getGame(roomID);
       const { hasHoleCard, cards: dealerCards, points } = game.dealer;
       const session: GameSession = {
         roomID: game.roomID,
@@ -374,10 +374,9 @@ class Store implements IStore {
     }
   }
 
-  public createNewRoom(playerID: PlayerID): RoomID {
+  public createNewRoom(): RoomID {
     const roomID = 'Room_id_' + randomstring.generate();
-    const gameState = initializeGameState({ roomID, playerID });
-    gameState.organizer = playerID;
+    const gameState = initializeGameState(roomID);
     this.store[roomID] = gameState;
     return roomID;
   }
@@ -385,7 +384,6 @@ class Store implements IStore {
   public getAvailableRoomID(io: Server<ClientToServerEvents, ServerToClientEvents>): RoomID | null {
     const rooms = io.sockets.adapter.rooms;
     for (const [id, participants] of rooms) {
-        // console.log("id, participants: ", {id, participants});
       if (id.startsWith('Room_id_') && participants.size < maxPlayersNum) {
         const game = this.getGame(id);
         if (!game.hasStarted) {

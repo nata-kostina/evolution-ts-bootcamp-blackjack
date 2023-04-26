@@ -66,7 +66,7 @@ export class SinglePlayerController implements Controller {
     try {
       const id = playerID || generatePlayerID();
       // const id = `Player_id_${socket.id}`;
-      const roomID = this._gameStore.createNewRoom(id);
+      const roomID = this._gameStore.createNewRoom();
 
       const socketRooms = socket.rooms;
       socketRooms.forEach((room) => {

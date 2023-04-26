@@ -88,7 +88,6 @@ export class SceneManager {
     }
 
     public updateSession(players: Record<string, PlayerInstance>): void {
-        const playersIds = Object.keys(players);
         this.playerSeats.forEach((seat) => seat.updateSeat(players[seat.playerID]));
     }
 
@@ -99,7 +98,6 @@ export class SceneManager {
     public async dealPlayerCard(newCard: DealPlayerCard): Promise<void> {
         // await this.playerSeat.dealCard(newCard);
         const seat = this.playerSeats.find((_seat) => _seat.playerID === newCard.playerID);
-        console.log({ playerID: newCard.playerID, seatPosition: seat?.position });
         if (seat) {
             await seat.dealCard(newCard);
         }
@@ -128,8 +126,11 @@ export class SceneManager {
         this._helper.skin.isVisible = false;
     }
 
-    public async removeHand(handID: string, result: GameResult): Promise<void> {
-        // await this.playerSeat.removeHand(handID, result);
+    public async removeHand(playerID: string, handID: string, result: GameResult): Promise<void> {
+        const seat = this.playerSeats.find((_seat) => _seat.playerID === playerID);
+        if (seat) {
+            await seat.removeHand(handID, result);
+        }
     }
 
     public updateHelper({ handId }: { handId: string; }): void {
@@ -142,6 +143,7 @@ export class SceneManager {
 
     public resetScene(): void {
         this.playerSeats.forEach((seat) => { seat.reset(); seat.dispose(); });
+        this.playerSeats = [];
         this.dealerSeat.reset();
         this.toggleChipAction(false);
         this._helper.skin.isVisible = false;

@@ -72,12 +72,15 @@ export class PlayerSeatCanvasElement
     }
 
     public updateSeat(player: PlayerInstance): void {
-        this.hands.forEach((hand) => {
-            const updatedHand = player.hands.find((_h) => _h.handID === hand.handID);
-            if (updatedHand) {
-                hand.updateHand(updatedHand);
-            }
-        });
+        console.log("player. hands: ", { player: player?.playerID, handsNum: player?.hands?.length });
+        if (this.hands) {
+            this.hands.forEach((hand) => {
+                const updatedHand = player.hands.find((_h) => _h.handID === hand.handID);
+                if (updatedHand) {
+                    hand.updateHand(updatedHand);
+                }
+            });
+        }
     }
 
     public set activeHand(handID: string) {
@@ -86,7 +89,6 @@ export class PlayerSeatCanvasElement
     }
 
     public async dealCard(newCard: DealPlayerCard): Promise<void> {
-        console.log({ playerID: this.playerID, hands: this.hands });
         const hand =
       this.getHand(newCard.handID) ||
       new HandCanvasElement(this.scene, newCard.handID, this._seat.position);
@@ -144,7 +146,7 @@ export class PlayerSeatCanvasElement
         const hand = this.getHand(handID);
         if (hand) {
             await hand.remove(gameResult);
-            const index = this.hands.findIndex((hand) => hand.handID !== handID);
+            const index = this.hands.findIndex((_hand) => _hand.handID !== handID);
             if (index) {
                 this.hands.slice(index, 1);
             }
@@ -156,6 +158,8 @@ export class PlayerSeatCanvasElement
             hand.reset();
             hand.dispose();
         });
+        this.hands = [];
+        // console.log("seat reset this.hands: ", this.hands);
     }
 
     public update(matrix: GameMatrix): void {

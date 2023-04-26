@@ -118,7 +118,8 @@ export class Game {
                 this._session = session;
                 console.log("handleUpdateGameSession session: ", session);
                 this._ui.player = validatedPlayer;
-                this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
+                this._ui.toggleVisibleActionBtnsDisabled(true);
+                // this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
                 this._scene?.updateSession(session.players);
             }
         });
@@ -269,6 +270,10 @@ export class Game {
                 throw new Error("No player found");
             }
 
+            const validatedPlayerID = await playerIDSchema.validate(
+                response.payload.playerID,
+            );
+
             const validatedHandID = await handIDSchema.validate(
                 response.payload.handID,
             );
@@ -277,7 +282,7 @@ export class Game {
             );
 
             this._ui.togglePlayerActionsBtnsDisabled(true);
-            await this._scene?.removeHand(validatedHandID, validatedGameResult);
+            await this._scene?.removeHand(validatedPlayerID, validatedHandID, validatedGameResult);
         });
     }
 
