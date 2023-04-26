@@ -68,7 +68,7 @@ export class BetChipCanvasElement extends Mesh {
             0,
             frameRate,
             false,
-            animationSpeed,
+            animationSpeed * 0.8,
             () => {
                 if (onFinish) {
                     onFinish();

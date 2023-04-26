@@ -1,4 +1,4 @@
-import { Bet, Card } from "./game.types";
+import { Card } from "./game.types";
 
 export type MatrixProps = {
     map: Cell[];
@@ -10,9 +10,9 @@ export type MatrixProps = {
 };
 
 export interface IBetCanvasElement {
-    addChip: (value: Bet) => void;
+    addChip: (value: number) => void;
     removeChip: () => void;
-    updateBet: (bet: Bet) => void;
+    updateBet: (bet: number) => void;
 }
 
 export type Cell = "0" | "chips" | "player-seat" | "dealer-seat";
@@ -46,4 +46,4 @@ export type UnholeCardPayload = {
     points: number;
 };
 
-export type SplitParams = { oldHandID: string; newHandID: string; bet: Bet; points: Array<number>; };
+export type SplitParams = { oldHandID: string; newHandID: string; bet: number; points: Array<number>; };

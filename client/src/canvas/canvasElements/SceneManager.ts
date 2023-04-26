@@ -5,7 +5,6 @@ import { DealerSeatCanvasElement } from "./DealerSeat.canvas.element copy";
 import { GameMatrix } from "../GameMatrix";
 import { ChipSetCanvasElement } from "./ChipSet.canvas.element";
 import { CanvasController } from "../CanvasController";
-import { BlackjackNotificationCanvasElement } from "./BlackjackNotification.canvas.element";
 import { SplitParams, UnholeCardPayload } from "../../types/canvas.types";
 import {
     DealDealerCard,
@@ -53,6 +52,7 @@ export class SceneManager {
         const rulesTexture = this.scene.getTextureByName(assetsSrc.rules) as Texture;
         backgroundMaterial.diffuseTexture = rulesTexture;
         backgroundMaterial.diffuseTexture.hasAlpha = true;
+
         ground.material = backgroundMaterial;
 
         ground.rotation.x = -Math.PI * 0.5;
@@ -123,11 +123,6 @@ export class SceneManager {
         // }
     }
 
-    public addBlackjackNotification(): void {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const notification = new BlackjackNotificationCanvasElement(this.scene);
-    }
-
     public async unholeCard(payload: UnholeCardPayload): Promise<void> {
         await this.dealerSeat.unholeCard(payload);
         this._helper.skin.isVisible = false;
@@ -145,7 +140,7 @@ export class SceneManager {
         // }
     }
 
-    public async resetScene(): Promise<void> {
+    public resetScene(): void {
         this.playerSeats.forEach((seat) => { seat.reset(); seat.dispose(); });
         this.dealerSeat.reset();
         this.toggleChipAction(false);

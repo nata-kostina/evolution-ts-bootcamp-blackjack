@@ -2,58 +2,79 @@ import { makeAutoObservable } from "mobx";
 import {
     Action,
     AvailableActions,
-    Bet,
     BetAction,
     PlayerInstance,
 } from "../types/game.types";
 import { Notification } from "../types/notification.types";
 import { IBetCanvasElement } from "../types/canvas.types";
+import { UiActionBtn } from "../types/ui.types";
+import { splitAmountIntoChipsValues } from "../utils/gameUtils/splitAmountIntoChipsValues";
 
 export class UIStore {
     private _player: PlayerInstance | null = null;
     private _actionBtnsState: Record<
     Action | BetAction,
-    { isVisible: boolean; isDisabled: boolean; }
+    UiActionBtn
   > = {
             [Action.Hit]: {
                 isVisible: false,
                 isDisabled: true,
+                type: "playerAction",
             },
             [Action.Stand]: {
                 isVisible: false,
                 isDisabled: true,
+                type: "playerAction",
             },
             [Action.Double]: {
                 isVisible: false,
                 isDisabled: true,
+                type: "playerAction",
             },
             [Action.Surender]: {
                 isVisible: false,
                 isDisabled: true,
+                type: "playerAction",
             },
             [Action.Insurance]: {
                 isVisible: false,
                 isDisabled: true,
+                type: "playerAction",
             },
             [Action.Bet]: {
                 isVisible: true,
                 isDisabled: true,
+                type: "betAction",
             },
             [Action.Split]: {
                 isVisible: false,
                 isDisabled: true,
+                type: "playerAction",
             },
-            reset: {
+            [BetAction.Reset]: {
                 isVisible: true,
                 isDisabled: true,
+                type: "betAction",
             },
-            undo: {
+            [BetAction.Undo]: {
                 isVisible: true,
                 isDisabled: true,
+                type: "betAction",
+            },
+            [BetAction.Rebet]: {
+                isVisible: true,
+                isDisabled: true,
+                type: "betAction",
+            },
+            [BetAction.AllIn]: {
+                isVisible: true,
+                isDisabled: true,
+                type: "betAction",
             },
         };
 
     private _betHistory: Array<number> = [];
+    private _lastBetHistory: Array<number> = [];
     private _currentModal: Notification | null = null;
     private _modalQueue: Array<Notification> = [];
     private _isModalShown = false;
@@ -71,7 +92,7 @@ export class UIStore {
         return this._player;
     }
 
-    public get bet(): Bet | null {
+    public get bet(): number | null {
         if (this.player) {
             return this.player.bet;
         }
@@ -111,17 +132,36 @@ export class UIStore {
         });
     }
 
+    public toggleEditBetBtnsVisible(value: boolean): void {
+        this._actionBtnsState[Action.Bet].isVisible = value;
+        this._actionBtnsState[BetAction.Undo].isVisible = value;
+        this._actionBtnsState[BetAction.Reset].isVisible = value;
+        this._actionBtnsState[BetAction.Rebet].isVisible = value;
+        this._actionBtnsState[BetAction.AllIn].isVisible = value;
+    }
+
+    public initEditBetBtns(): void {
+        this.toggleEditBetBtnsVisible(true);
+        this._actionBtnsState[Action.Bet].isDisabled = true;
+        this._actionBtnsState[BetAction.Undo].isDisabled = true;
+        this._actionBtnsState[BetAction.Reset].isDisabled = true;
+        this._actionBtnsState[BetAction.Rebet].isDisabled = !(this._lastBetHistory.length > 0);
+        this._actionBtnsState[BetAction.AllIn].isDisabled = false;
+    }
+
     public toggleActionBtnsVisible(enabled: AvailableActions): void {
         Object.keys(this._actionBtnsState).forEach((btn) => {
-            if (btn === Action.Bet) {
-                this._actionBtnsState.Bet.isVisible = enabled.includes(Action.Bet);
-            } else if (btn === BetAction.Reset || btn === BetAction.Undo) {
-                this._actionBtnsState.undo.isVisible = enabled.includes(Action.Bet);
-                this._actionBtnsState.reset.isVisible = enabled.includes(Action.Bet);
-            } else {
-                this._actionBtnsState[btn as Action].isVisible = enabled.includes(
-                    btn as Action,
-                );
+            const button = this._actionBtnsState[btn as keyof typeof this._actionBtnsState];
+            const isIncluded = enabled.includes(btn as Action);
+            if (button.type === "playerAction") {
+                button.isVisible = isIncluded;
+            } else if (btn === Action.Bet) {
+                this._actionBtnsState[Action.Bet].isVisible = isIncluded;
+                if (isIncluded) {
+                    this.initEditBetBtns();
+                } else {
+                    this.toggleEditBetBtnsVisible(false);
+                }
             }
         });
     }
@@ -134,7 +174,7 @@ export class UIStore {
         });
     }
 
-    public addBet({ value }: { value: Bet; }): void {
+    public addBet(value: number): void {
         try {
             if (this.player && value <= this.player.balance) {
                 this.player.bet += value;
@@ -181,7 +221,30 @@ export class UIStore {
     }
 
     public resetBetHistory(): void {
+        this._lastBetHistory = this._betHistory;
         this._betHistory = [];
+    }
+
+    public rebet(): void {
+        this._lastBetHistory.forEach((bet) => this.addBet(bet));
+    }
+
+    public allIn(): void {
+        if (this.player) {
+            const chipsValues = splitAmountIntoChipsValues(this.player.balance);
+            chipsValues.forEach((item) => {
+                for (let i = 0; i < item.amount; i++) {
+                    this.addBet(item.chipValue);
+                }
+            });
+            const cents = this.player.balance;
+            if (cents > 0) {
+                this._betHistory.push(cents);
+                this.player.bet += cents;
+                this.player.balance = 0;
+                this._betElement?.updateBet(this.player.bet);
+            }
+        }
     }
 
     public addModal(notification: Notification): void {

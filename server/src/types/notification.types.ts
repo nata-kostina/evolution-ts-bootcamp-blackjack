@@ -3,6 +3,9 @@ export enum NotificationVariant {
     StandOrTakeMoney = "StandOrTakeMoney",
     Disconnection = "Disconnection",
     GameError = "GameError",
+    WaitingPlayers = "WaitingPlayers",
+    GameStart = "GameStart",
+    PlaceBet = "PlaceBet",
 }
 
 export type Notification = {

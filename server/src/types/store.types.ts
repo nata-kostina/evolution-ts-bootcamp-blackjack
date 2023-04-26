@@ -1,5 +1,6 @@
+import { Server } from 'socket.io';
 import { RoomID, Deck, PlayerInstance, DealerInstance, PlayerID, GameSession, Hand } from './game.types.js';
-import { SpecificID } from './socket.types.js';
+import { ClientToServerEvents, ServerToClientEvents, SpecificID } from './socket.types.js';
 
 export interface GameState {
   roomID: RoomID;
@@ -7,10 +8,15 @@ export interface GameState {
   deck: Deck;
   players: Record<PlayerID, PlayerInstance>;
   dealer: DealerInstance;
+  hasStarted: boolean;
 }
 
 export type State = Record<RoomID, GameState>;
 
+export type UpdateGameParams = {
+  roomID: RoomID;
+  payload: { [key in keyof Partial<Omit<GameState, 'playerID' | 'roomID'>>]: GameState[key] };
+};
 export type UpdatePlayerParams = {
   playerID: PlayerID;
   roomID: RoomID;
@@ -41,9 +47,9 @@ export interface IStore {
   updatePlayer({ playerID, roomID, payload }: UpdatePlayerParams): void;
   getDealer(roomID: RoomID): DealerInstance;
   updateDealer({ roomID, payload }: UpdateDealerParams): void;
-  getActiveHand({roomID, playerID}: SpecificID): Hand;
+  getActiveHand({ roomID, playerID }: SpecificID): Hand;
   updateHand({ playerID, roomID, handID, payload }: UpdateHandParams): void;
-  getScore({ roomID, playerID, handID}: SpecificID & {handID: string}): Array<number>;
+  getScore({ roomID, playerID, handID }: SpecificID & { handID: string }): Array<number>;
   unholeCard(roomID: RoomID): void;
   resetPlayer({ playerID, roomID }: SpecificID): void;
   resetDealer(roomID: RoomID): void;
@@ -51,8 +57,10 @@ export interface IStore {
   getResetSession({ playerID, roomID }: SpecificID): GameSession;
   createNewRoom(playerID: PlayerID): RoomID;
   reassignActiveHand({ roomID, playerID }: SpecificID): void;
-  removeHand({ roomID, playerID, handID }: SpecificID & {handID: string}): void;
+  removeHand({ roomID, playerID, handID }: SpecificID & { handID: string }): void;
   getHand({ roomID, playerID, handID }: SpecificID & { handID: string }): Hand;
+  getAvailableRoomID(io: Server<ClientToServerEvents, ServerToClientEvents>): RoomID | null;
+  startGame(roomID: RoomID): void;
 }
 
 export interface IPlayersStore {

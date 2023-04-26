@@ -30,7 +30,7 @@ export class ChipCanvasElement extends Mesh {
                 trigger: ActionManager.OnPickTrigger,
             },
             (() => {
-                controller.addBet({ value: this.chip.value, id: this._id });
+                controller.addBet(this.chip.value);
             }),
         );
 

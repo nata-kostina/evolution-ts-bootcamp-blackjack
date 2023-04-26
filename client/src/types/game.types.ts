@@ -24,8 +24,6 @@ export type Deck = Card[];
 
 export type ChipItem = { id: string; name: string; value: number; img: string; };
 
-export type Bet = number;
-
 export type RoomID = string;
 export type PlayerID = string;
 
@@ -73,6 +71,8 @@ export enum Action {
 export enum BetAction {
     Undo = "undo",
     Reset = "reset",
+    Rebet = "rebet",
+    AllIn = "All in",
 }
 
 export enum GameMode {

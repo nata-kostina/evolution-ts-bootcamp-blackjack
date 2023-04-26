@@ -5,6 +5,7 @@ import { ServerErrorNotification } from "./notificationTypes/ServerErrorNotifica
 import { TakeMoneyOrStandNotification } from "./notificationTypes/TakeMoneyOrStandNotification";
 import { WaitingNotification } from "./notificationTypes/WaitingNotification";
 import { PlaceBetNotification } from "./notificationTypes/PlaceBetNotification";
+import { BlackjackNotification } from "./notificationTypes/BlackjackNotification";
 
 interface Props {
     notification: Notification | null;
@@ -26,6 +27,8 @@ export const NotificationModal = ({ isOpen, notification, closeModal }: Props) =
             return <WaitingNotification isOpen={isOpen} closeModal={closeModal} />;
         case NotificationVariant.PlaceBet:
             return <PlaceBetNotification isOpen={isOpen} closeModal={closeModal} />;
+        case NotificationVariant.Blackjack:
+            return <BlackjackNotification isOpen={isOpen} closeModal={closeModal} />;
         default:
             return <></>;
     }

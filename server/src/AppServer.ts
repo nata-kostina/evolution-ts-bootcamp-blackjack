@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { SinglePlayerController } from './controllers/SinglePlayer.controller.js';
 import { PlayerStore } from './store/Players.store.class.js';
-import { ClientToServerEvents, Controller, ServerToClientEvents } from './types/index.js';
+import { ClientToServerEvents, Controller, ServerToClientEvents, GameMode } from './types/index.js';
 import {
   actionSchema,
   betSchema,
@@ -12,11 +12,13 @@ import {
 } from './utils/validation.js';
 import { GameStore } from './store/Game.store.class.js';
 import { IResponseManager, ResponseManager } from './utils/responseManager.js';
+import { MultiPlayersController } from './controllers/MulltiPlayersController.js';
 
 export class AppServer {
   private readonly _IO: Server<ClientToServerEvents, ServerToClientEvents>;
   private readonly _responseManager: IResponseManager;
-  private readonly _controller: Controller;
+  private _controllers: { single: SinglePlayerController; multi: MultiPlayersController };
+  private _controller: Controller;
 
   constructor(clientURL: string) {
     this._IO = new Server<ClientToServerEvents, ServerToClientEvents>(3000, {
@@ -30,18 +32,28 @@ export class AppServer {
     });
 
     this._responseManager = new ResponseManager(this._IO);
-    this._controller = new SinglePlayerController(PlayerStore, GameStore, this._responseManager);
+    this._controllers = {
+      single: new SinglePlayerController(PlayerStore, GameStore, this._responseManager),
+      multi: new MultiPlayersController(PlayerStore, GameStore, this._responseManager),
+    };
+    this._controller = this._controllers.single;
   }
 
   public listen(): void {
     this._IO.on('connection', (socket) => {
+      console.log(`Socket ${socket.id}: connected`);
       socket.on('initGame', async ({ playerID, mode }) => {
         try {
           const { error } = modeSchema.validate(mode);
           if (error) {
             throw new Error('Invalid parameter');
           }
-          await this._controller.handleInitGame({ playerID, socket });
+          if (mode === GameMode.Multi) {
+            this._controller = this._controllers.multi;
+          } else {
+            this._controller = this._controllers.single;
+          }
+          await this._controller.handleInitGame({ playerID, socket, io: this._IO });
         } catch (e: unknown) {
           this._IO.to(socket.id).emit('initGame', { ok: false, statusText: 'Failed to initialize a game' });
         }
@@ -71,8 +83,8 @@ export class AppServer {
           if (roomSchemaError || playerSchemaError || betSchemaError) {
             throw new Error('Invalid parameter');
           }
-          await this._controller.handlePlaceBet({ roomID, playerID, bet });
-          await this._controller.startPlay({ roomID, playerID });
+          await this._controller.handlePlaceBet({ roomID, playerID, bet, socketID: socket.id });
+            await this._controller.startPlay({ roomID, playerID });
         } catch (e: unknown) {
           this._IO.to(socket.id).emit('updateSession', { ok: false, statusText: 'Failed to handle placing bet' });
         }

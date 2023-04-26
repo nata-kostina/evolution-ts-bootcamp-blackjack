@@ -8,7 +8,8 @@ import {
     ChipAnimation,
     HandAnimation,
 } from "../../types/canvas.types";
-import { Bet, DealPlayerCard, GameResult, Hand } from "../../types/game.types";
+
+import { DealPlayerCard, GameResult, Hand } from "../../types/game.types";
 import { CardCanvasElement } from "./Card.canvas.element";
 import { getSplitHandAnimation } from "../utils/animation/hand.animation";
 import { PointsCanvasElement } from "./Points.canvas.element";
@@ -106,7 +107,7 @@ export class HandCanvasElement extends TransformNode {
         this._pointsElement.update(points);
     }
 
-    public updateBet(bet: Bet): void {
+    public updateBet(bet: number): void {
         this._betElement.updateBet(bet);
     }
 
@@ -149,7 +150,7 @@ export class HandCanvasElement extends TransformNode {
     }
 
     public reset(): void {
-        this._cards.forEach((card) => card.animate(CardAnimation.Remove, () => card.dispose()));
+        this._cards.map((card) => card.animate(CardAnimation.Remove, () => card.dispose()));
         this._cards = [];
         this._pointsElement.dispose();
         this._betElement.dispose();

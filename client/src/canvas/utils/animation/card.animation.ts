@@ -35,27 +35,7 @@ export const getDealCardAnimation = (finalPosition: Vector3): { frameRate: numbe
 
     ySlide.setKeys(keyFramesY);
 
-    const yRotation = new Animation("rotationY", "rotation.y", frameRate, Animation.ANIMATIONTYPE_FLOAT);
-
-    const keyFramesYR = [];
-
-    // keyFramesYR.push({
-    //     frame: 0,
-    //     value: Math.PI,
-    // });
-    keyFramesYR.push({
-        frame: frameRate / 2,
-        value: Math.PI,
-    });
-
-    keyFramesYR.push({
-        frame: frameRate,
-        value: 0,
-    });
-
-    yRotation.setKeys(keyFramesYR);
-
-    return { frameRate, animationArray: [xSlide, ySlide, yRotation] };
+    return { frameRate, animationArray: [xSlide, ySlide] };
 };
 
 export const getUnholeCardAnimation = (): { frameRate: number; animationArray: Array<Animation>; } => {

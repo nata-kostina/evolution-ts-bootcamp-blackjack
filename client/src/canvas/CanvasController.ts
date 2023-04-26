@@ -1,5 +1,4 @@
 import { UIStore } from "../stores/UIstore";
-import { Bet } from "../types/game.types";
 import { IBetCanvasElement } from "../types/canvas.types";
 
 export class CanvasController {
@@ -9,8 +8,8 @@ export class CanvasController {
         this.uiStore = uiStore;
     }
 
-    public addBet({ value }: { value: Bet; id: string; }): void {
-        this.uiStore.addBet({ value });
+    public addBet(value: number): void {
+        this.uiStore.addBet(value);
     }
 
     public setBetElement(betElement: IBetCanvasElement): void {

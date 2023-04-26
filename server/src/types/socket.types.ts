@@ -64,6 +64,7 @@ export type DealDealerCard = {
 
 export type DealPlayerCard = {
   target: 'player';
+  playerID: PlayerID;
   card: Card;
   points: Array<number>;
   handID: string;
