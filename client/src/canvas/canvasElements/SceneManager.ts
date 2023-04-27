@@ -42,7 +42,7 @@ export class SceneManager {
     }
 
     public addContent(): void {
-        const ground = CreateGround("ground1", { width: 2.1, height: 0.6 }, this.scene);
+        const ground = CreateGround("table", { width: 2.1, height: 0.6 }, this.scene);
         ground.position.y = 0.8;
         ground.position.z = 0.3;
         const backgroundMaterial = new BackgroundMaterial("backgroundMaterial", this.scene);
