@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=development npx nodemon",
-    "build": "cross-env NODE_ENV=production rimraf ./build && npx tsc",
+    "build": "cross-env NODE_ENV=production rimraf ./build && npx typescript",
     "start": "npm run build && node build/main",
     "lint": "npx eslint ./src"
   },
