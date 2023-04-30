@@ -9,6 +9,6 @@ export enum NotificationVariant {
 }
 
 export type Notification = {
-  variant: NotificationVariant;
-  text: string;
+    variant: NotificationVariant;
+    text: string;
 };

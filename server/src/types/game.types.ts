@@ -1,90 +1,97 @@
 export enum CardValue {
-  ACE = 'A',
-  J = 'J',
-  Q = 'Q',
-  K = 'K',
-  TWO = '2',
-  THREE = '3',
-  FOUR = '4',
-  FIVE = '5',
-  SIX = '6',
-  SEVEN = '7',
-  EIGHT = '8',
-  NINE = '9',
-  TEN = '10',
+    ACE = "A",
+    J = "J",
+    Q = "Q",
+    K = "K",
+    TWO = "2",
+    THREE = "3",
+    FOUR = "4",
+    FIVE = "5",
+    SIX = "6",
+    SEVEN = "7",
+    EIGHT = "8",
+    NINE = "9",
+    TEN = "10",
 }
 export enum Suit {
-  Spades = 'S',
-  Diamonds = 'D',
-  Clubs = 'C',
-  Hearts = 'H',
+    Spades = "S",
+    Diamonds = "D",
+    Clubs = "C",
+    Hearts = "H",
 }
 
 export type Hand = {
-  handID: string;
-  parentID: string;
-  cards: Card[];
-  bet: number;
-  points: Array<number>;
-  isStanding: boolean;
+    handID: string;
+    parentID: string;
+    cards: Card[];
+    bet: number;
+    points: Array<number>;
+    isStanding: boolean;
 };
 
 export type PlayerInstance = {
-  readonly playerID: PlayerID;
-  readonly roomID: RoomID;
-  bet: number;
-  balance: number;
-  insurance: number;
-  availableActions: Action[];
-  hands: Array<Hand>;
-  activeHandID: string;
+    readonly playerID: PlayerID;
+    readonly roomID: RoomID;
+    bet: number;
+    balance: number;
+    insurance: number;
+    availableActions: Action[];
+    hands: Array<Hand>;
+    activeHandID: string;
+    seat?: Seat;
 };
 
 export type DealerInstance = {
-  cards: Card[];
-  hasHoleCard: boolean;
-  holeCard?: Card;
-  points: number;
+    cards: Card[];
+    hasHoleCard: boolean;
+    holeCard?: Card;
+    points: number;
 };
 
 export interface GameSession {
-  readonly roomID: RoomID;
-  players: Record<PlayerID, PlayerInstance>;
-  dealer: Omit<DealerInstance, 'holeCard'>;
+    readonly roomID: RoomID;
+    players: Record<PlayerID, PlayerInstance>;
+    dealer: Omit<DealerInstance, "holeCard">;
 }
 
 export type RoomID = string;
 export type PlayerID = string;
 
-export type Card = { value: CardValue; suit: Suit; id: string };
+export type Card = { value: CardValue; suit: Suit; id: string; };
 export type Deck = Card[];
 
 export enum Action {
-  Hit = 'Hit',
-  Stand = 'Stand',
-  Double = 'Double',
-  Surender = 'Surender',
-  Insurance = 'Insurance',
-  Split = 'Split',
-  Bet = 'Bet'
+    Hit = "Hit",
+    Stand = "Stand",
+    Double = "Double",
+    Surrender = "Surrender",
+    Insurance = "Insurance",
+    Split = "Split",
+    Bet = "Bet",
 }
 
 export const WinCoefficient = {
-  '3:2': 1.5,
-  '1:1': 1,
-  even: 0,
+    "3:2": 1.5,
+    "1:1": 1,
+    "even": 0,
 };
 
 export type Bet = number;
 
 export enum GameMode {
-  Single = 'single',
-  Multi = 'multi',
+    Single = "single",
+    Multi = "multi",
 }
 
-export type HoleCard = { id: string };
+export type HoleCard = { id: string; };
 
 export enum GameResult {
     Win = "win",
     Lose = "lose",
+}
+
+export enum Seat {
+    Left = "Left",
+    Middle = "Middle",
+    Right = "Right,",
 }

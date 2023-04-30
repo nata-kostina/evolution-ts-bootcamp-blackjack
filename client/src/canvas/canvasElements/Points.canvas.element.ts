@@ -5,7 +5,7 @@ import {
     MeshBuilder,
 } from "@babylonjs/core";
 import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui/2D";
-import { handSize, pointsTextblockSize } from "../../constants/canvas.constants";
+import { betTextblockSize, handSize, pointsTextblockSize } from "../../constants/canvas.constants";
 
 export class PointsCanvasElement extends GroundMesh {
     private readonly scene: Scene;
@@ -13,7 +13,7 @@ export class PointsCanvasElement extends GroundMesh {
     private _handID: string;
     private textBlock: TextBlock;
 
-    public constructor(scene: Scene, handID: string, handPosition: Vector3) {
+    public constructor(scene: Scene, handID: string) {
         super(`points-container-${handID}`, scene);
         this.scene = scene;
         this._handID = handID;
@@ -25,11 +25,10 @@ export class PointsCanvasElement extends GroundMesh {
         this._skin.setParent(this);
 
         this.position = new Vector3(
-            handPosition.x - handSize.width * 1.1,
-            handPosition.y + handSize.width * 0.45,
-            handPosition.z - 0.01,
+            -handSize.width * 0.5 - betTextblockSize.width * 0.5,
+            0.08,
+            handSize.width * 0.45,
         );
-        this.rotation.x = -Math.PI * 0.5;
 
         const texture = AdvancedDynamicTexture.CreateForMesh(this._skin);
         texture.background = "#113C45";

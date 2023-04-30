@@ -1,5 +1,5 @@
 import React, { createContext, ReactNode, useContext } from "react";
-import { Connection } from "../stores/Connection";
+import { Connection } from "../stores/connection.store";
 
 interface ConnectionContextProviderProps {
     children: ReactNode;

@@ -1,31 +1,34 @@
-import { TransformNode, Vector3, Scene } from "@babylonjs/core";
+import { TransformNode, Vector3, Scene, Axis, Space } from "@babylonjs/core";
 import { CanvasElement, GameMatrix } from "../GameMatrix";
 import { CardCanvasElement } from "./Card.canvas.element";
 import { DealDealerCard } from "../../types/game.types";
 import { CardAnimation, UnholeCardPayload } from "../../types/canvas.types";
-import { isNormalCard } from "../../utils/gameUtils/isHoleCard";
+import { isNormalCard } from "../../utils/game/isNormalCard";
 import { PointsCanvasElement } from "./Points.canvas.element";
 import { cardSize } from "../../constants/canvas.constants";
 import { getPositionFromMatrix } from "../utils/getPositionFromMatrix";
 
 export class DealerSeatCanvasElement extends TransformNode implements CanvasElement {
     protected readonly scene: Scene;
-    protected readonly matrix: GameMatrix;
+    private readonly _pointsElement: PointsCanvasElement;
     private _cards: Array<CardCanvasElement> = [];
-    private _pointsElement: PointsCanvasElement;
 
     public constructor(scene: Scene, matrix: GameMatrix) {
         super("dealer-seat", scene);
         this.scene = scene;
-        this.matrix = matrix;
-        this.position = getPositionFromMatrix(matrix, "dealer-seat");
 
+        this.position = getPositionFromMatrix(matrix, "dealer-seat");
+        this.rotate(Axis.X, -Math.PI * 0.5, Space.LOCAL);
         this._pointsElement = new PointsCanvasElement(
             this.scene,
             "points-dealer-seat",
-            this.position,
         );
+        this._pointsElement.parent = this;
         this._pointsElement.skin.isVisible = false;
+    }
+
+    public get cards(): Array<CardCanvasElement> {
+        return this._cards;
     }
 
     public async unholeCard({ card, points }: UnholeCardPayload): Promise<void> {
@@ -50,8 +53,8 @@ export class DealerSeatCanvasElement extends TransformNode implements CanvasElem
             this.scene,
             new Vector3(
                 this._cards.length * 0.13,
+                this._cards.length * cardSize.depth - 0.04,
                 0,
-                this.position.z - this._cards.length * cardSize.depth - 0.04,
             ),
             newCard.card,
         );
@@ -71,7 +74,7 @@ export class DealerSeatCanvasElement extends TransformNode implements CanvasElem
     }
 
     public removeCards(): void {
-        this._cards.forEach((card) => card.animate(CardAnimation.Remove));
+        this._cards.map((card) => card.animate(CardAnimation.Remove));
         this._cards = [];
         this._pointsElement.dispose();
     }
@@ -81,7 +84,7 @@ export class DealerSeatCanvasElement extends TransformNode implements CanvasElem
     }
 
     public reset(): void {
-        this._cards.forEach((card) => card.animate(CardAnimation.Remove, () => card.dispose()));
+        this._cards.map((card) => card.animate(CardAnimation.Remove, () => card.dispose()));
         this._cards = [];
         this._pointsElement.skin.isVisible = false;
     }

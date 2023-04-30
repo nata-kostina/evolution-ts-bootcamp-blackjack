@@ -1,13 +1,4 @@
-import { Card } from "./game.types";
-
-export type MatrixProps = {
-    map: Cell[];
-    size: number;
-    width: number;
-    height: number;
-    cellWidth: number;
-    cellHeight: number;
-};
+import { Card, PlayerID } from "./game.types";
 
 export interface IBetCanvasElement {
     addChip: (value: number) => void;
@@ -15,7 +6,7 @@ export interface IBetCanvasElement {
     updateBet: (bet: number) => void;
 }
 
-export type Cell = "0" | "chips" | "player-seat" | "dealer-seat";
+export type Cell = "0" | "chips" | "dealer-seat" | "deck";
 
 export enum CardAnimation {
     Deal = "Deal",
@@ -40,10 +31,19 @@ export enum HelperAnimation {
     Pulse = "Pulse",
 }
 
+export enum SeatAnimation {
+    Highlight = "Highlight",
+}
+
 export type UnholeCardPayload = {
     target: "dealer";
     card: Card;
     points: number;
 };
 
-export type SplitParams = { oldHandID: string; newHandID: string; bet: number; points: Array<number>; };
+export type SplitParams = {
+    oldHandID: string;
+    newHandID: string;
+    bet: number;
+    points: Array<number>;
+    playerID: PlayerID; };

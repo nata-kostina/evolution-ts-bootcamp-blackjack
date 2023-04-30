@@ -1,7 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { BackgroundMaterial, CreateGround, Scene, Texture, Vector3 } from "@babylonjs/core";
+import {
+    BackgroundMaterial,
+    CreateGround,
+    Scene,
+    Texture,
+    Vector3,
+} from "@babylonjs/core";
 import { PlayerSeatCanvasElement } from "./PlayerSeat.canvas.element";
-import { DealerSeatCanvasElement } from "./DealerSeat.canvas.element copy";
+import { DealerSeatCanvasElement } from "./DealerSeat.canvas.element";
 import { GameMatrix } from "../GameMatrix";
 import { ChipSetCanvasElement } from "./ChipSet.canvas.element";
 import { CanvasController } from "../CanvasController";
@@ -10,22 +15,23 @@ import {
     DealDealerCard,
     DealPlayerCard,
     GameResult,
+    PlayerID,
     PlayerInstance,
+    Seat,
 } from "../../types/game.types";
-// eslint-disable-next-line import/no-unassigned-import
-import "@babylonjs/loaders/glTF";
 import { HelperCanvasElement } from "./Helper.canvas.element";
 import { assetsSrc } from "../../constants/assets.constants";
+import { DeckCanvasElement } from "./Deck.canvas.element";
 
 export class SceneManager {
     public playerSeats: Array<PlayerSeatCanvasElement> = [];
-    // public playerSeat: PlayerSeatCanvasElement;
     public dealerSeat: DealerSeatCanvasElement;
     public chipSet: ChipSetCanvasElement;
     private readonly scene: Scene;
     private readonly gameMatrix: GameMatrix;
     private readonly controller: CanvasController;
     private _helper: HelperCanvasElement;
+    private readonly _deck: DeckCanvasElement;
 
     public constructor(
         scene: Scene,
@@ -35,21 +41,49 @@ export class SceneManager {
         this.scene = scene;
         this.gameMatrix = matrix;
         this.controller = controller;
-        // this.playerSeat = new PlayerSeatCanvasElement(scene, matrix);
+
+        const seatTypes = Object.values(Seat);
+
+        for (let i = 0; i < seatTypes.length; i++) {
+            const x =
+        ((i + 1) / (seatTypes.length + 1)) * this.gameMatrix.matrixWidth -
+        this.gameMatrix.matrixWidth * 0.5;
+            const position = new Vector3(x, Math.abs(x) * 0.2 - 0.2, 0);
+            const rotation = (i - (seatTypes.length - 1) * 0.5) * (-Math.PI / 9);
+            const playerSeat = new PlayerSeatCanvasElement(
+                scene,
+                seatTypes[i],
+                position,
+                rotation,
+                (seat: Seat) => this.chooseSeat(seat),
+            );
+
+            this.playerSeats.push(playerSeat);
+        }
         this.dealerSeat = new DealerSeatCanvasElement(scene, matrix);
         this.chipSet = new ChipSetCanvasElement(scene, matrix, controller);
         this._helper = new HelperCanvasElement(scene, Vector3.Zero());
         this._helper.skin.isVisible = false;
+        this._deck = new DeckCanvasElement(scene, matrix);
 
         this.gameMatrix.addSubscriber([this.chipSet, this.dealerSeat]);
     }
 
     public addContent(): void {
-        const ground = CreateGround("ground1", { width: 2.1, height: 0.6 }, this.scene);
+        const ground = CreateGround(
+            "ground1",
+            { width: 2.1, height: 0.6 },
+            this.scene,
+        );
         ground.position.y = 0.8;
-        ground.position.z = 0.3;
-        const backgroundMaterial = new BackgroundMaterial("backgroundMaterial", this.scene);
-        const rulesTexture = this.scene.getTextureByName(assetsSrc.rules) as Texture;
+        ground.position.z = 0.1;
+        const backgroundMaterial = new BackgroundMaterial(
+            "backgroundMaterial",
+            this.scene,
+        );
+        const rulesTexture = this.scene.getTextureByName(
+            assetsSrc.rules,
+        ) as Texture;
         backgroundMaterial.diffuseTexture = rulesTexture;
         backgroundMaterial.diffuseTexture.hasAlpha = true;
 
@@ -58,37 +92,34 @@ export class SceneManager {
         ground.rotation.x = -Math.PI * 0.5;
 
         this.chipSet.addContent();
-        // this.playerSeat.addContent();
+        this._deck.addContent();
     }
 
-    // public init(activeHand: string): void {
-    //     this.resetScene();
-    //     this.toggleChipAction(true);
-    //     this.addInitialHand(activeHand);
-    // }
-
-    public init(playerID: string, players: Record<string, PlayerInstance>): void {
-        this.resetScene();
-        const playersIds = Object.keys(players);
-
-        playersIds.forEach((id, index) => {
-            const x = (index + 1) / (playersIds.length + 1) * this.gameMatrix.matrixWidth - this.gameMatrix.matrixWidth * 0.5;
-            const position = new Vector3(x, 0, 0);
-            const seat = new PlayerSeatCanvasElement(this.scene, position, id);
+    public init(availableSeats: Array<Seat>): void {
+        this.playerSeats.forEach((seat) => {
             seat.addContent();
-            this.playerSeats.push(seat);
-
-            const player = players[id];
-            const initialHandElement = seat.addHand(player.activeHandID);
-            if (playerID === id) {
-                this.controller.setBetElement(initialHandElement.betElement);
+            if (availableSeats.includes(seat.type)) {
+                seat.toggleSeatAction(true);
+                seat.animate();
             }
         });
-        this.toggleChipAction(true);
     }
 
-    public updateSession(players: Record<string, PlayerInstance>): void {
-        this.playerSeats.forEach((seat) => seat.updateSeat(players[seat.playerID]));
+    public updateSession(playerID: string, players: Record<string, PlayerInstance>): void {
+        const data = Object.values(players);
+        data.forEach((_data) => {
+            const seat = this.playerSeats.find((_seat) => _seat.type === _data.seat);
+            if (seat) {
+                seat.updateData(_data);
+
+                if (seat.playerID === playerID) {
+                    const activeHand = seat.getHand(_data.activeHandID);
+                    if (activeHand) {
+                        this.controller.setBetElement(activeHand.betElement);
+                    }
+                }
+            }
+        });
     }
 
     public toggleChipAction(register: boolean): void {
@@ -96,8 +127,9 @@ export class SceneManager {
     }
 
     public async dealPlayerCard(newCard: DealPlayerCard): Promise<void> {
-        // await this.playerSeat.dealCard(newCard);
-        const seat = this.playerSeats.find((_seat) => _seat.playerID === newCard.playerID);
+        const seat = this.playerSeats.find(
+            (_seat) => _seat.playerID === newCard.playerID,
+        );
         if (seat) {
             await seat.dealCard(newCard);
         }
@@ -112,13 +144,17 @@ export class SceneManager {
         newHandID,
         bet,
         points,
+        playerID,
     }: SplitParams): Promise<void> {
-        // await this.playerSeat.split({ oldHandID, newHandID, bet, points });
-        // const hand = this.playerSeat.getHand(oldHandID);
-        // if (hand) {
-        //     this._helper.update(hand.position);
-        //     this._helper.skin.isVisible = true;
-        // }
+        const seat = this.playerSeats.find((_seat) => _seat.playerID === playerID);
+        const hand = seat?.getHand(oldHandID);
+        if (seat && hand) {
+            await seat.split({ oldHandID, newHandID, bet, points, playerID });
+            if (hand) {
+                this._helper.update(hand.position);
+                this._helper.skin.isVisible = true;
+            }
+        }
     }
 
     public async unholeCard(payload: UnholeCardPayload): Promise<void> {
@@ -126,35 +162,46 @@ export class SceneManager {
         this._helper.skin.isVisible = false;
     }
 
-    public async removeHand(playerID: string, handID: string, result: GameResult): Promise<void> {
+    public async removeHand(
+        playerID: string,
+        handID: string,
+        result: GameResult,
+    ): Promise<void> {
         const seat = this.playerSeats.find((_seat) => _seat.playerID === playerID);
         if (seat) {
             await seat.removeHand(handID, result);
         }
     }
 
-    public updateHelper({ handId }: { handId: string; }): void {
-        // const hand = this.playerSeat.getHand(handId);
-        // if (hand) {
-        //     this._helper.update(hand.position);
-        //     this._helper.skin.isVisible = true;
-        // }
+    public updateHelper({ handId, playerID }: { handId: string; playerID: PlayerID; }): void {
+        const seat = this.playerSeats.find((_seat) => _seat.playerID === playerID);
+        if (seat) {
+            if (seat.hands.length < 2) {
+                this._helper.skin.isVisible = false;
+                return;
+            }
+            const hand = seat.getHand(handId);
+
+            if (hand) {
+                this._helper.update(hand.position);
+                this._helper.skin.isVisible = true;
+            }
+        }
     }
 
     public resetScene(): void {
-        this.playerSeats.forEach((seat) => { seat.reset(); seat.dispose(); });
-        this.playerSeats = [];
+        this.playerSeats.forEach((seat) => seat.reset());
         this.dealerSeat.reset();
         this.toggleChipAction(false);
         this._helper.skin.isVisible = false;
-        // this.playerSeat.reset();
     }
 
-    private addInitialHand(handID: string): void {
-        // this.playerSeat.addHand(handID);
-        // const initialHandElement = this.playerSeat.getHand(handID);
-        // if (initialHandElement) {
-        // this.controller.setBetElement(initialHandElement.betElement);
-        // }
+    private chooseSeat(seat: Seat): void {
+        this.controller.chooseSeat(seat);
+        this.playerSeats.forEach((seatElement) => {
+            seatElement.seatText.dispose();
+            seatElement.toggleSeatAction(false);
+            seatElement.stopAnimation();
+        });
     }
 }

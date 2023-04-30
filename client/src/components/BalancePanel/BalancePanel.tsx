@@ -12,15 +12,15 @@ export const BalancePanel = observer(() => {
                 <div className={styles.inner}>
                     <div className={styles.amount}>
                         <div className={styles.amountKey}>Balance:</div>
-                        <span className={styles.amountValue} data-testid="balance-value">{player.balance}$</span>
+                        <span className={styles.amountValue} data-testid="balance-value">${player.balance}</span>
                     </div>
                     <div className={styles.amount}>
                         <div className={styles.amountKey}>Bet Amount:</div>
-                        <span className={styles.amountValue} data-testid="bet-value">{player.bet}$</span>
+                        <span className={styles.amountValue} data-testid="bet-value">${player.bet}</span>
                     </div>
                     <div className={styles.amount}>
                         <div className={styles.amountKey}>Insurance:</div>
-                        <span className={styles.amountValue} data-testid="insurance-value">{player.insurance}$</span>
+                        <span className={styles.amountValue} data-testid="insurance-value">${player.insurance}</span>
                     </div>
                 </div>
             )}

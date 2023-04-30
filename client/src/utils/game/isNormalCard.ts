@@ -1,10 +1,5 @@
 import { Card, HoleCard } from "../../types/game.types";
 
-export function isHoleCard(
-    card: Card | HoleCard,
-): card is HoleCard {
-    return card.id === "hole";
-}
 export function isNormalCard(
     card: Card | HoleCard,
 ): card is Card {

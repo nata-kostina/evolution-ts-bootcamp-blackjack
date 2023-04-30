@@ -9,6 +9,7 @@ import { AssetsLoader } from "../../canvas/utils/assetsManager";
 import { useConnection } from "../../context/ConnectionContext";
 import { LoaderScreen } from "../LoaderScreen/LoaderScreen";
 import { GameMode } from "../../types/game.types";
+import { ClientToServerEvents, RequestParameters } from "../../types/socket.types";
 
 export const GameCanvas = observer(() => {
     const reactCanvas = useRef<HTMLCanvasElement>(null);
@@ -26,23 +27,24 @@ export const GameCanvas = observer(() => {
 
         const canvasBase = new CanvasBase(canvas);
         const matrix = canvasBase.getGameMatrix();
+
         const controller = new CanvasController(game.UI);
+        controller.requestHandler = (request: RequestParameters<keyof ClientToServerEvents>) => connection.sendRequest(request);
+
         const sceneManager = new SceneManager(canvasBase.scene, matrix, controller);
         game.scene = sceneManager;
 
         const assetsManager = new AssetsLoader(canvasBase.scene);
         assetsManager.preload()
             .then(() => {
-                setTimeout(() => {
-                    setIsLoading(false);
-                    sceneManager.addContent();
-                    const playerID: string | null = localStorage.getItem("player_id");
+                setIsLoading(false);
+                sceneManager.addContent();
+                const playerID: string | null = localStorage.getItem("player_id");
 
-                    connection.sendRequest<"initGame">({
-                        event: "initGame",
-                        payload: [{ playerID, mode: GameMode.Single }],
-                    });
-                }, 0);
+                connection.sendRequest<"initGame">({
+                    event: "initGame",
+                    payload: [{ playerID, mode: GameMode.Single }],
+                });
             })
             .catch((error) => console.log(error));
     }, [reactCanvas, game, connection]);

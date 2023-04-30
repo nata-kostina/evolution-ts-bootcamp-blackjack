@@ -5,49 +5,117 @@ import {
     StandardMaterial,
     Texture,
     Vector3,
+    Axis,
+    Space,
+    ActionManager,
+    ExecuteCodeAction,
+    Animatable,
 } from "@babylonjs/core";
-import { CanvasElement, GameMatrix } from "../GameMatrix";
+import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
 import { HandCanvasElement } from "./Hand.canvas.element";
 import {
     DealPlayerCard,
     GameResult,
     PlayerID,
     PlayerInstance,
+    Seat,
 } from "../../types/game.types";
 import { HandAnimation, SplitParams } from "../../types/canvas.types";
-import { seatSize } from "../../constants/canvas.constants";
+import { animationSpeed, seatSize, seatTextSize } from "../../constants/canvas.constants";
 import { assetsSrc } from "../../constants/assets.constants";
-import { getPositionFromMatrix } from "../utils/getPositionFromMatrix";
+import { getSeatAnimation } from "../utils/animation/seat.animation";
 
 export class PlayerSeatCanvasElement
-    extends GroundMesh
-    implements CanvasElement {
-    protected readonly scene: Scene;
-    protected readonly _playerID: PlayerID;
-    private hands: Array<HandCanvasElement> = [];
-    private _activeHand: HandCanvasElement | null = null;
+    extends GroundMesh {
+    private readonly scene: Scene;
+    private readonly _type: Seat;
+    private _playerID: PlayerID | null = null;
+    private _hands: Array<HandCanvasElement> = [];
     private readonly _seat: GroundMesh;
+    private seatAction: ExecuteCodeAction;
+    private animation: Animatable | null = null;
+    private _seatText: GroundMesh;
 
-    public constructor(scene: Scene, position: Vector3, playerID: PlayerID) {
+    public constructor(
+        scene: Scene,
+        type: Seat,
+        position: Vector3,
+        rotation: number,
+        onSeatChoose: (seat: Seat) => void,
+    ) {
         super(`player-seat`, scene);
         this.scene = scene;
-        this._playerID = playerID;
+        this._type = type;
         this._seat = MeshBuilder.CreateGround(
-      `player-seat`,
+      `player-seat-${type}`,
       {
           width: seatSize.width,
           height: seatSize.height,
       },
       this.scene,
         );
+
+        this.seatAction = new ExecuteCodeAction(
+            {
+                trigger: ActionManager.OnPickTrigger,
+            },
+            () => {
+                onSeatChoose(this._type);
+            },
+        );
+
         this._seat.setParent(this);
-        // this.position = getPositionFromMatrix(matrix, "player-seat");
+
+        this.rotate(Axis.X, -Math.PI * 0.5, Space.LOCAL);
+        this.rotate(Axis.Y, rotation, Space.LOCAL);
         this.position = position;
-        this.rotation.x = -Math.PI * 0.5;
+
+        this._seat.actionManager = new ActionManager(this.scene);
+
+        this._seatText = MeshBuilder.CreateGround(
+      `seat-text--${this.playerID}`,
+      { width: seatTextSize.width, height: seatTextSize.height },
+      this.scene,
+        );
+        this._seatText.setParent(this._seat);
+
+        this._seatText.position = new Vector3(0, -0.01, 0);
+        this._seatText.rotate(Axis.X, -Math.PI * 0.5, Space.LOCAL);
+        this._seatText.rotate(Axis.Y, rotation, Space.LOCAL);
+        const textTexture = AdvancedDynamicTexture.CreateForMesh(this._seatText);
+
+        const textBlock = new TextBlock(
+      `seat-text--${this.playerID}`,
+      "Click\nto choose seat",
+        );
+        textBlock.color = "white";
+        textBlock.fontSize = 150;
+
+        textTexture.addControl(textBlock);
     }
 
-    public get playerID(): PlayerID {
+    public set playerID(value: PlayerID | null) {
+        this._playerID = value;
+    }
+
+    public get playerID(): PlayerID | null {
         return this._playerID;
+    }
+
+    public get type(): Seat {
+        return this._type;
+    }
+
+    public get seat(): GroundMesh {
+        return this._seat;
+    }
+
+    public get seatText(): GroundMesh {
+        return this._seatText;
+    }
+
+    public get hands(): Array<HandCanvasElement> {
+        return this._hands;
     }
 
     public addContent(): void {
@@ -65,35 +133,18 @@ export class PlayerSeatCanvasElement
         const hand = new HandCanvasElement(
             this.scene,
             handID,
-            new Vector3().copyFrom(this.position),
         );
-        this.hands.push(hand);
+        hand.parent = this;
+        this._hands.push(hand);
         return hand;
     }
 
-    public updateSeat(player: PlayerInstance): void {
-        console.log("player. hands: ", { player: player?.playerID, handsNum: player?.hands?.length });
-        if (this.hands) {
-            this.hands.forEach((hand) => {
-                const updatedHand = player.hands.find((_h) => _h.handID === hand.handID);
-                if (updatedHand) {
-                    hand.updateHand(updatedHand);
-                }
-            });
-        }
-    }
-
-    public set activeHand(handID: string) {
-        this._activeHand =
-      this.hands.find((hand) => hand.handID === handID) || null;
-    }
-
     public async dealCard(newCard: DealPlayerCard): Promise<void> {
-        const hand =
-      this.getHand(newCard.handID) ||
-      new HandCanvasElement(this.scene, newCard.handID, this._seat.position);
-        this.hands.push(hand);
-        await hand.dealCard(newCard);
+        const hand = this.getHand(newCard.handID);
+        if (hand) {
+            hand.parent = this;
+            await hand.dealCard(newCard);
+        }
     }
 
     public async split({
@@ -104,13 +155,11 @@ export class PlayerSeatCanvasElement
     }: SplitParams): Promise<void> {
         const hand = this.getHand(oldHandID);
         if (hand) {
-            this._activeHand = hand;
-
             const newHand = new HandCanvasElement(
                 this.scene,
                 newHandID,
-                new Vector3().copyFrom(hand.position),
             );
+            newHand.parent = this;
             newHand.pointsElement.skin.isVisible = true;
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const [firstCard, secondCard] = hand.cards;
@@ -122,7 +171,7 @@ export class PlayerSeatCanvasElement
             newHand.updatePoints(points);
             hand.updatePoints(points);
             newHand.updateBet(bet);
-            this.hands.push(newHand);
+            this._hands.push(newHand);
 
             await Promise.all([
                 hand.animate(HandAnimation.ToLeft),
@@ -136,7 +185,7 @@ export class PlayerSeatCanvasElement
     }
 
     public getHand(handID: string): HandCanvasElement | undefined {
-        return this.hands.find((element) => element.handID === handID);
+        return this._hands.find((element) => element.handID === handID);
     }
 
     public async removeHand(
@@ -146,23 +195,102 @@ export class PlayerSeatCanvasElement
         const hand = this.getHand(handID);
         if (hand) {
             await hand.remove(gameResult);
-            const index = this.hands.findIndex((_hand) => _hand.handID !== handID);
-            if (index) {
-                this.hands.slice(index, 1);
+            const index = this._hands.findIndex((_hand) => _hand.handID === handID);
+            if (index > -1) {
+                this._hands.splice(index, 1);
             }
         }
     }
 
     public reset(): void {
-        this.hands.forEach((hand) => {
+        this._hands.forEach((hand) => {
             hand.reset();
             hand.dispose();
         });
-        this.hands = [];
-        // console.log("seat reset this.hands: ", this.hands);
+        this._hands = [];
     }
 
-    public update(matrix: GameMatrix): void {
-        this.position = getPositionFromMatrix(matrix, "player-seat");
+    public animate(): void {
+        const { frameRate, animationArray } = getSeatAnimation();
+        this.animation = this.scene.beginDirectAnimation(
+            this._seat,
+            animationArray,
+            0,
+            frameRate,
+            true,
+            animationSpeed * 0.2,
+        );
+    }
+
+    public stopAnimation(): void {
+        this.animation?.reset();
+        this.animation?.stop();
+    }
+
+    public toggleSeatAction(register: boolean): void {
+        if (this._seat.actionManager) {
+            if (register) {
+                this._seat.actionManager.registerAction(this.seatAction);
+            } else {
+                this._seat.actionManager.unregisterAction(this.seatAction);
+            }
+        }
+    }
+
+    public updateData(data: PlayerInstance): void {
+        this.playerID = data.playerID;
+        const dataHandsIds = data.hands.map((_hand) => _hand.handID);
+        const existingHandsIDs = this._hands.map((_hand) => _hand.handID);
+        const newHands = dataHandsIds.filter(
+            (id) => !existingHandsIDs.includes(id),
+        );
+        const toDeleteHandsElements = this._hands.filter(
+            (_hand) => !dataHandsIds.includes(_hand.handID),
+        );
+        const toUpdateHandsElements = this._hands.filter((_hand) =>
+            dataHandsIds.includes(_hand.handID),
+        );
+
+        toDeleteHandsElements.forEach((_hand) => {
+            _hand.dispose();
+            const handIdx = this._hands.findIndex(
+        (hand) => hand.handID === _hand.handID,
+            );
+            if (handIdx > -1) {
+                this._hands.slice(handIdx, 1);
+            }
+        });
+
+        newHands.forEach((id) => {
+            const newHand = new HandCanvasElement(
+                this.scene,
+                id,
+            );
+            newHand.parent = this;
+            this._hands.push(newHand);
+
+            const hand = data.hands.find((_hand) => _hand.handID === id);
+            if (hand) {
+                hand.cards.map((card) =>
+          newHand.addCard2({
+              card,
+              handID: newHand.handID,
+              playerID: data.playerID,
+              points: hand.points,
+              target: "player",
+          }),
+                );
+            }
+        });
+
+        toUpdateHandsElements.forEach((_handElement) => {
+            const hand = data.hands.find(
+        (_hand) => _hand.handID === _handElement.handID,
+            );
+            if (hand) {
+                _handElement.updateBet(hand.bet);
+                _handElement.updatePoints(hand.points);
+            }
+        });
     }
 }

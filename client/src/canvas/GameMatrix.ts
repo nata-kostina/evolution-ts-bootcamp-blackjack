@@ -13,11 +13,11 @@ export class GameMatrix {
     private _cellHeight: number;
     private readonly _subscribers: Array<CanvasElement>;
     private readonly _matrix: Cell[] = [
-        "0", "0", "0", "0", "0", "0", "0",
+        "0", "0", "0", "0", "0", "0", "deck",
         "chips", "0", "0", "dealer-seat", "0", "0", "0",
         "0", "0", "0", "0", "0", "0", "0",
         "0", "0", "0", "0", "0", "0", "0",
-        "0", "0", "0", "player-seat", "0", "0", "0",
+        "0", "0", "0", "0", "0", "0", "0",
         "0", "0", "0", "0", "0", "0", "0",
         "0", "0", "0", "0", "0", "0", "0",
         "0", "0", "0", "0", "0", "0", "0",

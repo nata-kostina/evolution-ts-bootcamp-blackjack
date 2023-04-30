@@ -26,25 +26,22 @@ export class HandCanvasElement extends TransformNode {
     public constructor(
         scene: Scene,
         id: string,
-        position: Vector3,
     ) {
         super(`hand-${id}`, scene);
         this.scene = scene;
         this._handID = id;
-        this.position = new Vector3().copyFrom(position);
+
         this._betElement = new BetCanvasElement(
             scene,
-            this.position,
             this._handID,
         );
-        this._betElement.setParent(this);
+        this._betElement.parent = this;
 
         this._pointsElement = new PointsCanvasElement(
             this.scene,
             this._handID,
-            this.position,
         );
-        this._pointsElement.setParent(this);
+        this._pointsElement.parent = this;
         this._pointsElement.skin.isVisible = false;
     }
 
@@ -56,24 +53,29 @@ export class HandCanvasElement extends TransformNode {
         this._betElement.updateBet(hand.bet);
     }
 
-    public async dealCard(newCard: DealPlayerCard): Promise<void> {
+    public async addCard2(newCard: DealPlayerCard): Promise<CardCanvasElement> {
         const cardElement = new CardCanvasElement(
             this.scene,
             new Vector3(
                 this._cards.length * 0.13,
+                this._cards.length * cardSize.depth,
                 0,
-                -this._cards.length * cardSize.depth - 0.04,
             ),
             newCard.card,
         );
-        cardElement.setParent(this);
+        cardElement.skin.parent = this;
+        await cardElement.addContent();
 
         this._cards.push(cardElement);
-        await cardElement.addContent();
-        await cardElement.animate(CardAnimation.Deal, () => {
-            this.updatePoints(newCard.points);
-            this._pointsElement.skin.isVisible = true;
-        });
+        return cardElement;
+    }
+
+    public async dealCard(newCard: DealPlayerCard): Promise<void> {
+        const cardElement = await this.addCard2(newCard);
+
+        await cardElement.animate(CardAnimation.Deal);
+        this.updatePoints(newCard.points);
+        this._pointsElement.skin.isVisible = true;
     }
 
     public get chipsValue(): Array<number> {

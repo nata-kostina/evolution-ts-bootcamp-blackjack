@@ -20,7 +20,6 @@ export enum Suit {
     Hearts = "H",
 }
 export type Card = { value: CardValue; suit: Suit; id: string; };
-export type Deck = Card[];
 
 export type ChipItem = { id: string; name: string; value: number; img: string; };
 
@@ -44,6 +43,7 @@ export type PlayerInstance = {
     hands: Array<Hand>;
     activeHandID: string;
     availableActions: Action[];
+    seat?: Seat;
 };
 
 export type DealerInstance = {
@@ -62,7 +62,7 @@ export enum Action {
     Hit = "Hit",
     Stand = "Stand",
     Double = "Double",
-    Surender = "Surender",
+    Surrender = "Surrender",
     Insurance = "Insurance",
     Split = "Split",
     Bet = "Bet",
@@ -100,4 +100,10 @@ export type DealPlayerCard = {
 export enum GameResult {
     Win = "win",
     Lose = "lose",
+}
+
+export enum Seat {
+    Left = "Left",
+    Middle = "Middle",
+    Right = "Right,",
 }

@@ -21,7 +21,7 @@ export class BetCanvasElement extends TransformNode implements IBetCanvasElement
     private readonly _textBlock: TextBlock;
     private readonly _chipsStack: Array<BetChipCanvasElement> = [];
 
-    public constructor(scene: Scene, handPosition: Vector3, handID: string) {
+    public constructor(scene: Scene, handID: string) {
         super(`bet-${handID}`, scene);
         this.scene = scene;
         this._handID = handID;
@@ -32,16 +32,13 @@ export class BetCanvasElement extends TransformNode implements IBetCanvasElement
         this._textGround.setParent(this);
 
         this.position = new Vector3(
-            handPosition.x,
-            handPosition.y - handSize.height * 0.5 - betTextblockSize.height * 0.5,
-            handPosition.z);
-
-        this._textGround.rotation.x = -Math.PI * 0.5;
-        this._textGround.setParent(this);
+            0,
+            0,
+            -handSize.height * 0.5 - betTextblockSize.height * 0.5);
 
         const texture = AdvancedDynamicTexture.CreateForMesh(this._textGround);
 
-        this._textBlock = new TextBlock(`text-points-${this._handID}`, "0$");
+        this._textBlock = new TextBlock(`text-points-${this._handID}`, "$0");
         this._textBlock.color = "white";
         this._textBlock.fontSize = 250;
 
@@ -60,18 +57,15 @@ export class BetCanvasElement extends TransformNode implements IBetCanvasElement
                 const chip = new BetChipCanvasElement(this.scene,
                     { id: uuid(), img: getChipImg(value), value, name: `chip-${value}` },
                 );
-                chip.setParent(this);
-
-                chip.position = new Vector3(setChip.position.x - this.position.x,
-                    setChip.position.y - this.position.y,
-                    0,
-                );
+                chip.position = new Vector3().copyFrom(setChip.position);
                 this._chipsStack.push(chip);
                 chip.finalPosition = new Vector3(
-                    this.position.x + (Math.random() * 0.08 - 0.05) - betTextblockSize.width,
+                    (Math.random() * 0.08 - 0.05) - betTextblockSize.width,
+                    this._chipsStack.length * chipSize.height * 1.1,
                     (Math.random() * 0.08 - 0.05) + 0.06,
-                    this.position.z - this._chipsStack.length * chipSize.height * 1.1);
+                );
 
+                chip.setParent(this);
                 await chip.animate(ChipAnimation.Add);
             }
         }
@@ -83,17 +77,18 @@ export class BetCanvasElement extends TransformNode implements IBetCanvasElement
             const chipConstant = chipSet.find((chip) => chip.value === lastChip.chipValue);
             if (chipConstant) {
                 const setChip = this.scene.getMeshByName(`chip-${chipConstant.id}`) as Mesh;
-                lastChip.finalPosition = new Vector3(setChip.position.x - this.position.x,
-                    setChip.position.y - this.position.y,
-                    0);
+                lastChip.setParent(setChip);
+                lastChip.finalPosition = new Vector3(0, 0, 0);
                 await lastChip.animate(ChipAnimation.Remove, () => {
                     lastChip.dispose();
                 });
+            } else {
+                lastChip.dispose();
             }
         }
     }
 
     public updateBet(bet: number): void {
-        this._textBlock.text = `${bet.toString()}$`;
+        this._textBlock.text = `$${bet.toString()}`;
     }
 }

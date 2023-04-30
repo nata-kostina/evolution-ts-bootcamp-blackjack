@@ -6,6 +6,8 @@ import Chip50 from "../assets/img/chips/chip_50.png";
 import Chip100 from "../assets/img/chips/chip_100.png";
 import Rules from "../assets/img/scene/rules.png";
 import Seat from "../assets/img/seat/seat.svg";
+import SeatText from "../assets/img/seat/seatText.png";
+import HoleCard from "../assets/img/cards/Hole.png";
 
 export const assetsSrc = {
     "chip-1": Chip1,
@@ -16,4 +18,6 @@ export const assetsSrc = {
     "chip-100": Chip100,
     "rules": Rules,
     "seat": Seat,
+    "seatText": SeatText,
+    "holeCard": HoleCard,
 };

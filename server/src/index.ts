@@ -1,10 +1,15 @@
-import { AppServer } from './AppServer.js';
+import { AppServer } from "./AppServer.js";
 
-(function init () {
-  try {
-    const server = new AppServer('http://localhost:3001');
-    server.listen();
-  } catch (error) {
-    console.log(error);
-  }
-})();
+// eslint-disable-next-line no-restricted-properties
+const clientURL = process.env.NODE_ENV === "development" ?
+    "http://localhost:3001" :
+    "https://ts-bootcamp-blackjack-client.netlify.app/";
+
+(function init() {
+    try {
+        const server = new AppServer(clientURL);
+        server.listen();
+    } catch (error) {
+        console.log(error);
+    }
+}());

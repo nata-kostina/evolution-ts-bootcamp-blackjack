@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import { io, Socket } from "socket.io-client";
-import { Game } from "./Game";
-import { errorConncetionNumLimit } from "../constants/connection.constants";
+import { Game } from "./game.store";
+import { errorConnectionNumLimit } from "../constants/connection.constants";
 import {
     ServerToClientEvents,
     ClientToServerEvents,
@@ -9,7 +9,7 @@ import {
     SocketStatus,
 } from "../types/socket.types";
 import { RoomID } from "../types/game.types";
-import { ResponseQueue } from "./ResponseHandlerQueue";
+import { ResponseQueue } from "../utils/connection/ResponseHandlerQueue";
 import { NotificationVariant } from "../types/notification.types";
 
 export class Connection {
@@ -49,7 +49,7 @@ export class Connection {
 
         this._socket.on("connect_error", async () => {
             this._connectionErrorCounter++;
-            if (this._connectionErrorCounter > errorConncetionNumLimit) {
+            if (this._connectionErrorCounter > errorConnectionNumLimit) {
                 this.status = SocketStatus.WithError;
                 this._socket.disconnect();
                 await this._game.handleNotificate({
@@ -71,9 +71,9 @@ export class Connection {
             });
         });
 
-        this._socket.on("placeBet", async (reponse) => {
+        this._socket.on("placeBet", async (response) => {
             await this._responseHandlerQueue.enqueue(async () => {
-                await this._game.handlePlaceBet(reponse);
+                await this._game.handlePlaceBet(response);
             });
         });
 
@@ -83,15 +83,15 @@ export class Connection {
             });
         });
 
-        this._socket.on("dealDealerCard", async (reponse) => {
+        this._socket.on("dealDealerCard", async (response) => {
             await this._responseHandlerQueue.enqueue(async () => {
-                await this._game.handleDealDealerCard(reponse);
+                await this._game.handleDealDealerCard(response);
             });
         });
 
-        this._socket.on("dealPlayerCard", async (reponse) => {
+        this._socket.on("dealPlayerCard", async (response) => {
             await this._responseHandlerQueue.enqueue(async () => {
-                await this._game.handleDealPlayerCard(reponse);
+                await this._game.handleDealPlayerCard(response);
             });
         });
 

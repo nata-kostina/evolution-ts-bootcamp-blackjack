@@ -1,5 +1,5 @@
 import React, { createContext, ReactNode, useContext } from "react";
-import { Game } from "../stores/Game";
+import { Game } from "../stores/game.store";
 
 interface GameContextProviderProps {
     children: ReactNode;

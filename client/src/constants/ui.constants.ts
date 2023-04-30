@@ -3,7 +3,7 @@ import { Action, BetAction } from "../types/game.types";
 import HitSVG from "../assets/img/actions/hit.svg";
 import StandSVG from "../assets/img/actions/stand.svg";
 import DoubleSVG from "../assets/img/actions/double.svg";
-import SurenderSVG from "../assets/img/actions/surender.svg";
+import SurrenderSVG from "../assets/img/actions/surrender.svg";
 import InsuranceSVG from "../assets/img/actions/insurance.svg";
 import BetSVG from "../assets/img/actions/bet.svg";
 import UndoSVG from "../assets/img/actions/undo.svg";
@@ -39,8 +39,8 @@ export const actionButtons: ActionBtn[] = [
         type: "playerAction",
     },
     {
-        action: Action.Surender,
-        svgPath: SurenderSVG,
+        action: Action.Surrender,
+        svgPath: SurrenderSVG,
         type: "playerAction",
     },
     {

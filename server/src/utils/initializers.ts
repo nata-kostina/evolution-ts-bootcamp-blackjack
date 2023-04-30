@@ -1,42 +1,42 @@
-import { initialDeck } from '../constants/index.js';
-import { GameState, Hand, PlayerInstance, SpecificID, Action, RoomID } from '../types/index.js';
-import { v4 } from 'uuid';
+import { v4 } from "uuid";
+import { initialDeck } from "../constants/index.js";
+import { GameState, Hand, PlayerInstance, SpecificID, Action, RoomID } from "../types/index.js";
 
 export function initializeGameState(roomID: RoomID): GameState {
-  return {
-    roomID,
-    deck: initialDeck,
-    players: {},
-    dealer: { cards: [], hasHoleCard: false, points: 0 },
-    hasStarted: false,
-  };
+    return {
+        roomID,
+        deck: initialDeck,
+        players: {},
+        dealer: { cards: [], hasHoleCard: false, points: 0 },
+        isMultiplayer: false,
+    };
 }
 
 export function initializePlayer({
-  playerID,
-  roomID,
-  balance = 2000,
-}: SpecificID & { balance?: number }): PlayerInstance {
-    const activeHand = initializeHand(playerID);
-  return {
     playerID,
     roomID,
-    balance,
-    bet: 0,
-    insurance: 0,
-    hands: [activeHand],
-    activeHandID: activeHand.handID,
-    availableActions: [Action.Bet],
-  };
+    balance = 2000,
+}: SpecificID & { balance?: number; }): PlayerInstance {
+    const activeHand = initializeHand(playerID);
+    return {
+        playerID,
+        roomID,
+        balance,
+        bet: 0,
+        insurance: 0,
+        hands: [activeHand],
+        activeHandID: activeHand.handID,
+        availableActions: [Action.Bet],
+    };
 }
 
 export function initializeHand(parentID: string): Hand {
-  return {
-    bet: 0,
-    cards: [],
-    handID: v4(),
-    parentID,
-    points: [0],
-    isStanding: false,
-  };
+    return {
+        bet: 0,
+        cards: [],
+        handID: v4(),
+        parentID,
+        points: [0],
+        isStanding: false,
+    };
 }
