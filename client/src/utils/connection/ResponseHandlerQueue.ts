@@ -12,7 +12,7 @@ export class ResponseQueue {
     public async enqueue(handler: Handler): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this._queue.push({ handler, resolve, reject });
-            this.dequeue();
+            this.dequeue().then(() => {}).catch(() => {});
         });
     }
 

@@ -87,7 +87,7 @@ describe("Player's actions panel tests", () => {
         expect(actionBtnElement).toBeDisabled();
     });
 
-    it("should call handleClick after button has been clicked", async () => {
+    it("should call handleClick after button has been clicked", () => {
         mock.UI.getPlayerActionBtnState = () => ({
             isDisabled: false,
             isVisible: true,
