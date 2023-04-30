@@ -9,10 +9,11 @@ import {
     PlayerID,
     RoomID,
     GameResult,
+    Seat,
 } from "./game.types";
 
 export interface ServerToClientEvents {
-    initGame: (response: SocketResponse<{ game: GameSession; playerID: PlayerID; }>) => void;
+    initGame: (response: SocketResponse<{ game: GameSession; playerID: PlayerID; availableSeats: Array<Seat>; }>) => void;
     placeBet: (response: SocketResponse<GameSession>) => void;
     updateSession: (response: SocketResponse<GameSession>) => void;
     dealDealerCard: (response: SocketResponse<DealDealerCard>) => void;
@@ -24,7 +25,6 @@ export interface ServerToClientEvents {
     finishRoundForHand: (response: SocketResponse<FinishRoundForHand>) => void;
     reassignActiveHand: (response: SocketResponse<ReassignActiveHand>) => void;
     makeDecision: (response: SocketResponse<GameSession>) => void;
-
 }
 
 export interface ClientToServerEvents {
@@ -32,7 +32,7 @@ export interface ClientToServerEvents {
     takeMoneyDecision: ({ roomID, playerID }: SpecificID & { response: YesNoAcknowledgement; }) => void;
     placeBet: ({ roomID, playerID, bet }: SpecificID & { bet: number; }) => void;
     makeDecision: ({ roomID, playerID, action }: SpecificID & { action: Action; }) => void;
-    startPlay: ({ roomID, playerID }: SpecificID) => void;
+    chooseSeat: ({ roomID, playerID, seat }: SpecificID & { seat: Seat; }) => void;
 }
 
 export type SocketResponse<T> = {

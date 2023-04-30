@@ -45,13 +45,13 @@ describe("Balance panel tests", () => {
         const { getByTestId } = render(<BalancePanel />);
 
         const balanceText = getByTestId("balance-value");
-        expect(balanceText.textContent).toBe("1000$");
+        expect(balanceText.textContent).toBe("$1000");
 
         const betText = getByTestId("bet-value");
-        expect(betText.textContent).toBe("0$");
+        expect(betText.textContent).toBe("$0");
 
         const insuranceText = getByTestId("insurance-value");
-        expect(insuranceText.textContent).toBe("0$");
+        expect(insuranceText.textContent).toBe("$0");
     });
 
     it("should not render values if player is null", () => {

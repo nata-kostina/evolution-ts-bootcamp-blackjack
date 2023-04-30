@@ -1,6 +1,6 @@
 .controlPanel {
   position: fixed;
-  height: 80px;
+  height: 75px;
   left: 0;
   bottom: 0;
   right: 0;
@@ -24,7 +24,14 @@
   justify-content: space-between;
 }
 
-@media screen and (max-height: 768px) {
+@media screen and (max-width: 720px) {
+    .controlPanel {
+        border-radius: unset;
+        padding: 1px;
+      }
+}
+
+/* @media screen and (max-height: 768px) {
   .controlPanel {
     height: 60px;
   }
@@ -41,4 +48,4 @@ screen and (max-height: 580px) {
     border-radius: unset;
     padding: 1px;
   }
-}
+} */

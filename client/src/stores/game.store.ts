@@ -1,7 +1,6 @@
-/* eslint-disable no-debugger */
 import { makeAutoObservable } from "mobx";
-import { UIStore } from "./UIstore";
-import { pickPlayerInstance } from "../utils/storeUtils/pickPlayerInsrance";
+import { UIStore } from "./UI.store";
+import { pickPlayerInstance } from "../utils/store/pickPlayerInsrance";
 import { SceneManager } from "../canvas/canvasElements/SceneManager";
 import { UnholeCardPayload } from "../types/canvas.types";
 import {
@@ -11,6 +10,7 @@ import {
     DealDealerCard,
     DealPlayerCard,
     Action,
+    Seat,
 } from "../types/game.types";
 import { Notification, NotificationVariant } from "../types/notification.types";
 import { FinishRoundForHand, ReassignActiveHand, SocketResponse } from "../types/socket.types";
@@ -22,6 +22,7 @@ import {
     notificationSchema,
     playerIDSchema,
     playerSchema,
+    seatSchema,
     unholedCardSchema,
 } from "../utils/validation/schemas";
 
@@ -67,11 +68,12 @@ export class Game {
     }
 
     public async handleInitGame(
-        response: SocketResponse<{ game: GameSession; playerID: PlayerID; }>,
+        response: SocketResponse<{ game: GameSession; playerID: PlayerID; availableSeats: Array<Seat>; }>,
     ): Promise<void> {
         await this.handleResponse(response, async () => {
             const session = await gameSessionSchema.validate(response.payload.game);
             const id = await playerIDSchema.validate(response.payload.playerID);
+            const seats = await seatSchema.validate(response.payload.availableSeats);
             this.playerID = id;
 
             const player = pickPlayerInstance({
@@ -81,7 +83,7 @@ export class Game {
 
             if (player) {
                 const validatedPlayer = await playerSchema.validate(player);
-                const validatedActiveHand = await handSchema.validate(
+                await handSchema.validate(
                     validatedPlayer.hands.find(
                             (hand) => hand.handID === player.activeHandID,
                     ),
@@ -91,10 +93,10 @@ export class Game {
 
                 this._session = session;
                 this._roomID = session.roomID;
+
                 this._ui.player = validatedPlayer;
 
-                this._ui.toggleActionBtnsVisible([Action.Bet]);
-                this._scene?.init(validatedActiveHand.handID);
+                this._scene?.init(seats);
             }
         });
     }
@@ -116,8 +118,12 @@ export class Game {
             if (player) {
                 const validatedPlayer = await playerSchema.validate(player);
                 this._session = session;
+
                 this._ui.player = validatedPlayer;
                 this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
+
+                this._scene?.updateSession(player.playerID, session.players);
+                this._scene?.toggleChipAction(validatedPlayer.availableActions.includes(Action.Bet));
             }
         });
     }
@@ -139,8 +145,10 @@ export class Game {
             if (player) {
                 const validatedPlayer = await playerSchema.validate(player);
                 this._session = session;
+
                 this._ui.player = validatedPlayer;
                 this._ui.toggleVisibleActionBtnsDisabled(true);
+
                 this._scene?.toggleChipAction(false);
             }
         });
@@ -154,9 +162,13 @@ export class Game {
                 response.payload,
             );
             switch (notification.variant) {
-                // case NotificationVariant.Blackjack:
-                //     this._scene?.addBlackjackNotification();
-                //     break;
+                case NotificationVariant.PlaceBet:
+                    if (this._ui.isModalShown) {
+                        this._ui.isModalShown = false;
+                        this._ui.modalQueue.pop();
+                    }
+                    this._ui.addModal(notification);
+                    break;
                 default:
                     this._ui.addModal(notification);
                     break;
@@ -178,8 +190,10 @@ export class Game {
                     stripUnknown: true,
                 });
                 this._session = session;
+
                 this._ui.resetBetHistory();
                 this._ui.player = validatedPlayer;
+
                 this._scene?.resetScene();
             }
         });
@@ -239,14 +253,17 @@ export class Game {
                     return;
                 }
                 this._session = session;
+
                 this._ui.player = validatedPlayer;
                 this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
                 this._ui.toggleVisibleActionBtnsDisabled(true);
+
                 await this._scene?.split({
                     oldHandID: validatedActiveHand.handID,
                     newHandID: newHand.handID,
                     bet: validatedActiveHand.bet,
                     points: validatedActiveHand.points,
+                    playerID: validatedPlayer.playerID,
                 });
             }
         });
@@ -260,6 +277,10 @@ export class Game {
                 throw new Error("No player found");
             }
 
+            const validatedPlayerID = await playerIDSchema.validate(
+                response.payload.playerID,
+            );
+
             const validatedHandID = await handIDSchema.validate(
                 response.payload.handID,
             );
@@ -268,14 +289,18 @@ export class Game {
             );
 
             this._ui.togglePlayerActionsBtnsDisabled(true);
-            await this._scene?.removeHand(validatedHandID, validatedGameResult);
+
+            await this._scene?.removeHand(validatedPlayerID, validatedHandID, validatedGameResult);
         });
     }
 
     public async handleReassignActiveHand(response: SocketResponse<ReassignActiveHand>): Promise<void> {
         await this.handleResponse(response, async () => {
             const validatedId = await handIDSchema.validate(response.payload.handID);
-            this._scene?.updateHelper({ handId: validatedId });
+            const validatedPlayerID = await playerIDSchema.validate(
+                response.payload.playerID,
+            );
+            this._scene?.updateHelper({ handId: validatedId, playerID: validatedPlayerID });
         });
     }
 

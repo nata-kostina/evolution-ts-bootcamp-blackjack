@@ -34,7 +34,7 @@ describe("Yes&No Modal tests", () => {
         expect(noBtn).toBeInTheDocument();
     });
 
-    it("should not render Yes&No Modal component ifisOpen is false", () => {
+    it("should not render Yes&No Modal component if isOpen is false", () => {
         const { queryByTestId } = render(<YesNoNotificationModal
             handleAnswer={mockProps.handleAnswer}
             isOpen={false}

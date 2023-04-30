@@ -18,7 +18,7 @@ export const getSplitHandAnimation = (
 
     keyFramesX.push({
         frame: frameRate,
-        value: type === HandAnimation.ToLeft ? initPosition.x - 0.6 : initPosition.x + 0.6,
+        value: type === HandAnimation.ToLeft ? initPosition.x - 0.5 : initPosition.x + 0.5,
     });
 
     xSlide.setKeys(keyFramesX);

@@ -1,6 +1,9 @@
 import { Animation, Vector3 } from "@babylonjs/core";
 
-export const getDealCardAnimation = (finalPosition: Vector3): { frameRate: number; animationArray: Array<Animation>; } => {
+export const getDealCardAnimation = (startPosition: Vector3,
+    finalPosition: Vector3,
+):
+{ frameRate: number; animationArray: Array<Animation>; } => {
     const frameRate = 8;
 
     const xSlide = new Animation("xSlide", "position.x", frameRate, Animation.ANIMATIONTYPE_FLOAT);
@@ -9,7 +12,7 @@ export const getDealCardAnimation = (finalPosition: Vector3): { frameRate: numbe
 
     keyFramesX.push({
         frame: 0,
-        value: 5,
+        value: startPosition.x,
     });
 
     keyFramesX.push({
@@ -25,7 +28,7 @@ export const getDealCardAnimation = (finalPosition: Vector3): { frameRate: numbe
 
     keyFramesY.push({
         frame: 0,
-        value: 5,
+        value: startPosition.y,
     });
 
     keyFramesY.push({
@@ -35,29 +38,66 @@ export const getDealCardAnimation = (finalPosition: Vector3): { frameRate: numbe
 
     ySlide.setKeys(keyFramesY);
 
-    return { frameRate, animationArray: [xSlide, ySlide] };
+    const zSlide = new Animation("zSlide", "position.z", frameRate, Animation.ANIMATIONTYPE_FLOAT);
+
+    const keyFramesZ = [];
+
+    keyFramesZ.push({
+        frame: 0,
+        value: startPosition.z,
+    });
+
+    keyFramesZ.push({
+        frame: frameRate,
+        value: finalPosition.z,
+    });
+    zSlide.setKeys(keyFramesZ);
+
+    return { frameRate, animationArray: [xSlide, zSlide, ySlide] };
 };
 
-export const getUnholeCardAnimation = (): { frameRate: number; animationArray: Array<Animation>; } => {
-    const frameRate = 5;
+export const getUnholeCardAnimation = (startRotation: number,
+    finalRotation: number): { frameRate: number; animationArray: Array<Animation>; } => {
+    const frameRate = 6;
+    const xRotation = new Animation("rotationX", "rotation.x", frameRate, Animation.ANIMATIONTYPE_FLOAT);
 
-    const yRotation = new Animation("rotationY", "rotation.y", frameRate, Animation.ANIMATIONTYPE_FLOAT);
+    const keyFramesXR = [];
 
-    const keyFramesYR = [];
-
-    keyFramesYR.push({
+    keyFramesXR.push({
         frame: 0,
-        value: Math.PI,
+        value: -Math.PI * 0.5,
     });
 
-    keyFramesYR.push({
+    keyFramesXR.push({
         frame: frameRate,
-        value: 0,
+        value: finalRotation,
     });
 
-    yRotation.setKeys(keyFramesYR);
+    xRotation.setKeys(keyFramesXR);
 
-    return { frameRate, animationArray: [yRotation] };
+    return { frameRate, animationArray: [xRotation] };
+};
+export const getTranslateYCardAnimation = (
+    startPosition: Vector3,
+    finalPosition: Vector3): { frameRate: number; animationArray: Array<Animation>; } => {
+    const frameRate = 6;
+
+    const zSlide = new Animation("zSlide", "position.y", frameRate, Animation.ANIMATIONTYPE_FLOAT);
+
+    const keyFramesZ = [];
+
+    keyFramesZ.push({
+        frame: 0,
+        value: startPosition.y,
+    });
+
+    keyFramesZ.push({
+        frame: frameRate,
+        value: finalPosition.y,
+    });
+    zSlide.setKeys(keyFramesZ);
+
+    return { frameRate, animationArray: [zSlide] };
 };
 
 export const getRemoveCardAnimation = (position: Vector3,
@@ -80,13 +120,13 @@ export const getRemoveCardAnimation = (position: Vector3,
 
     xSlide.setKeys(keyFramesX);
 
-    const ySlide = new Animation("ySlide", "position.y", frameRate, Animation.ANIMATIONTYPE_FLOAT);
+    const ySlide = new Animation("ySlide", "position.z", frameRate, Animation.ANIMATIONTYPE_FLOAT);
 
     const keyFramesY = [];
 
     keyFramesY.push({
         frame: 0,
-        value: position.y,
+        value: position.z,
     });
 
     keyFramesY.push({

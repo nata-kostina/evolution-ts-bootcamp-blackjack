@@ -8,7 +8,7 @@ import {
 import { Notification } from "../types/notification.types";
 import { IBetCanvasElement } from "../types/canvas.types";
 import { UiActionBtn } from "../types/ui.types";
-import { splitAmountIntoChipsValues } from "../utils/gameUtils/splitAmountIntoChipsValues";
+import { splitAmountIntoChipsValues } from "../utils/game/splitAmountIntoChipsValues";
 
 export class UIStore {
     private _player: PlayerInstance | null = null;
@@ -31,7 +31,7 @@ export class UIStore {
                 isDisabled: true,
                 type: "playerAction",
             },
-            [Action.Surender]: {
+            [Action.Surrender]: {
                 isVisible: false,
                 isDisabled: true,
                 type: "playerAction",
@@ -109,6 +109,10 @@ export class UIStore {
 
     public get isModalShown(): boolean {
         return this._isModalShown;
+    }
+
+    public set isModalShown(value: boolean) {
+        this._isModalShown = value;
     }
 
     public set betElement(element: IBetCanvasElement) {

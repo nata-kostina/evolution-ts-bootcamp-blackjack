@@ -23,6 +23,7 @@ jest.mock("../../../context/GameContext", () => ({
 }));
 
 const mockActionButton: ActionBtn = {
+    type: "playerAction",
     action: Action.Bet,
     svgPath: "",
 };

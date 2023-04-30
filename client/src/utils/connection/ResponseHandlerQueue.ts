@@ -33,7 +33,7 @@ export class ResponseQueue {
             this._pendingPromise = false;
             item.reject();
         } finally {
-            this.dequeue();
+            await this.dequeue();
         }
     }
 }

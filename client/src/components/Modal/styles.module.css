@@ -100,6 +100,22 @@
   transform: translateY(-4px);
 }
 
+.spinner {
+   width: 56px;
+   height: 56px;
+   border-radius: 50%;
+   background: radial-gradient(farthest-side,#e3c12b 94%,#0000) top/9px 9px no-repeat,
+          conic-gradient(#0000 30%,#e3c12b);
+   -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 9px),#000 0);
+   animation: spinner-animation 1.2s infinite linear;
+}
+
+@keyframes spinner-animation {
+   100% {
+      transform: rotate(1turn);
+   }
+}
+
 .blackjackNotification {
     font-family: "OldStandard", "serif";
     font-size: 160px;
@@ -122,4 +138,3 @@
       opacity: 0;
     }
   }
-  

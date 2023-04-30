@@ -50,11 +50,11 @@ export class BetChipCanvasElement extends Mesh {
 
     public async animate(type: ChipAnimation, onFinish?: () => void): Promise<void> {
         if (type === ChipAnimation.Lose) {
-            this._finalPosition = new Vector3(this.position.x, 5, this.position.z);
+            this._finalPosition = new Vector3(this.position.x, this.position.y, 5);
         }
 
         if (type === ChipAnimation.Win) {
-            this._finalPosition = new Vector3(this.position.x, -5, this.position.z);
+            this._finalPosition = new Vector3(this.position.x, this.position.y, -5);
         }
 
         const { frameRate, animationArray } = getChipAnimation(

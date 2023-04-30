@@ -15,6 +15,7 @@ export const useAction = () => {
             if (playerID && roomID) {
                 if (actionBtn.action === Action.Bet) {
                     const bet = game.UI.bet;
+                    game?.UI.toggleVisibleActionBtnsDisabled(true);
                     if (bet) {
                         connection.sendRequest<"placeBet">({
                             event: "placeBet",

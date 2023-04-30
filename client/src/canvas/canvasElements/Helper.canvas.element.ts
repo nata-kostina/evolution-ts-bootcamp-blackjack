@@ -33,7 +33,7 @@ export class HelperCanvasElement extends Mesh {
             position.y + handSize.height * 0.5 + helperSize.diameter,
             position.z - helperSize.diameter);
         this.rotation.y = Math.PI * 0.5;
-        this.rotation.z = -Math.PI * 0.5;
+        this.rotation.z = -Math.PI / 1.5;
     }
 
     public get skin(): Mesh {
@@ -42,12 +42,12 @@ export class HelperCanvasElement extends Mesh {
 
     public update(position: Vector3): void {
         this.position = new Vector3(position.x,
-            position.y + handSize.height * 0.5 + helperSize.diameter,
+            helperSize.diameter,
             position.z - helperSize.diameter);
         this.animate(HelperAnimation.Pulse);
     }
 
-    public async animate(type: HelperAnimation, onFinish?: () => void): Promise<void> {
+    public animate(type: HelperAnimation, onFinish?: () => void): void {
         switch (type) {
             case HelperAnimation.Pulse:
                 const { frameRate, animationArray } = getHelperAnimation(
