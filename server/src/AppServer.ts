@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+import http from "http";
 import { SinglePlayerController } from "./controllers/SinglePlayer.controller.js";
 import { PlayerStore } from "./store/Players.store.class.js";
 import { ClientToServerEvents, Controller, ServerToClientEvents } from "./types/index.js";
@@ -19,12 +20,16 @@ export class AppServer {
     private readonly _responseManager: IResponseManager;
     private readonly _controller: Controller;
 
-    public constructor(clientURL: string) {
-        this._IO = new Server<ClientToServerEvents, ServerToClientEvents>(3000, {
+    public constructor(clientURL: string, httpServer: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>) {
+        this._IO = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
+            cookie: false,
             cors: {
-                origin: clientURL,
+                origin: "*",
+                methods: ["GET", "POST"],
             },
-        });
+            transports: ["websocket"],
+        },
+        );
 
         this._IO.engine.on("headers", (headers) => {
             headers["Access-Control-Allow-Credentials"] = true;
@@ -35,7 +40,11 @@ export class AppServer {
     }
 
     public listen(): void {
+        // eslint-disable-next-line no-restricted-properties
+        this._IO.listen(parseInt(<string>process.env.PORT, 10) || 3000);
+        console.log("Server is listening...");
         this._IO.on("connection", (socket) => {
+            console.log(`Socket: ${socket} connected`);
             socket.on("initGame", async ({ playerID, mode }) => {
                 try {
                     const { error } = modeSchema.validate(mode);
