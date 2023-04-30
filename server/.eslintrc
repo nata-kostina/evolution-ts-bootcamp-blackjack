@@ -16,6 +16,7 @@
     "project": ["./tsconfig.json"]
   },
   "plugins": ["@typescript-eslint", "import", "import-newlines"],
+  "ignorePatterns": ["declaration.d.ts"],
   "rules": {
     "arrow-body-style": "off",
     "arrow-parens": "off",
