@@ -341,6 +341,12 @@
         "semi": true,
         "forceSingleLine": false
       }
+    ],
+    "import/extensions": [
+        "error",
+        {
+            "js": "ignorePackages"
+        }
     ]
   }
 }
