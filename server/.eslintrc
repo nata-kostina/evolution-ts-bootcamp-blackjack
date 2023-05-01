@@ -135,34 +135,6 @@
     "@typescript-eslint/consistent-type-exports": ["warn", { "fixMixedExportsWithInlineTypeSpecifier": true }],
     "@typescript-eslint/dot-notation": ["warn", { "allowKeywords": true }],
     "@typescript-eslint/explicit-member-accessibility": ["error", { "accessibility": "explicit" }],
-    "@typescript-eslint/explicit-module-boundary-types": [
-      "warn",
-      {
-        "allowArgumentsExplicitlyTypedAsAny": false,
-        "allowDirectConstAssertionInArrowFunctions": true,
-        "allowedNames": [
-          // ignore React lifecycle methods
-          "render",
-          "getInitialState",
-          "getDefaultProps",
-          "getChildContext",
-          "componentWillMount",
-          "UNSAFE_componentWillMount",
-          "componentDidMount",
-          "componentWillReceiveProps",
-          "UNSAFE_componentWillReceiveProps",
-          "shouldComponentUpdate",
-          "componentWillUpdate",
-          "UNSAFE_componentWillUpdate",
-          "componentDidUpdate",
-          "componentWillUnmount",
-          "componentDidCatch",
-          "getSnapshotBeforeUpdate"
-        ],
-        "allowHigherOrderFunctions": true,
-        "allowTypedFunctionExpressions": true
-      }
-    ],
     "@typescript-eslint/indent": [
       "error",
       4,
@@ -330,7 +302,7 @@
     "import/no-default-export": "error",
     "import/no-dynamic-require": "warn",
     "import/no-extraneous-dependencies": "off",
-    "import/no-unassigned-import": ["error", { "allow": ["react", "**/*.css"] }],
+    "import/no-unassigned-import": "error",
     "import/no-webpack-loader-syntax": "off",
     "import/prefer-default-export": "off",
     "import-newlines/enforce": [
