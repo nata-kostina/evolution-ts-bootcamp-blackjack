@@ -13,7 +13,7 @@ import {
 } from "./utils/validation.js";
 import { GameStore } from "./store/game.store.js";
 import { IResponseManager, ResponseManager } from "./utils/responseManager.js";
-import { SinglePlayerController } from "./controllers/singlePlayer.controller.js";
+import { SinglePlayerController } from "./controllers/controller.js";
 
 export class AppServer {
     private readonly _IO: Server<ClientToServerEvents, ServerToClientEvents>;
