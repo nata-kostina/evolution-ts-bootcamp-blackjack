@@ -8,10 +8,7 @@ import {
     Axis,
     Space,
     ActionManager,
-    ExecuteCodeAction,
-    Animatable,
 } from "@babylonjs/core";
-import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
 import { HandCanvasElement } from "./Hand.canvas.element";
 import {
     DealPlayerCard,
@@ -21,9 +18,8 @@ import {
     Seat,
 } from "../../types/game.types";
 import { HandAnimation, SplitParams } from "../../types/canvas.types";
-import { animationSpeed, seatSize, seatTextSize } from "../../constants/canvas.constants";
+import { seatSize } from "../../constants/canvas.constants";
 import { assetsSrc } from "../../constants/assets.constants";
-import { getSeatAnimation } from "../utils/animation/seat.animation";
 
 export class PlayerSeatCanvasElement
     extends GroundMesh {
@@ -32,16 +28,12 @@ export class PlayerSeatCanvasElement
     private _playerID: PlayerID | null = null;
     private _hands: Array<HandCanvasElement> = [];
     private readonly _seat: GroundMesh;
-    private seatAction: ExecuteCodeAction;
-    private animation: Animatable | null = null;
-    private _seatText: GroundMesh;
 
     public constructor(
         scene: Scene,
         type: Seat,
         position: Vector3,
         rotation: number,
-        onSeatChoose: (seat: Seat) => void,
     ) {
         super(`player-seat`, scene);
         this.scene = scene;
@@ -55,15 +47,6 @@ export class PlayerSeatCanvasElement
       this.scene,
         );
 
-        this.seatAction = new ExecuteCodeAction(
-            {
-                trigger: ActionManager.OnPickTrigger,
-            },
-            () => {
-                onSeatChoose(this._type);
-            },
-        );
-
         this._seat.setParent(this);
 
         this.rotate(Axis.X, -Math.PI * 0.5, Space.LOCAL);
@@ -71,27 +54,6 @@ export class PlayerSeatCanvasElement
         this.position = position;
 
         this._seat.actionManager = new ActionManager(this.scene);
-
-        this._seatText = MeshBuilder.CreateGround(
-      `seat-text--${this.playerID}`,
-      { width: seatTextSize.width, height: seatTextSize.height },
-      this.scene,
-        );
-        this._seatText.setParent(this._seat);
-
-        this._seatText.position = new Vector3(0, -0.01, 0);
-        this._seatText.rotate(Axis.X, -Math.PI * 0.5, Space.LOCAL);
-        this._seatText.rotate(Axis.Y, rotation, Space.LOCAL);
-        const textTexture = AdvancedDynamicTexture.CreateForMesh(this._seatText);
-
-        const textBlock = new TextBlock(
-      `seat-text--${this.playerID}`,
-      "Click\nto choose seat",
-        );
-        textBlock.color = "white";
-        textBlock.fontSize = 150;
-
-        textTexture.addControl(textBlock);
     }
 
     public set playerID(value: PlayerID | null) {
@@ -108,10 +70,6 @@ export class PlayerSeatCanvasElement
 
     public get seat(): GroundMesh {
         return this._seat;
-    }
-
-    public get seatText(): GroundMesh {
-        return this._seatText;
     }
 
     public get hands(): Array<HandCanvasElement> {
@@ -208,33 +166,6 @@ export class PlayerSeatCanvasElement
             hand.dispose();
         });
         this._hands = [];
-    }
-
-    public animate(): void {
-        const { frameRate, animationArray } = getSeatAnimation();
-        this.animation = this.scene.beginDirectAnimation(
-            this._seat,
-            animationArray,
-            0,
-            frameRate,
-            true,
-            animationSpeed * 0.2,
-        );
-    }
-
-    public stopAnimation(): void {
-        this.animation?.reset();
-        this.animation?.stop();
-    }
-
-    public toggleSeatAction(register: boolean): void {
-        if (this._seat.actionManager) {
-            if (register) {
-                this._seat.actionManager.registerAction(this.seatAction);
-            } else {
-                this._seat.actionManager.unregisterAction(this.seatAction);
-            }
-        }
     }
 
     public updateData(data: PlayerInstance): void {

@@ -22,7 +22,6 @@ import {
     notificationSchema,
     playerIDSchema,
     playerSchema,
-    seatSchema,
     unholedCardSchema,
 } from "../utils/validation/schemas";
 
@@ -73,7 +72,6 @@ export class Game {
         await this.handleResponse(response, async () => {
             const session = await gameSessionSchema.validate(response.payload.game);
             const id = await playerIDSchema.validate(response.payload.playerID);
-            const seats = await seatSchema.validate(response.payload.availableSeats);
             this.playerID = id;
 
             const player = pickPlayerInstance({
@@ -96,7 +94,12 @@ export class Game {
 
                 this._ui.player = validatedPlayer;
 
-                this._scene?.init(seats);
+                this._scene?.init();
+
+                this._ui.toggleActionBtnsVisible(validatedPlayer.availableActions);
+
+                this._scene?.updateSession(player.playerID, session.players);
+                this._scene?.toggleChipAction(true);
             }
         });
     }

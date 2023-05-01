@@ -55,7 +55,6 @@ export class SceneManager {
                 seatTypes[i],
                 position,
                 rotation,
-                (seat: Seat) => this.chooseSeat(seat),
             );
 
             this.playerSeats.push(playerSeat);
@@ -92,13 +91,9 @@ export class SceneManager {
         this._deck.addContent();
     }
 
-    public init(availableSeats: Array<Seat>): void {
+    public init(): void {
         this.playerSeats.forEach((seat) => {
             seat.addContent();
-            if (availableSeats.includes(seat.type)) {
-                seat.toggleSeatAction(true);
-                seat.animate();
-            }
         });
     }
 
@@ -191,14 +186,5 @@ export class SceneManager {
         this.dealerSeat.reset();
         this.toggleChipAction(false);
         this._helper.skin.isVisible = false;
-    }
-
-    private chooseSeat(seat: Seat): void {
-        this.controller.chooseSeat(seat);
-        this.playerSeats.forEach((seatElement) => {
-            seatElement.seatText.dispose();
-            seatElement.toggleSeatAction(false);
-            seatElement.stopAnimation();
-        });
     }
 }
