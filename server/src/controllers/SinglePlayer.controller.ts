@@ -24,6 +24,7 @@ import {
     GameResult,
     ReassignActiveHand,
     Seat,
+    Suit,
 } from "../types/index.js";
 import { IResponseManager } from "../utils/responseManager.js";
 import {
@@ -133,6 +134,9 @@ export class SinglePlayerController implements Controller {
                 case Action.Split:
                     await this.handleSplit({ roomID, playerID });
                     break;
+                case Action.SkipInsurance:
+                    this.handleSkipInsurance({ roomID, playerID });
+                    break;
                 case Action.Bet:
                     break;
                 default:
@@ -189,17 +193,12 @@ export class SinglePlayerController implements Controller {
                 await this.handleBlackjack({ roomID, playerID });
             } else {
                 const proposeInsurance = CardsHandler.canPlaceInsurance({ roomID, playerID, store: this._gameStore });
-                const canDouble = CardsHandler.canDouble({ roomID, playerID, store: this._gameStore });
-                const canSplit = CardsHandler.canSplit({ roomID, playerID, store: this._gameStore });
-                const availableActions = [Action.Hit, Action.Stand, Action.Surrender];
-                if (canDouble) {
-                    availableActions.push(Action.Double);
-                }
+                const availableActions: Array<Action> = [];
                 if (proposeInsurance) {
                     availableActions.push(Action.Insurance);
-                }
-                if (canSplit) {
-                    availableActions.push(Action.Split);
+                    availableActions.push(Action.SkipInsurance);
+                } else {
+                    availableActions.concat(...this.getAvailableActions({ roomID, playerID }));
                 }
                 this._gameStore.updatePlayer({
                     roomID,
@@ -281,7 +280,7 @@ export class SinglePlayerController implements Controller {
                 return;
             }
 
-            const { bet, balance } = this._gameStore.getPlayer({ roomID, playerID });
+            const { bet, balance, activeHandID } = this._gameStore.getPlayer({ roomID, playerID });
             this._gameStore.updateHand({
                 roomID,
                 playerID,
@@ -296,11 +295,7 @@ export class SinglePlayerController implements Controller {
             newHand.cards = [secondCard];
             newHand.points = [PointsMap[secondCard.value]];
 
-            const canSplit = CardsHandler.canSplit({ roomID, playerID, store: this._gameStore });
             const availableActions = [Action.Hit, Action.Stand];
-            if (canSplit) {
-                availableActions.push(Action.Split);
-            }
 
             const player = this._gameStore.getPlayer({ roomID, playerID });
 
@@ -319,6 +314,23 @@ export class SinglePlayerController implements Controller {
                 event: "split",
                 response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
             });
+
+            await this.dealPlayerCard({ roomID, playerID });
+            this.reassignActiveHand({ roomID, playerID });
+            await this.dealPlayerCard({ roomID, playerID });
+            this._gameStore.updatePlayer({
+                roomID,
+                playerID,
+                payload: {
+                    activeHandID: activeHandID,
+                },
+            });
+            this._respondManager.respond({
+                event: "reassignActiveHand",
+                roomID,
+                response: [successResponse<ReassignActiveHand>(ld.cloneDeep({ roomID, playerID, handID: activeHandID }))],
+            });
+
             await this._respondManager.respondWithDelay({
                 roomID,
                 event: "makeDecision",
@@ -425,10 +437,11 @@ export class SinglePlayerController implements Controller {
 
     private async dealCards({ playerID, roomID }: SpecificID): Promise<void> {
         try {
-            await this.dealPlayerCard({ roomID, playerID });
-            await this.dealDealerCard(roomID);
-            await this.dealPlayerCard({ roomID, playerID });
-            await this.dealDealerHoleCard(roomID);
+            // await this.dealPlayerCard({ roomID, playerID });
+            // await this.dealDealerCard(roomID);
+            // await this.dealPlayerCard({ roomID, playerID });
+            // await this.dealDealerHoleCard(roomID);
+            await this.dealMockCards({ roomID, playerID });
         } catch (error: unknown) {
             throw new Error(isError(error) ? error.message : `${playerID}: Failed to deal cards`);
         }
@@ -469,15 +482,16 @@ export class SinglePlayerController implements Controller {
 
     private placeInsurance({ playerID, roomID }: SpecificID): void {
         try {
-            const { balance, bet, availableActions } = this._gameStore.getPlayer({ playerID, roomID });
+            const { balance, bet } = this._gameStore.getPlayer({ playerID, roomID });
             const insurance = bet / 2;
+            const availableActions = this.getAvailableActions({ roomID, playerID });
             this._gameStore.updatePlayer({
                 roomID,
                 playerID,
                 payload: {
                     balance: balance - insurance,
                     insurance,
-                    availableActions: availableActions.filter((action) => action !== Action.Insurance),
+                    availableActions: availableActions,
                 },
             });
             this._respondManager.respond({
@@ -767,6 +781,51 @@ export class SinglePlayerController implements Controller {
         }
     }
 
+    private getAvailableActions({ playerID, roomID }: SpecificID): Action[] {
+        try {
+            const availableActions = [Action.Hit, Action.Stand, Action.Surrender];
+            const canDouble = CardsHandler.canDouble({ roomID, playerID, store: this._gameStore });
+            const canSplit = CardsHandler.canSplit({ roomID, playerID, store: this._gameStore });
+            if (canDouble) {
+                availableActions.push(Action.Double);
+            }
+
+            if (canSplit) {
+                availableActions.push(Action.Split);
+            }
+
+            return availableActions;
+        } catch (error) {
+            throw new Error(`Socket ${playerID}: Failed to get available actions`);
+        }
+    }
+
+    private handleSkipInsurance({ playerID, roomID }: SpecificID): void {
+        try {
+            const availableActions = this.getAvailableActions({ roomID, playerID });
+
+            this._gameStore.updatePlayer({
+                roomID,
+                playerID,
+                payload: {
+                    availableActions,
+                },
+            });
+            this._respondManager.respond({
+                event: "updateSession",
+                roomID,
+                response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
+            });
+            this._respondManager.respond({
+                roomID,
+                event: "makeDecision",
+                response: [successResponse<GameSession>(ld.cloneDeep(this._gameStore.getSession(roomID)))],
+            });
+        } catch (error) {
+            throw new Error(`Socket ${playerID}: Failed to skip insurance`);
+        }
+    }
+
     private giveInsurance({ playerID, roomID }: SpecificID): void {
         try {
             const { balance, insurance } = this._gameStore.getPlayer({ playerID, roomID });
@@ -948,6 +1007,98 @@ export class SinglePlayerController implements Controller {
             payload: {
                 hasHoleCard: true,
                 holeCard: card,
+            },
+        });
+        await this._respondManager.respondWithDelay({
+            roomID,
+            event: "dealDealerCard",
+            response: [
+                successResponse<DealDealerCard>({
+                    target: "dealer",
+                    card: { id: "hole" },
+                    points: this._gameStore.getDealer(roomID).points,
+                }),
+            ],
+        });
+    }
+
+    private async dealMockCards({ playerID, roomID }: SpecificID): Promise<void> {
+        const player = this._gameStore.getPlayer({ playerID, roomID });
+        const card1 = { id: "1sd23", suit: Suit.Clubs, value: CardValue.FOUR };
+
+        this._gameStore.updateHand({
+            playerID: player.playerID,
+            roomID,
+            handID: player.activeHandID,
+            payload: {
+                cards: [card1],
+            },
+        });
+
+        await this._respondManager.respondWithDelay({
+            roomID,
+            event: "dealPlayerCard",
+            response: [
+                successResponse<DealPlayerCard>({
+                    target: "player",
+                    card: card1,
+                    handID: player.activeHandID,
+                    points: this._gameStore.getScore({ roomID, playerID, handID: player.activeHandID }),
+                    playerID,
+                }),
+            ],
+        });
+
+        const card2 = { id: "1faf", suit: Suit.Clubs, value: CardValue.ACE };
+        this._gameStore.updateDealer({
+            roomID,
+            payload: {
+                hasHoleCard: false,
+                cards: [card2],
+            },
+        });
+        await this._respondManager.respondWithDelay({
+            roomID,
+            event: "dealDealerCard",
+            response: [
+                successResponse<DealDealerCard>({
+                    target: "dealer",
+                    card: card2,
+                    points: this._gameStore.getDealer(roomID).points,
+                }),
+            ],
+        });
+
+        const card3 = { id: "ghjr", suit: Suit.Clubs, value: CardValue.FOUR };
+        this._gameStore.updateHand({
+            playerID: player.playerID,
+            roomID,
+            handID: player.activeHandID,
+            payload: {
+                cards: [...this._gameStore.getActiveHand({ roomID, playerID }).cards, card3],
+            },
+        });
+
+        await this._respondManager.respondWithDelay({
+            roomID,
+            event: "dealPlayerCard",
+            response: [
+                successResponse<DealPlayerCard>({
+                    target: "player",
+                    card: card3,
+                    handID: player.activeHandID,
+                    points: this._gameStore.getScore({ roomID, playerID, handID: player.activeHandID }),
+                    playerID,
+                }),
+            ],
+        });
+
+        const card4 = { id: "wegtq", suit: Suit.Clubs, value: CardValue.SEVEN };
+        this._gameStore.updateDealer({
+            roomID,
+            payload: {
+                hasHoleCard: true,
+                holeCard: card4,
             },
         });
         await this._respondManager.respondWithDelay({

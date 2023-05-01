@@ -43,7 +43,7 @@ export class DealerSeatCanvasElement extends TransformNode implements CanvasElem
 
             await unholedCard.addContent();
             unholedCard.position = holeCard.position;
-            await unholedCard.animate(CardAnimation.Unhole);
+            await unholedCard.animate(CardAnimation.OpenDealerCard);
             this.updatePoints(points);
         }
     }

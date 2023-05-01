@@ -1,7 +1,6 @@
 import { Server } from "socket.io";
 import http from "http";
-import { SinglePlayerController } from "./controllers/SinglePlayer.controller.js";
-import { PlayerStore } from "./store/Players.store.class.js";
+import { PlayerStore } from "./store/players.store.js";
 import { ClientToServerEvents, Controller, ServerToClientEvents } from "./types/index.js";
 import {
     actionSchema,
@@ -12,15 +11,16 @@ import {
     seatSchema,
     yesNoResponseSchema,
 } from "./utils/validation.js";
-import { GameStore } from "./store/Game.store.class.js";
+import { GameStore } from "./store/game.store.js";
 import { IResponseManager, ResponseManager } from "./utils/responseManager.js";
+import { SinglePlayerController } from "./controllers/SinglePlayer.controller.js";
 
 export class AppServer {
     private readonly _IO: Server<ClientToServerEvents, ServerToClientEvents>;
     private readonly _responseManager: IResponseManager;
     private readonly _controller: Controller;
 
-    public constructor(clientURL: string, httpServer: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>) {
+    public constructor(httpServer: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>) {
         this._IO = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
             cookie: false,
             cors: {

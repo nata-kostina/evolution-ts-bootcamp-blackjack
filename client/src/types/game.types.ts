@@ -66,13 +66,14 @@ export enum Action {
     Insurance = "Insurance",
     Split = "Split",
     Bet = "Bet",
+    SkipInsurance = "SkipInsurance",
 }
 
 export enum BetAction {
     Undo = "undo",
     Reset = "reset",
     Rebet = "rebet",
-    AllIn = "All in",
+    AllIn = "Allin",
 }
 
 export enum GameMode {

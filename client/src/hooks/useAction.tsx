@@ -1,3 +1,4 @@
+import { toJS } from "mobx";
 import { useConnection } from "../context/ConnectionContext";
 import { useGame } from "../context/GameContext";
 import { Action, BetAction } from "../types/game.types";
@@ -12,6 +13,8 @@ export const useAction = () => {
         const roomID = connection?.roomID;
 
         if (isPlayerAction(actionBtn, actionBtn.action)) {
+            game?.UI.saveBetHistory();
+            console.log("last bet history: ", toJS(game?.UI.lastBetHistory));
             if (playerID && roomID) {
                 if (actionBtn.action === Action.Bet) {
                     const bet = game.UI.bet;

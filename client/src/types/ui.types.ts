@@ -4,6 +4,7 @@ export type ActionBtn = {
     action: Action | BetAction;
     svgPath: string;
     type: "playerAction" | "betAction";
+    text: string;
 };
 
 export type BetActionBtn = {

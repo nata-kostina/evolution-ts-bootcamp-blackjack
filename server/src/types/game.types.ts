@@ -68,6 +68,7 @@ export enum Action {
     Insurance = "Insurance",
     Split = "Split",
     Bet = "Bet",
+    SkipInsurance = "SkipInsurance",
 }
 
 export const WinCoefficient = {

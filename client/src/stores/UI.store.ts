@@ -41,6 +41,11 @@ export class UIStore {
                 isDisabled: true,
                 type: "playerAction",
             },
+            [Action.SkipInsurance]: {
+                isVisible: false,
+                isDisabled: true,
+                type: "playerAction",
+            },
             [Action.Bet]: {
                 isVisible: true,
                 isDisabled: true,
@@ -79,6 +84,7 @@ export class UIStore {
     private _modalQueue: Array<Notification> = [];
     private _isModalShown = false;
     private _betElement: IBetCanvasElement | null = null;
+    private _undoMode: "last" | "all" = "last";
 
     public constructor() {
         makeAutoObservable(this);
@@ -145,8 +151,13 @@ export class UIStore {
         this._actionBtnsState[Action.Bet].isDisabled = true;
         this._actionBtnsState[BetAction.Undo].isDisabled = true;
         this._actionBtnsState[BetAction.Reset].isDisabled = true;
-        this._actionBtnsState[BetAction.Rebet].isDisabled = !(this._lastBetHistory.length > 0);
-        this._actionBtnsState[BetAction.AllIn].isDisabled = false;
+
+        const playerBalance = this.player ? this.player.balance : 0;
+        this._actionBtnsState[BetAction.AllIn].isDisabled = playerBalance <= 0;
+
+        const lastBetSum = this._lastBetHistory.reduce((sum, current) => sum + current, 0);
+        this._actionBtnsState[BetAction.Rebet].isDisabled = !(this._lastBetHistory.length > 0 &&
+            lastBetSum <= playerBalance);
     }
 
     public toggleActionBtnsVisible(enabled: AvailableActions): void {
@@ -186,6 +197,7 @@ export class UIStore {
                     this._betElement.addChip(value);
                     this._betElement.updateBet(this.player.bet);
                 }
+                this._undoMode = "last";
             }
         } catch (error) {
             console.log("Failed to add bet");
@@ -194,20 +206,32 @@ export class UIStore {
 
     public undoBet(): void {
         try {
-            if (this.player) {
-                const lastBet = this._betHistory.pop();
-                if (lastBet) {
-                    this.player.bet -= lastBet;
-                    this.player.balance += lastBet;
+            if (this.player && this._betElement) {
+                if (this._undoMode === "last") {
+                    const lastBet = this._betHistory.pop();
+                    if (lastBet) {
+                        this.player.bet -= lastBet;
+                        this.player.balance += lastBet;
+                    }
+
+                    this._betElement.removeChip();
+                    this._betElement.updateBet(this.player.bet);
+                } else {
+                    // eslint-disable-next-line @typescript-eslint/prefer-for-of
+                    for (let i = 0; i < this._betHistory.length; i++) {
+                        this._betElement.removeChip();
+                    }
+
+                    this._betHistory = [];
+                    this.player.balance += this.player.bet;
+                    this.player.bet = 0;
+                    this._undoMode = "last";
                 }
                 if (this.player.bet === 0) {
                     this.toggleBetEditBtnsDisabled(true);
                     this.togglePlaceBetBtnDisabled(true);
                 }
-                if (this._betElement) {
-                    this._betElement.removeChip();
-                    this._betElement.updateBet(this.player.bet);
-                }
+                this._betElement.updateBet(this.player.bet);
             }
         } catch (error) {
             console.log("Failed to undo bet");
@@ -220,13 +244,21 @@ export class UIStore {
         }
     }
 
+    public saveBetHistory(): void {
+        this._lastBetHistory = [...this._betHistory];
+    }
+
     public resetBetHistory(): void {
-        this._lastBetHistory = this._betHistory;
         this._betHistory = [];
     }
 
     public rebet(): void {
         this._lastBetHistory.forEach((bet) => this.addBet(bet));
+        this._undoMode = "all";
+    }
+
+    public get lastBetHistory(): Array<number> {
+        return this._lastBetHistory;
     }
 
     public allIn(): void {
@@ -245,6 +277,7 @@ export class UIStore {
                 this._betElement?.updateBet(this.player.bet);
             }
         }
+        this._undoMode = "all";
     }
 
     public addModal(notification: Notification): void {

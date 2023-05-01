@@ -26,6 +26,7 @@ const mockActionButton: ActionBtn = {
     type: "playerAction",
     action: Action.Bet,
     svgPath: "",
+    text: "Bet",
 };
 
 const MockHandleClick = jest.fn();

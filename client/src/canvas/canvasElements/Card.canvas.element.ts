@@ -162,6 +162,22 @@ export class CardCanvasElement {
                 );
                 await translateAnim.waitAsync();
                 break;
+            case CardAnimation.OpenDealerCard:
+                const { frameRate: framerateTranslate, animationArray: translateDealerCardAnimation } =
+                  getTranslateYCardAnimation(this.position, new Vector3(this.position.x,
+                      this.position.y + cardSize.height * 0.4,
+                      this.position.z));
+                const translateDealerCardAnim = this.scene.beginDirectAnimation(
+                    this._skin,
+                    translateDealerCardAnimation,
+                    0,
+                    framerateTranslate,
+                    false,
+                    animationSpeed * 3,
+                );
+                await translateDealerCardAnim.waitAsync();
+                await this.animate(CardAnimation.Unhole);
+                break;
             default:
                 assertUnreachable(type);
         }

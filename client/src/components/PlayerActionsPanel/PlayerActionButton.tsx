@@ -27,7 +27,7 @@ export const PlayerActionButton = observer(({ item }: Props) => {
                 <div className={styles.imgContainer} data-testid="actionIcon">
                     <ReactSVG className={styles.imgContainerInner} src={item.svgPath} />
                 </div>
-                <div className={styles.textContainer}>{item.action}</div>
+                <div className={styles.textContainer}>{item.text}</div>
             </button>
         )}
         </>

@@ -12,6 +12,7 @@ export enum CardAnimation {
     Deal = "Deal",
     Remove = "Remove",
     Unhole = "Unhole",
+    OpenDealerCard = "OpenDealerCard",
 }
 
 export enum HandAnimation {
