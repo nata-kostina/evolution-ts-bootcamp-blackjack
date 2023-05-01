@@ -10,9 +10,8 @@
     }
   },
   "scripts": {
-    "dev": "cross-env NODE_ENV=development npx nodemon",
-    "build": "cross-env NODE_ENV=production && npx tsc",
-    "start": "node build/index.js",
+    "build": "cross-env NODE_ENV=production npx tsc",
+    "start": "cross-env NODE_ENV=development npx nodemon",
     "lint": "npx eslint ./src",
     "test": "jest"
   },
