@@ -13,7 +13,8 @@
     "dev": "cross-env NODE_ENV=development npx nodemon",
     "build": "cross-env NODE_ENV=production && npx tsc",
     "start": "node build/index.js",
-    "lint": "npx eslint ./src"
+    "lint": "npx eslint ./src",
+    "test": "jest"
   },
   "author": "natakostina123@gmail.com",
   "license": "ISC",
