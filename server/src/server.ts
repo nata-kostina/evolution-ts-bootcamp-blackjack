@@ -12,8 +12,8 @@ import {
     yesNoResponseSchema,
 } from "./utils/validation.js";
 import { GameStore } from "./store/game.store.js";
-import { SinglePlayerController } from "./controllers/singlePlayer.controller.js";
 import { IResponseManager, ResponseManager } from "./utils/responseManager.js";
+import { SinglePlayerController } from "./controllers/singlePlayer.controller.js";
 
 export class AppServer {
     private readonly _IO: Server<ClientToServerEvents, ServerToClientEvents>;
