@@ -31,6 +31,9 @@ jobs:
       - name: build
         run: npm run build
         
+      - name: init git in server directory
+        run: git init
+        
       - name: Add remote origin
         run: git remote add heroku https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git
 
