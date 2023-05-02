@@ -9,11 +9,11 @@ import {
 } from "@babylonjs/core";
 import { assetsSrc } from "../../constants/assets.constants";
 import { cardSize } from "../../constants/canvas.constants";
-import { GameMatrix } from "../GameMatrix";
+import { CanvasElement, GameMatrix } from "../GameMatrix";
 import { getPositionFromMatrix } from "../utils/getPositionFromMatrix";
 import { CardCanvasElement } from "./Card.canvas.element";
 
-export class DeckCanvasElement extends TransformNode {
+export class DeckCanvasElement extends TransformNode implements CanvasElement {
     private readonly scene: Scene;
     private readonly cardsNum = 100;
 
@@ -44,5 +44,9 @@ export class DeckCanvasElement extends TransformNode {
             card.position = new Vector3(0, -i * cardSize.depth, 0);
             card.skin.material = cardMaterial;
         }
+    }
+
+    public update(matrix: GameMatrix): void {
+        this.position = getPositionFromMatrix(matrix, "deck");
     }
 }

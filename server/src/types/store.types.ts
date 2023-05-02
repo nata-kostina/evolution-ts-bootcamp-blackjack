@@ -7,7 +7,6 @@ export interface GameState {
     deck: Deck;
     players: Record<PlayerID, PlayerInstance>;
     dealer: DealerInstance;
-    isMultiplayer: boolean;
 }
 
 export type State = Record<RoomID, GameState>;

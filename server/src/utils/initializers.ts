@@ -8,7 +8,6 @@ export function initializeGameState(roomID: RoomID): GameState {
         deck: initialDeck,
         players: {},
         dealer: { cards: [], hasHoleCard: false, points: 0 },
-        isMultiplayer: false,
     };
 }
 

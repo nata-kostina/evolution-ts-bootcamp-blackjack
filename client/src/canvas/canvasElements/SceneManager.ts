@@ -42,30 +42,22 @@ export class SceneManager {
         this.gameMatrix = matrix;
         this.controller = controller;
 
-        const seatTypes = Object.values(Seat);
+        const playerSeat = new PlayerSeatCanvasElement(
+            scene,
+            Seat.Middle,
+            new Vector3(0, -0.2, 0),
+            0,
+        );
 
-        for (let i = 0; i < seatTypes.length; i++) {
-            const x =
-        ((i + 1) / (seatTypes.length + 1)) * this.gameMatrix.matrixWidth -
-        this.gameMatrix.matrixWidth * 0.5;
-            const position = new Vector3(x, Math.abs(x) * 0.2 - 0.2, 0);
-            const rotation = (i - (seatTypes.length - 1) * 0.5) * (-Math.PI / 9);
-            const playerSeat = new PlayerSeatCanvasElement(
-                scene,
-                seatTypes[i],
-                position,
-                rotation,
-            );
+        this.playerSeats.push(playerSeat);
 
-            this.playerSeats.push(playerSeat);
-        }
         this.dealerSeat = new DealerSeatCanvasElement(scene, matrix);
         this.chipSet = new ChipSetCanvasElement(scene, matrix, controller);
         this._helper = new HelperCanvasElement(scene, Vector3.Zero());
         this._helper.skin.isVisible = false;
         this._deck = new DeckCanvasElement(scene, matrix);
 
-        this.gameMatrix.addSubscriber([this.chipSet, this.dealerSeat]);
+        this.gameMatrix.addSubscriber([this.chipSet, this.dealerSeat, this._deck]);
     }
 
     public addContent(): void {

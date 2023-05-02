@@ -373,10 +373,7 @@ export class Store implements IStore {
         const rooms = io.sockets.adapter.rooms;
         for (const [id, participants] of rooms) {
             if (id.startsWith("Room_id_") && participants.size < maxPlayersNum) {
-                const game = this.getGame(id);
-                if (game.isMultiplayer) {
-                    return id;
-                }
+                return id;
             }
         }
         return null;
