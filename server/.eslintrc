@@ -16,7 +16,7 @@
     "project": ["./tsconfig.json"]
   },
   "plugins": ["@typescript-eslint", "import", "import-newlines"],
-  "ignorePatterns": ["declaration.d.ts"],
+  "ignorePatterns": ["jest.config.js"],
   "rules": {
     "arrow-body-style": "off",
     "arrow-parens": "off",

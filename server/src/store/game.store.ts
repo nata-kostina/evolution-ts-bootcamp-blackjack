@@ -22,11 +22,15 @@ import { initializeGameState, initializeHand } from "../utils/initializers.js";
 import { CardsHandler } from "../utils/CardsHandler.js";
 import { maxPlayersNum } from "../constants/game.constants.js";
 
-class Store implements IStore {
+export class Store implements IStore {
     private store: State;
 
     public constructor() {
         this.store = {};
+    }
+
+    public get game(): State {
+        return this.store;
     }
 
     public updateDeck({ roomID, deck }: { roomID: RoomID; deck: Deck; }): void {

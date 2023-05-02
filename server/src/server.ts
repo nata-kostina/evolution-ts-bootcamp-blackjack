@@ -44,15 +44,15 @@ export class AppServer {
         this._IO.listen(parseInt(<string>process.env.PORT, 10) || 3000);
         console.log("Server is listening...");
         this._IO.on("connection", (socket) => {
-            console.log(`Socket: ${socket} connected`);
-            socket.on("initGame", async ({ playerID, mode }) => {
+            console.log(`Socket: ${socket.id} was connected`);
+            socket.on("initGame", async ({ playerID, mode, debug }) => {
                 try {
                     const { error } = modeSchema.validate(mode);
                     if (error) {
                         throw new Error("Invalid parameter");
                     }
 
-                    await this._controller.handleInitGame({ playerID, socket });
+                    await this._controller.handleInitGame({ playerID, socket, debug });
                 } catch (e: unknown) {
                     this._IO.to(socket.id).emit("initGame", { ok: false, statusText: "Failed to initialize a game" });
                 }

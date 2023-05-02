@@ -35,15 +35,17 @@ export const GameCanvas = observer(() => {
         game.scene = sceneManager;
 
         const assetsManager = new AssetsLoader(canvasBase.scene);
+
         assetsManager.preload()
             .then(() => {
                 setIsLoading(false);
                 sceneManager.addContent();
                 const playerID: string | null = localStorage.getItem("player_id");
 
+                const isDebugMode = window.location.href.split("/").pop() === "debug";
                 connection.sendRequest<"initGame">({
                     event: "initGame",
-                    payload: [{ playerID, mode: GameMode.Single }],
+                    payload: [{ playerID, mode: GameMode.Single, debug: isDebugMode }],
                 });
             })
             .catch((error) => console.log(error));

@@ -44,6 +44,7 @@ export class SinglePlayerController implements Controller {
     private readonly _playersStore: IPlayersStore;
     private readonly _gameStore: IStore;
     private readonly _respondManager: IResponseManager;
+    private _isDebugMode = false;
 
     public constructor(playersStore: IPlayersStore, gameStore: IStore, respondManager: IResponseManager) {
         this._playersStore = playersStore;
@@ -51,11 +52,13 @@ export class SinglePlayerController implements Controller {
         this._respondManager = respondManager;
     }
 
-    public async handleInitGame({ playerID, socket }: {
+    public async handleInitGame({ playerID, socket, debug }: {
         playerID: PlayerID;
         socket: Socket;
+        debug: boolean;
     }): Promise<void> {
         try {
+            this._isDebugMode = debug;
             const id = playerID || generatePlayerID();
             const roomID = this._gameStore.createNewRoom();
 
@@ -198,7 +201,8 @@ export class SinglePlayerController implements Controller {
                     availableActions.push(Action.Insurance);
                     availableActions.push(Action.SkipInsurance);
                 } else {
-                    availableActions.concat(...this.getAvailableActions({ roomID, playerID }));
+                    const actions = this.getAvailableActions({ roomID, playerID });
+                    availableActions.push(...actions);
                 }
                 this._gameStore.updatePlayer({
                     roomID,
@@ -437,11 +441,14 @@ export class SinglePlayerController implements Controller {
 
     private async dealCards({ playerID, roomID }: SpecificID): Promise<void> {
         try {
-            // await this.dealPlayerCard({ roomID, playerID });
-            // await this.dealDealerCard(roomID);
-            // await this.dealPlayerCard({ roomID, playerID });
-            // await this.dealDealerHoleCard(roomID);
-            await this.dealMockCards({ roomID, playerID });
+            if (this._isDebugMode) {
+                await this.dealMockCards({ roomID, playerID });
+            } else {
+                await this.dealPlayerCard({ roomID, playerID });
+                await this.dealDealerCard(roomID);
+                await this.dealPlayerCard({ roomID, playerID });
+                await this.dealDealerHoleCard(roomID);
+            }
         } catch (error: unknown) {
             throw new Error(isError(error) ? error.message : `${playerID}: Failed to deal cards`);
         }

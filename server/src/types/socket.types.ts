@@ -36,7 +36,7 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-    initGame: ({ playerID, mode }: { playerID: PlayerID | null; mode: GameMode; }) => void;
+    initGame: (payload: { playerID: PlayerID | null; mode: GameMode; debug: boolean; }) => void;
     finishGame: ({ roomID, playerID }: SpecificID) => void;
     takeMoneyDecision: ({ roomID, playerID }: SpecificID & { response: YesNoAcknowledgement; }) => void;
     placeBet: ({ roomID, playerID, bet }: SpecificID & { bet: Bet; }) => void;

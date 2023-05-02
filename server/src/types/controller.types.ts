@@ -9,7 +9,7 @@ import {
 } from "./index.js";
 
 export interface Controller {
-    handleInitGame(payload: { playerID: PlayerID | null; socket: Socket; }): Promise<void>;
+    handleInitGame(payload: { playerID: PlayerID | null; socket: Socket; debug: boolean; }): Promise<void>;
     handleDecision({ roomID, playerID, action }: SpecificID & { action: Action; }): Promise<void>;
     handlePlaceBet({ playerID, roomID, bet }: SpecificID & { bet: Bet; socketID: string; }): Promise<void>;
     handleTakeMoneyDecision({

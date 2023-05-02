@@ -14,9 +14,10 @@ export const GameErrorNotification = ({ isOpen, closeModal }: Props) => {
     const game = useGame();
 
     const handleOkClick = () => {
+        const isDebugMode = window.location.href.split("/").pop() === "debug";
         connection?.sendRequest<"initGame">({
             event: "initGame",
-            payload: [{ playerID: game?.playerID, mode: GameMode.Single }],
+            payload: [{ playerID: game?.playerID, mode: GameMode.Single, debug: isDebugMode }],
         });
     };
     return (

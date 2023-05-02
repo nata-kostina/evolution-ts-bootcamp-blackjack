@@ -51,7 +51,6 @@ export class CanvasBase {
     private createCamera(): ArcRotateCamera {
         const camera = new ArcRotateCamera("Camera", -Math.PI * 0.5, Math.PI * 0.54, 2.8, Vector3.Zero(), this._scene);
         this._scene.setActiveCameraByName("Camera");
-        camera.attachControl(true);
         return camera;
     }
 
