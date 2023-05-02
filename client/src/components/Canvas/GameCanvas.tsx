@@ -42,7 +42,8 @@ export const GameCanvas = observer(() => {
                 sceneManager.addContent();
                 const playerID: string | null = localStorage.getItem("player_id");
 
-                const isDebugMode = window.location.href.split("/").pop() === "debug";
+                const isDebugMode = window.location.search.includes("debug=true");
+
                 connection.sendRequest<"initGame">({
                     event: "initGame",
                     payload: [{ playerID, mode: GameMode.Single, debug: isDebugMode }],
