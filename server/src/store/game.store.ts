@@ -304,36 +304,6 @@ export class Store implements IStore {
         }
     }
 
-    public getResetSession({ playerID, roomID }: SpecificID): GameSession {
-        try {
-            const player = this.getPlayer({ playerID, roomID });
-            const activeHand = initializeHand(playerID);
-
-            const updatedPlayer: PlayerInstance = {
-                ...player,
-                hands: [activeHand],
-                bet: 0,
-                insurance: 0,
-                activeHandID: activeHand.handID,
-            };
-
-            const session: GameSession = {
-                roomID: playerID,
-                players: {
-                    [playerID]: updatedPlayer,
-                },
-                dealer: {
-                    hasHoleCard: false,
-                    cards: [],
-                    points: 0,
-                },
-            };
-            return session;
-        } catch (e) {
-            throw new Error(`Player ${playerID}: Failed to get reset session`);
-        }
-    }
-
     public reassignActiveHand({ roomID, playerID }: SpecificID): void {
         try {
             const player = this.getPlayer({ roomID, playerID });
@@ -377,16 +347,6 @@ export class Store implements IStore {
             }
         }
         return null;
-    }
-
-    public getAvailableSeat(roomID: RoomID): Array<Seat> {
-        try {
-            const { players } = this.getGame(roomID);
-            const occupiedSeats = Object.values(players).map((player) => player.seat);
-            return Object.values(Seat).filter((seat) => !occupiedSeats.includes(seat));
-        } catch (e: unknown) {
-            throw new Error("Failed to reset dealer");
-        }
     }
 }
 

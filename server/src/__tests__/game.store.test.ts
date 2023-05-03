@@ -313,4 +313,90 @@ describe("Players' store", () => {
         expect(actualDealer.hasHoleCard).toBe(false);
         expect(actualDealer.holeCard).toBeUndefined();
     });
+
+    it("should reset game session", () => {
+        gameStore.game[roomID] = session;
+        gameStore.resetSession({ roomID, playerID });
+        const actualDealer = gameStore.game[roomID].dealer;
+
+        expect(actualDealer.cards).toStrictEqual([]);
+        expect(actualDealer.hasHoleCard).toBe(false);
+        expect(actualDealer.holeCard).toBeUndefined();
+
+        const actualPlayer = gameStore.game[roomID].players[playerID];
+
+        expect(actualPlayer.activeHandID).toBe("");
+        expect(actualPlayer.availableActions).toStrictEqual([]);
+        expect(actualPlayer.balance).toBe(mockPlayerInstance.balance);
+        expect(actualPlayer.bet).toBe(0);
+        expect(actualPlayer.hands).toStrictEqual([]);
+        expect(actualPlayer.insurance).toBe(0);
+    });
+
+    it("should get reset game session", () => {
+        gameStore.game[roomID] = session;
+        gameStore.resetSession({ roomID, playerID });
+        const actualDealer = gameStore.game[roomID].dealer;
+
+        expect(actualDealer.cards).toStrictEqual([]);
+        expect(actualDealer.hasHoleCard).toBe(false);
+        expect(actualDealer.holeCard).toBeUndefined();
+
+        const actualPlayer = gameStore.game[roomID].players[playerID];
+
+        expect(actualPlayer.activeHandID).toBe("");
+        expect(actualPlayer.availableActions).toStrictEqual([]);
+        expect(actualPlayer.balance).toBe(mockPlayerInstance.balance);
+        expect(actualPlayer.bet).toBe(0);
+        expect(actualPlayer.hands).toStrictEqual([]);
+        expect(actualPlayer.insurance).toBe(0);
+    });
+
+    it("should reassign active hand", () => {
+        const mockHand: Hand = {
+            parentID: playerID,
+            handID: "active-hand",
+            bet: 15,
+            cards: [{ id: "card-id", value: CardValue.EIGHT, suit: Suit.Diamonds }],
+            isStanding: false,
+            points: [8],
+        };
+        const mockNewHand: Hand = {
+            parentID: mockHand.handID,
+            handID: "new-active-hand",
+            bet: 15,
+            cards: [{ id: "card-id", value: CardValue.EIGHT, suit: Suit.Diamonds }],
+            isStanding: false,
+            points: [8],
+        };
+        mockPlayerInstance.activeHandID = mockHand.handID;
+        mockPlayerInstance.hands = [mockHand, mockNewHand];
+        gameStore.game[roomID] = session;
+
+        gameStore.reassignActiveHand({ roomID, playerID });
+        const actualActiveHand = gameStore.getActiveHand({ roomID, playerID });
+
+        expect(actualActiveHand.handID).toBe(mockNewHand.handID);
+    });
+
+    it("should remove hand", () => {
+        const mockHand: Hand = {
+            parentID: playerID,
+            handID: "active-hand",
+            bet: 15,
+            cards: [{ id: "card-id", value: CardValue.EIGHT, suit: Suit.Diamonds }],
+            isStanding: false,
+            points: [8],
+        };
+
+        mockPlayerInstance.activeHandID = mockHand.handID;
+        mockPlayerInstance.hands = [mockHand];
+        gameStore.game[roomID] = session;
+
+        gameStore.removeHand({ roomID, playerID, handID: mockHand.handID });
+        const actualPlayer = gameStore.game[roomID].players[playerID];
+        const actualHand = actualPlayer.hands.find((hand) => hand.handID === "active-hand");
+
+        expect(actualHand).toBeUndefined();
+    });
 });
