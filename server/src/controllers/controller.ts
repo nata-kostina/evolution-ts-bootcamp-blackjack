@@ -83,7 +83,7 @@ export class SinglePlayerController implements Controller {
 
             this._gameStore.joinPlayerToGameState({ roomID, player });
 
-            const availableSeats = this._gameStore.getAvailableSeat(roomID);
+            const availableSeats = [Seat.Middle];
 
             await this._respondManager.respondWithDelay({
                 roomID,

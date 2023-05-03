@@ -52,13 +52,11 @@ export interface IStore {
     resetPlayer({ playerID, roomID }: SpecificID): void;
     resetDealer(roomID: RoomID): void;
     resetSession({ playerID, roomID }: SpecificID): void;
-    getResetSession({ playerID, roomID }: SpecificID): GameSession;
     createNewRoom(): RoomID;
     reassignActiveHand({ roomID, playerID }: SpecificID): void;
     removeHand({ roomID, playerID, handID }: SpecificID & { handID: string; }): void;
     getHand({ roomID, playerID, handID }: SpecificID & { handID: string; }): Hand;
     getAvailableRoomID(io: Server<ClientToServerEvents, ServerToClientEvents>): RoomID | null;
-    getAvailableSeat(roomID: RoomID): Array<Seat>;
 }
 
 export interface IPlayersStore {
